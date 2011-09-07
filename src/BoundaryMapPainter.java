@@ -4,14 +4,7 @@
 import java.awt.Color;
 import java.util.List;
 
-import plural.executor.eachindex.implementations.PluralEachIndexExecutor;
 
-import fava.datatypes.Pair;
-import fava.signatures.FnEach;
-
-
-
-import scidraw.drawing.backends.Buffer;
 import scidraw.drawing.backends.Surface.EndCap;
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.map.palettes.ThermalScalePalette;
