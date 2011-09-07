@@ -1,3 +1,4 @@
+package misorientation.viewer;
 import javax.swing.Scrollable;
 
 import scidraw.swing.GraphicsPanel;
