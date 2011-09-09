@@ -241,7 +241,6 @@ public class Misorientation extends JFrame{
 		String valString;
 		valString = SigDigits.roundFloatTo((float)value, 4);
 		if (value < 0) valString = "No Data";
-		if (value > 5) valString = "Grain Boundary";
 		
 		return valString;
 	}
