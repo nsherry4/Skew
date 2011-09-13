@@ -13,15 +13,21 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
@@ -31,6 +37,8 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import misorientation.calculation.Calculation;
 
 
 import commonenvironment.AbstractFile;
@@ -306,13 +314,58 @@ public class Misorientation extends JFrame{
 							Misorientation.this.setTitle(title);
 						}
 						
-						readIntensities(misorientationFile);
+						Reader r = misorientationFile.getReader();
+						readIntensities(r);
+						r.close();
 					}
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
 				
 				repaint();
+				
+			}
+		});
+		
+		
+		ToolbarImageButton importFiles = new ToolbarImageButton(StockIcon.DOCUMENT_IMPORT, "Import");
+		importFiles.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				JFileChooser chooser = new JFileChooser(new File("."));
+				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				chooser.showOpenDialog(Misorientation.this);
+				File f = chooser.getSelectedFile();
+				
+				if (!f.isDirectory()) return;
+				
+				FList<String> filenames = new FList<String>(f.list(new FilenameFilter() {
+					
+					@Override
+					public boolean accept(File dir, String name) {
+						return name.endsWith(".ind");
+					}
+				}));
+				
+				StringWriter writer = new StringWriter();
+				
+				
+				
+				try {
+					Integer width = Integer.parseInt(JOptionPane.showInputDialog(Misorientation.this, "Map Width", 1));
+					Integer height = Integer.parseInt(JOptionPane.showInputDialog(Misorientation.this, "Map Height", 1));
+				
+					Coord<Integer> mapSize = new Coord<Integer>(width, height);
+					
+					Calculation.calculate(filenames, mapSize, writer);
+					
+					readIntensities(new StringReader(writer.toString()));
+					
+				} catch (Exception ex){}
+				
+								
 				
 			}
 		});
@@ -431,6 +484,7 @@ public class Misorientation extends JFrame{
 		
 		
 		toolbar.add(open);
+		toolbar.add(importFiles);
 		toolbar.add(save);
 		
 		toolbar.addSeparator();
@@ -504,7 +558,7 @@ public class Misorientation extends JFrame{
 			protected void drawGraphics(Surface backend, boolean vector) {
 							
 				if (data == null) return;
-				
+				if (datawidth == 0 || dataheight == 0) return;
 				
 				dr.maxYIntensity = maxIntensity;
 
@@ -608,11 +662,11 @@ public class Misorientation extends JFrame{
 	}
 	
 	
-	private void readIntensities(AbstractFile file) throws IOException
+	private void readIntensities(Reader reader) throws IOException
 	{
 		
 		FList<Pixel> olddata = data;
-		data = FStringInput.lines(file.getInputStream()).map(new FnMap<String, String>() {
+		data = FStringInput.lines(reader).toSink().map(new FnMap<String, String>() {
 
 			@Override
 			public String f(String v) {
