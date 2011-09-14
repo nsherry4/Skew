@@ -337,7 +337,7 @@ public class Misorientation extends JFrame{
 				JFileChooser chooser = new JFileChooser(new File("."));
 				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				chooser.showOpenDialog(Misorientation.this);
-				File f = chooser.getSelectedFile();
+				final File f = chooser.getSelectedFile();
 				
 				if (!f.isDirectory()) return;
 				
@@ -347,7 +347,13 @@ public class Misorientation extends JFrame{
 					public boolean accept(File dir, String name) {
 						return name.endsWith(".ind");
 					}
-				}));
+				})).map(new FnMap<String, String>() {
+
+					@Override
+					public String f(String filename) {
+						return f.getPath() + "/" + filename;
+					}
+				});
 				
 				StringWriter writer = new StringWriter();
 				
