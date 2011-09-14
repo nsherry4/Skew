@@ -1,13 +1,10 @@
 package misorientation.viewer;
 
-
-
 import java.awt.Color;
 import java.util.List;
 
 import scidraw.drawing.common.Spectrums;
 import scidraw.drawing.map.palettes.AbstractPalette;
-
 
 
 public class EBSDPalette extends AbstractPalette
@@ -22,8 +19,6 @@ public class EBSDPalette extends AbstractPalette
 		{ 0.81, 0.36, 0.00, 0.24f }, //orange
 		{ 0.64, 0.00, 0.00, 0.12f }  //red
 	};
-	
-	
 	private List<Color> spectrum;
 
 	public EBSDPalette()

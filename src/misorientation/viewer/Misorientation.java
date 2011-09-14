@@ -1,4 +1,5 @@
 package misorientation.viewer;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -67,6 +68,14 @@ import swidget.icons.StockIcon;
 import swidget.widgets.ToolbarImageButton;
 import swidget.widgets.ZoomSlider;
 
+/**
+ * Misorientation viewer GUI displays the results of misorientation calculations as a 2D map.
+ * Older XMAS data sets are supported, but misorientation data calculated with this tool
+ * uses the south and east boundary values to draw grain boundaries overtop of the map, rather
+ * than blacking out pixels on the map to mark boundaries
+ * @author Nathaniel Sherry, 2011
+ *
+ */
 
 public class Misorientation extends JFrame{
 
@@ -246,7 +255,7 @@ public class Misorientation extends JFrame{
 	private String formatMisorientationValue(double value)
 	{
 		String valString;
-		valString = SigDigits.roundFloatTo((float)value, 4);
+		valString = SigDigits.roundFloatTo((float)value, 3);
 		if (value < 0) valString = "No Data";
 		
 		return valString;
@@ -258,10 +267,6 @@ public class Misorientation extends JFrame{
 		Rectangle r = pane.getVisibleRect();
 		if (graphics == null) return;
 		
-		
-		//float oldwidth = graphics.getUsedWidth();
-		//float oldheight = graphics.getUsedHeight();
-
 		
 		Dimension panesize = pane.getSize();
 		
@@ -598,9 +603,9 @@ public class Misorientation extends JFrame{
 				List<Pair<Float, String>> axisMarkings = new FList<Pair<Float,String>>();
 				
 				axisMarkings.add(  new Pair<Float, String>(0.0f, "" + 0)  );
-				axisMarkings.add(  new Pair<Float, String>(0.25f, "" + SigDigits.roundFloatTo((float)(maxIntensity * 0.25), 4))  );
-				axisMarkings.add(  new Pair<Float, String>(0.5f, "" + SigDigits.roundFloatTo((float)(maxIntensity * 0.5), 4))  );
-				axisMarkings.add(  new Pair<Float, String>(0.75f, "" + SigDigits.roundFloatTo((float)(maxIntensity * 0.75), 4))  );
+				axisMarkings.add(  new Pair<Float, String>(0.25f, "" + SigDigits.roundFloatTo((float)(maxIntensity * 0.25), 3))  );
+				axisMarkings.add(  new Pair<Float, String>(0.5f, "" + SigDigits.roundFloatTo((float)(maxIntensity * 0.5), 3))  );
+				axisMarkings.add(  new Pair<Float, String>(0.75f, "" + SigDigits.roundFloatTo((float)(maxIntensity * 0.75), 3))  );
 				axisMarkings.add(  new Pair<Float, String>(1f, "" + maxIntensity)  );
 				
 				

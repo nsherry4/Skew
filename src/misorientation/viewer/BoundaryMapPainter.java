@@ -13,9 +13,9 @@ import scitypes.Coord;
 
 /**
  * 
- * This class implements the drawing of a map using block pixel filling
+ * This class implements the drawing of boundaries on a map
  * 
- * @author Nathaniel Sherry, 2009
+ * @author Nathaniel Sherry, 2011
  */
 
 public class BoundaryMapPainter extends MapPainter

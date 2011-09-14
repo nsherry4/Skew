@@ -16,9 +16,7 @@ import plural.executor.DummyExecutor;
 import plural.executor.ExecutorSet;
 import plural.executor.eachindex.EachIndexExecutor;
 import plural.executor.eachindex.implementations.PluralEachIndexExecutor;
-import plural.executor.eachindex.implementations.SimpleEachIndexExecutor;
 import plural.executor.map.MapExecutor;
-import plural.executor.map.implementations.PluralMapExecutor;
 
  
 
@@ -31,22 +29,18 @@ public class Calculation {
 	public static ExecutorSet<Boolean> calculate(final List<String> filenames, final Coord<Integer> mapSize, final Writer writer )
 	{
 		
+		//create empty data structures
 		final MatrixList matrixlist = new MatrixList(mapSize.x, mapSize.y);
 		final MisAnglePointList anglelist = new MisAnglePointList(mapSize.x, mapSize.y);
 		
-		System.out.println("A");
 		
-		final MapExecutor<String, String> loadFilesExec = matrixlist.loadMatrixList(filenames); 
-		
-		System.out.println("B");
-		
+		//executors
+		final MapExecutor<String, String> loadFilesExec = matrixlist.loadMatrixList(filenames); 		
 		final EachIndexExecutor calculateExec = calculateAngleList(matrixlist, anglelist,mapSize.x,mapSize.y);
-		
-		System.out.println("C");
-		
 		final DummyExecutor writing = new DummyExecutor();
 		writing.setName("Collecting Values");
 		 
+		//define how the executors will operate
 		ExecutorSet<Boolean> execset = new ExecutorSet<Boolean>("Opening Data Set") {
 
 			@Override
@@ -70,9 +64,7 @@ public class Calculation {
 				
 			}
 		};
-		
-		System.out.println("D");
-		
+				
 		execset.addExecutor(loadFilesExec);
 		execset.addExecutor(calculateExec);
 		execset.addExecutor(writing);
