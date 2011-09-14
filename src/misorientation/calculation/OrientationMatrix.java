@@ -17,11 +17,11 @@ public class OrientationMatrix {
 	 
 	 
 	
-	public void setOrientationMatrix(String fileName){
-		if(loadOrientationMatrix(fileName)){
-			this.fileNumber = IndexFileName.getFileNumber(fileName);
-			 
-		}
+	public void setOrientationMatrix(String fileName)
+	{
+	
+		if(loadOrientationMatrix(fileName)) this.fileNumber = IndexFileName.getFileNumber(fileName); 
+
 	}
 	public void printMatrix(){
 		System.out.println("filenumber="+fileNumber+":"+matrix[0][0]+matrix[0][1]+matrix[0][2]+","
@@ -77,7 +77,7 @@ public class OrientationMatrix {
 			}
 	 
 			   
-			// load the matrix  
+			// load the matrix
 			for (int i = 0; i < 3; i++)
 			{
 				line = reader.readLine();
@@ -100,7 +100,7 @@ public class OrientationMatrix {
 		
 		catch(Exception e)
 		{
-			 
+			System.out.println(inputFile);
 			e.printStackTrace(); 
 			return false;
 		

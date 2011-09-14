@@ -38,6 +38,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import plural.executor.ExecutorSet;
+import plural.swing.ExecutorSetView;
+
 import misorientation.calculation.Calculation;
 
 
@@ -100,7 +103,7 @@ public class Misorientation extends JFrame{
 	
 	JScrollPane pane;
 	ZoomSlider zoomslider;
-	int zoom = 1;
+	float zoom = 1;
 	
 	JLabel coords;
 	
@@ -173,13 +176,13 @@ public class Misorientation extends JFrame{
 		add(statusbar, BorderLayout.SOUTH);
 		
 		statusbar.setLayout(new BorderLayout());
-		zoomslider = new ZoomSlider(1, 10, 1);
+		zoomslider = new ZoomSlider(100, 500, 50);
 		statusbar.add(zoomslider, BorderLayout.EAST);
 		zoomslider.addListener(new EventfulListener() {
 			
 			@Override
 			public void change() {
-				setZoom(zoomslider.getValue());
+				setZoom(zoomslider.getValue() / 100f);
 			}
 		});
 		
@@ -253,7 +256,7 @@ public class Misorientation extends JFrame{
 		return valString;
 	}
 	
-	private void setZoom(int newzoom)
+	private void setZoom(float newzoom)
 	{
 		zoom = newzoom;
 		Rectangle r = pane.getVisibleRect();
@@ -339,6 +342,7 @@ public class Misorientation extends JFrame{
 				chooser.showOpenDialog(Misorientation.this);
 				final File f = chooser.getSelectedFile();
 				
+				if (f == null) return;
 				if (!f.isDirectory()) return;
 				
 				FList<String> filenames = new FList<String>(f.list(new FilenameFilter() {
@@ -360,12 +364,15 @@ public class Misorientation extends JFrame{
 				
 				
 				try {
+					
 					Integer width = Integer.parseInt(JOptionPane.showInputDialog(Misorientation.this, "Map Width", 1));
 					Integer height = Integer.parseInt(JOptionPane.showInputDialog(Misorientation.this, "Map Height", 1));
 				
 					Coord<Integer> mapSize = new Coord<Integer>(width, height);
 					
-					Calculation.calculate(filenames, mapSize, writer);
+					ExecutorSet<Boolean> execset = Calculation.calculate(filenames, mapSize, writer);
+					ExecutorSetView view = new ExecutorSetView(Misorientation.this, execset);
+					
 					
 					readIntensities(new StringReader(writer.toString()));
 					
@@ -635,7 +642,7 @@ public class Misorientation extends JFrame{
 
 			@Override
 			public int getScrollableBlockIncrement(Rectangle arg0, int arg1, int arg2) {
-				return 25*zoom;
+				return (int)(25f*zoom);
 			}
 
 			@Override
@@ -650,7 +657,7 @@ public class Misorientation extends JFrame{
 
 			@Override
 			public int getScrollableUnitIncrement(Rectangle arg0, int arg1,	int arg2) {
-				return 5*zoom;
+				return (int)(5f*zoom);
 			}
 				
 		};

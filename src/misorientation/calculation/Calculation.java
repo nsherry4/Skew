@@ -10,6 +10,16 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
+import fava.signatures.FnEach;
+
+import plural.executor.DummyExecutor;
+import plural.executor.ExecutorSet;
+import plural.executor.eachindex.EachIndexExecutor;
+import plural.executor.eachindex.implementations.PluralEachIndexExecutor;
+import plural.executor.eachindex.implementations.SimpleEachIndexExecutor;
+import plural.executor.map.MapExecutor;
+import plural.executor.map.implementations.PluralMapExecutor;
+
  
 
 import scitypes.Coord;
@@ -18,14 +28,57 @@ import scitypes.SigDigits;
 public class Calculation {
 	 
 	 
-	public static void calculate(List<String> filenames, Coord<Integer> mapSize, Writer writer ) throws IOException
+	public static ExecutorSet<Boolean> calculate(final List<String> filenames, final Coord<Integer> mapSize, final Writer writer )
 	{
 		
-		 MatrixList matrixlist = new MatrixList(mapSize.x, mapSize.y);
-		 matrixlist.loadMatrixList(filenames); 
-		 MisAnglePointList anglelist = new MisAnglePointList(mapSize.x, mapSize.y);
-		 calculateAngleList(matrixlist, anglelist,mapSize.x,mapSize.y);
-		 writeAngleList(writer, anglelist);
+		final MatrixList matrixlist = new MatrixList(mapSize.x, mapSize.y);
+		final MisAnglePointList anglelist = new MisAnglePointList(mapSize.x, mapSize.y);
+		
+		System.out.println("A");
+		
+		final MapExecutor<String, String> loadFilesExec = matrixlist.loadMatrixList(filenames); 
+		
+		System.out.println("B");
+		
+		final EachIndexExecutor calculateExec = calculateAngleList(matrixlist, anglelist,mapSize.x,mapSize.y);
+		
+		System.out.println("C");
+		
+		final DummyExecutor writing = new DummyExecutor();
+		writing.setName("Collecting Values");
+		 
+		ExecutorSet<Boolean> execset = new ExecutorSet<Boolean>("Opening Data Set") {
+
+			@Override
+			protected Boolean doMaps() {
+				
+				loadFilesExec.executeBlocking();
+				
+				calculateExec.executeBlocking();
+				
+				writing.advanceState();				
+				try {
+					writeAngleList(writer, anglelist);
+				} catch (IOException e) {
+					e.printStackTrace();
+					return false;
+				} finally {
+					writing.advanceState();
+				}
+								
+				return true;
+				
+			}
+		};
+		
+		System.out.println("D");
+		
+		execset.addExecutor(loadFilesExec);
+		execset.addExecutor(calculateExec);
+		execset.addExecutor(writing);
+		
+		return execset;
+		 
 	     	
 	}
 
@@ -57,157 +110,175 @@ public class Calculation {
 		writer.flush();
 	}	
 
-	private static void calculateAngleList(MatrixList matrixlist,
-			MisAnglePointList anglelist,int width,int height) {
+	private static EachIndexExecutor calculateAngleList(
+			final MatrixList matrixlist,
+			final MisAnglePointList anglelist,
+			final int width,
+			final int height
+		)
+	{
+
+		 FnEach<Integer> eachIndex = new FnEach<Integer>() {
+
+			@Override
+			public void f(Integer index) {
+				calculateAngle(index, matrixlist, anglelist, width, height);
+			}
+		 };
+		
+		 EachIndexExecutor exec = new PluralEachIndexExecutor(width * height, eachIndex);
+		 exec.setName("Calculating Values");
+		 return exec;
 		 
+	}
+	
+	private static void calculateAngle(int i, MatrixList matrixlist, MisAnglePointList anglelist, int width,int height)
+	{
+		
+		 if(!matrixlist.getMatrix(i).matrixOK()) return;
+			 
+	 
 		 int n,w,e,s,nw,sw,se,ne,row,col, points=0 ;
 		 double angle_total=0., angle;
 		 
+		 points=0;
+		 angle_total=0.;
+		 //deside center point and its 8 eight neighbours' indeces
 		 
-		 for(int i=0;i<width*height;i++){
-			  
+		 
+		 row=anglelist.getAnglePoint(i).getRow();
+		 col=anglelist.getAnglePoint(i).getCol(); 
+		
+		 n=(row-1)*width+col;
+		 
+		 s=(row+1)*width+col;
+		 w=i-1;
+		 e=i+1;  
+		 nw=n-1;
+		 ne=n+1;
+		 sw=s-1;
+		 se=s+1;
+		 
+		 if(row==0) {n=-1;nw=-1;ne=-1;} 
+		 if(row==height-1) {s=-1;sw=-1;se=-1;}
+		 if(col==0) {w=-1;sw=-1;nw=-1;}
+		 if(col==width-1) {e=-1;ne=-1;se=-1;} 
+		  
+		 if(n>=0) {
+			 angle=0.;
 			 
-			 if(matrixlist.getMatrix(i).matrixOK()){
+			 if(matrixlist.getMatrix(n).matrixOK()){
+				 
+					  
+				 
+					 angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(n));
+					 
+			     
+				 if(angle <5.){
+					 angle_total+=angle;
+					 points++;
+				 }
 				  
-				 points=0;
-				 angle_total=0.;
-				 //deside center point and its 8 eight neighbours' indeces
-				 
-				 
-				 row=anglelist.getAnglePoint(i).getRow();
-				 col=anglelist.getAnglePoint(i).getCol(); 
-				
-				 n=(row-1)*width+col;
-				 
-				 s=(row+1)*width+col;
-				 w=i-1;
-				 e=i+1;  
-				 nw=n-1;
-				 ne=n+1;
-				 sw=s-1;
-				 se=s+1;
-				 
-				 if(row==0) {n=-1;nw=-1;ne=-1;} 
-				 if(row==height-1) {s=-1;sw=-1;se=-1;}
-				 if(col==0) {w=-1;sw=-1;nw=-1;}
-				 if(col==width-1) {e=-1;ne=-1;se=-1;} 
-				  
-				 if(n>=0) {
-					 angle=0.;
-					 
-					 if(matrixlist.getMatrix(n).matrixOK()){
-						 
-							  
-						 
-							 angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(n));
-							 
-					     
-						 if(angle <5.){
-							 angle_total+=angle;
-							 points++;
-						 }
-						  
-					 }
-				 }
-				 if(s >=0){
-					 angle=0.;
-					 if(matrixlist.getMatrix(s).matrixOK()){
-						 
-						 
-							 angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(s));
-							 
-						 if(angle <5.){
-							 angle_total+=angle;
-							 points++;
-						 }
-						 anglelist.getAnglePoint(i).setSouth(angle);
-						  
-					 } 
-				 }
-				 if(w >=0){
-					 angle=0.;
-					 if(matrixlist.getMatrix(w).matrixOK()){
-						 
-						 
-							 angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(w));
-							 
-						 if(angle <5.){
-							 angle_total+=angle;
-							 points++;
-						 }  
-					 } 
-				 }
-				 if(e >=0){
-					 angle=0.;
-					 if(matrixlist.getMatrix(e).matrixOK()){
-						 //angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(e));
-						  
-						 
-							 angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(e));
-							 
-						 if(angle <5.){
-							 angle_total+=angle;
-							 points++;
-						 }
-						 anglelist.getAnglePoint(i).setEast(angle);
-						  
-					 } 
-				 } 
-				 if(nw >=0){
-					 angle=0.;
-					 if(matrixlist.getMatrix(nw).matrixOK()){
-						 angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(nw));
-					 
-						 if(angle <5.){
-							 angle_total+=angle;
-							 points++;
-						 }  
-					 } 
-				 } 
-				 if(ne >=0){
-					 angle=0.;
-					 if(matrixlist.getMatrix(ne).matrixOK()){
-						 angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(ne)); 
-						 if(angle <5.){
-							 angle_total+=angle;
-							 points++;
-						 }  
-					 } 
-				 } 
-				 if(sw >=0){
-					 angle=0.;
-					 if(matrixlist.getMatrix(sw).matrixOK()){
-						 angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(sw));
-					 
-						 if(angle <5.){
-							 angle_total+=angle;
-							 points++;
-						 }  
-					 } 
-				 } 
-				 if(se >=0){
-					 angle=0.;
-					 if(matrixlist.getMatrix(se).matrixOK()){
-						 angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(se));
-					 
-						 if(angle <5){
-							 angle_total+=angle;
-							 points++;
-						 }  
-					 } 
-				 } 
-						 
-				 if(points!=0){
-					 //System.out.println(i+ " angle="+angle_total/points);
-					 anglelist.getAnglePoint(i).setAverage(angle_total/points);
-					
-				 } 
-				 else{
-					 anglelist.getAnglePoint(i).setAverage(0.0);
-				 }
-				 //printf("%10d %10d %15.8f %15.8f %15.8f \n",row, col,pointList[i].average,pointList[i].east,pointList[i].south);
 			 }
 		 }
+		 if(s >=0){
+			 angle=0.;
+			 if(matrixlist.getMatrix(s).matrixOK()){
+				 
+				 
+					 angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(s));
+					 
+				 if(angle <5.){
+					 angle_total+=angle;
+					 points++;
+				 }
+				 anglelist.getAnglePoint(i).setSouth(angle);
+				  
+			 } 
+		 }
+		 if(w >=0){
+			 angle=0.;
+			 if(matrixlist.getMatrix(w).matrixOK()){
+				 
+				 
+					 angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(w));
+					 
+				 if(angle <5.){
+					 angle_total+=angle;
+					 points++;
+				 }  
+			 } 
+		 }
+		 if(e >=0){
+			 angle=0.;
+			 if(matrixlist.getMatrix(e).matrixOK()){
+				 //angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(e));
+				  
+				 
+					 angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(e));
+					 
+				 if(angle <5.){
+					 angle_total+=angle;
+					 points++;
+				 }
+				 anglelist.getAnglePoint(i).setEast(angle);
+				  
+			 } 
+		 } 
+		 if(nw >=0){
+			 angle=0.;
+			 if(matrixlist.getMatrix(nw).matrixOK()){
+				 angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(nw));
+			 
+				 if(angle <5.){
+					 angle_total+=angle;
+					 points++;
+				 }  
+			 } 
+		 } 
+		 if(ne >=0){
+			 angle=0.;
+			 if(matrixlist.getMatrix(ne).matrixOK()){
+				 angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(ne)); 
+				 if(angle <5.){
+					 angle_total+=angle;
+					 points++;
+				 }  
+			 } 
+		 } 
+		 if(sw >=0){
+			 angle=0.;
+			 if(matrixlist.getMatrix(sw).matrixOK()){
+				 angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(sw));
+			 
+				 if(angle <5.){
+					 angle_total+=angle;
+					 points++;
+				 }  
+			 } 
+		 } 
+		 if(se >=0){
+			 angle=0.;
+			 if(matrixlist.getMatrix(se).matrixOK()){
+				 angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(se));
+			 
+				 if(angle <5){
+					 angle_total+=angle;
+					 points++;
+				 }  
+			 } 
+		 } 
+				 
+		 if(points!=0){
+			 //System.out.println(i+ " angle="+angle_total/points);
+			 anglelist.getAnglePoint(i).setAverage(angle_total/points);
+			
+		 } 
+		 else{
+			 anglelist.getAnglePoint(i).setAverage(0.0);
+		 }
+		 //printf("%10d %10d %15.8f %15.8f %15.8f \n",row, col,pointList[i].average,pointList[i].east,pointList[i].south);
+
 		
 	}
 
@@ -362,7 +433,7 @@ public class Calculation {
         	Coord<Integer> mapSize = new Coord<Integer>(Integer.parseInt(args[2]), Integer.parseInt(args[3]));
         	
         	output = new BufferedWriter(new FileWriter(new File(args[1])));
-        	calculate(fileNames,mapSize,output);   
+        	calculate(fileNames,mapSize,output).startWorkingBlocking();   
         	output.close();
         }
     } 
