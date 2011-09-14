@@ -61,7 +61,7 @@ public class BoundaryMapPainter extends MapPainter
 		
 		p.context.setLineWidth(baseline);
 		p.context.setSource(Color.BLACK);
-		p.context.setLineEnd(EndCap.BUTT);
+		p.context.setLineEnd(EndCap.ROUND);
 		
 
 		

@@ -11,19 +11,15 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -32,7 +28,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JToolBar;
-import javax.swing.JViewport;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
@@ -56,11 +51,9 @@ import scidraw.drawing.DrawingRequest;
 import scidraw.drawing.backends.Surface;
 import scidraw.drawing.map.MapDrawing;
 import scidraw.drawing.map.painters.MapPainter;
-import scidraw.drawing.map.painters.RasterColorMapPainter;
 import scidraw.drawing.map.painters.RasterSpectrumMapPainter;
 import scidraw.drawing.map.painters.axis.SpectrumCoordsAxisPainter;
 import scidraw.drawing.map.palettes.AbstractPalette;
-import scidraw.drawing.map.palettes.ThermalScalePalette;
 import scidraw.drawing.painters.axis.AxisPainter;
 import scidraw.drawing.painters.axis.TitleAxisPainter;
 import scidraw.swing.GraphicsPanel;
@@ -111,6 +104,8 @@ public class Misorientation extends JFrame{
 
 	public Misorientation() {
 		
+		setTitle("Misorientation Viewer");
+		
 		dir = new File(".");
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -158,8 +153,9 @@ public class Misorientation extends JFrame{
 		//////////////////////////
 		//UI
 		//////////////////////////
-		setPreferredSize(new Dimension(750, 350));
+		setPreferredSize(new Dimension(1000, 474));
 		pack();
+		setLocationRelativeTo(null);
 		
 		setLayout(new BorderLayout());
 		
@@ -376,6 +372,9 @@ public class Misorientation extends JFrame{
 					
 					readIntensities(new StringReader(writer.toString()));
 					
+					wspin.setValue(width);
+					hspin.setValue(height);
+					
 				} catch (Exception ex){}
 				
 								
@@ -409,8 +408,8 @@ public class Misorientation extends JFrame{
 		
 		
 		
-		hspin = new JSpinner(new SpinnerNumberModel(1, 1, 1000000, 1));
-		wspin = new JSpinner(new SpinnerNumberModel(1, 1, 1000000, 1));
+		hspin = new JSpinner(new SpinnerNumberModel(1, 1, 9999, 1));
+		wspin = new JSpinner(new SpinnerNumberModel(1, 1, 9999, 1));
 		
 		maxspin = new JSpinner(new SpinnerNumberModel(1.0, 0.1, 180.0, 0.1));
 		
@@ -504,7 +503,7 @@ public class Misorientation extends JFrame{
 		toolbar.add(Box.createHorizontalGlue());
 
 		
-		toolbar.add(new JLabel("  Cutoff:"));
+		toolbar.add(new JLabel("  Scale:"));
 		toolbar.add(maxspin);
 		
 		toolbar.add(new JLabel("  Width:"));
