@@ -1,5 +1,10 @@
 package misorientation.calculation;
-
+/**
+ * OrientationMatrix defines the structure for storing the orientation matrix for one scan point in an area scan. 
+ * These matrixes are loaded from index files. It accepts the index file format for both XMAS and FOXMAS
+ * @author Jinhui Qin, 2011
+ *
+ */
  
 import java.io.BufferedReader;
 import java.io.FileReader;
