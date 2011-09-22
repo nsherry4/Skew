@@ -1,5 +1,10 @@
 package misorientation.calculation;
-
+/**
+ * MatrixList defines the structure for storing the orientation matrix for all scan points in an area scan. 
+ * These matrixes are loaded from index files. It accepts the index file format for both XMAS and FOXMAS
+ * @author Jinhui Qin, 2011
+ *
+ */
  
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +21,7 @@ import fava.signatures.FnEach;
 import fava.signatures.FnMap;
  
 public class MatrixList {
-	private static int startNum=1; //by default
+	private static int startNum=1; //by default, assuming all index files are named with a number started from 1
 	private ArrayList<OrientationMatrix> values;
 	private int width;
 	private int height;

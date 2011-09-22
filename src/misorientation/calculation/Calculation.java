@@ -1,5 +1,13 @@
 package misorientation.calculation;
-
+/**
+ * This package provides the routines for calculating mis-orientation angles for each scan point in an area scan.
+ * The mis-angle for each scan point is set as the average of all mis-angles to its 8  neighbors if the angle value  
+ * is less than 5 degree; it also recorded the angles to the east and to the south neighbors as the reference 
+ * for drawing grain boundaries, e.g. if any of these two angles is large than 5 degree, draw a boundary line at the
+ * east/south side of this scan point.     
+ * @author Jinhui Qin, 2011
+ *
+ */
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -156,7 +164,7 @@ public class Calculation {
 		 if(col==0) {w=-1;sw=-1;nw=-1;}
 		 if(col==width-1) {e=-1;ne=-1;se=-1;} 
 		  
-		 if(n>=0) {
+		 if(n>=0) {  //has north neighbor
 			 angle=0.;
 			 
 			 if(matrixlist.getMatrix(n).matrixOK()){
@@ -173,7 +181,7 @@ public class Calculation {
 				  
 			 }
 		 }
-		 if(s >=0){
+		 if(s >=0){ //has south neighbor
 			 angle=0.;
 			 if(matrixlist.getMatrix(s).matrixOK()){
 				 
@@ -188,7 +196,7 @@ public class Calculation {
 				  
 			 } 
 		 }
-		 if(w >=0){
+		 if(w >=0){ //has west neighbor
 			 angle=0.;
 			 if(matrixlist.getMatrix(w).matrixOK()){
 				 
@@ -201,7 +209,7 @@ public class Calculation {
 				 }  
 			 } 
 		 }
-		 if(e >=0){
+		 if(e >=0){ //has east neighbor
 			 angle=0.;
 			 if(matrixlist.getMatrix(e).matrixOK()){
 				 //angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(e));
@@ -217,7 +225,7 @@ public class Calculation {
 				  
 			 } 
 		 } 
-		 if(nw >=0){
+		 if(nw >=0){ //has north-west neighbor
 			 angle=0.;
 			 if(matrixlist.getMatrix(nw).matrixOK()){
 				 angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(nw));
@@ -228,7 +236,7 @@ public class Calculation {
 				 }  
 			 } 
 		 } 
-		 if(ne >=0){
+		 if(ne >=0){//has north-east neighbor
 			 angle=0.;
 			 if(matrixlist.getMatrix(ne).matrixOK()){
 				 angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(ne)); 
@@ -238,7 +246,7 @@ public class Calculation {
 				 }  
 			 } 
 		 } 
-		 if(sw >=0){
+		 if(sw >=0){//has south-west neighbor
 			 angle=0.;
 			 if(matrixlist.getMatrix(sw).matrixOK()){
 				 angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(sw));
@@ -249,7 +257,7 @@ public class Calculation {
 				 }  
 			 } 
 		 } 
-		 if(se >=0){
+		 if(se >=0){//has south-east neighbor
 			 angle=0.;
 			 if(matrixlist.getMatrix(se).matrixOK()){
 				 angle =  calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(se));

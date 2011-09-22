@@ -1,5 +1,10 @@
 package misorientation.calculation;
-
+/**
+ * CubicSymOP defines the 24 symmetrical operators for a cubic structure
+ * @author Jinhui Qin, 2011
+ *
+ */
+ 
 public class CubicSymOP {
 	 private int num;
 	 private int [][][]op;

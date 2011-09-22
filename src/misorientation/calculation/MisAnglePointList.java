@@ -1,5 +1,9 @@
 package misorientation.calculation;
-
+/**
+ * MisAnglePointList defines the structure for storing the mis-angles for all scan points in an area scan. 
+ * @author Jinhui Qin, 2011
+ *
+ */
 import java.util.ArrayList;
 
 public class MisAnglePointList {
