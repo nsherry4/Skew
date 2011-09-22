@@ -290,7 +290,7 @@ public class Misorientation extends JFrame{
 		JToolBar toolbar = new JToolBar();
 		toolbar.setFloatable(false);
 		
-		ToolbarImageButton open = new ToolbarImageButton(StockIcon.DOCUMENT_OPEN, "Open");
+		ToolbarImageButton open = new ToolbarImageButton(StockIcon.DOCUMENT_OPEN, "Open Misorientation File");
 		open.addActionListener(new ActionListener() {
 			
 			@Override
@@ -332,7 +332,7 @@ public class Misorientation extends JFrame{
 		});
 		
 		
-		ToolbarImageButton importFiles = new ToolbarImageButton(StockIcon.DOCUMENT_IMPORT, "Import");
+		ToolbarImageButton importFiles = new ToolbarImageButton(StockIcon.DOCUMENT_IMPORT, "Import IND Folder");
 		importFiles.addActionListener(new ActionListener() {
 			
 			@Override
@@ -350,7 +350,7 @@ public class Misorientation extends JFrame{
 					
 					@Override
 					public boolean accept(File dir, String name) {
-						return name.endsWith(".ind");
+						return name.toLowerCase().endsWith(".ind");
 					}
 				})).map(new FnMap<String, String>() {
 
