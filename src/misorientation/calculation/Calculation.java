@@ -5,8 +5,7 @@ package misorientation.calculation;
  * is less than 5 degree; it also recorded the angles to the east and to the south neighbors as the reference 
  * for drawing grain boundaries, e.g. if any of these two angles is large than 5 degree, draw a boundary line at the
  * east/south side of this scan point.     
- * @author Jinhui Qin, 2011
- *
+ * @author Jinhui Qin, 2011 
  */
 import java.io.BufferedWriter;
 import java.io.File;

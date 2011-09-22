@@ -53,7 +53,7 @@ public class OrientationMatrix {
 
 		try
 		{
-				
+			System.out.println("filename:"+inputFile);	
 			reader = new BufferedReader(new FileReader(inputFile));
 			
 			//skip first three lines  
