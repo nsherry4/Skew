@@ -7,17 +7,11 @@ package misorientation.calculation;
  */
  
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
-import plural.executor.eachindex.implementations.PluralEachIndexExecutor;
 import plural.executor.map.MapExecutor;
 import plural.executor.map.implementations.PluralMapExecutor;
-import plural.executor.map.implementations.SimpleMapExecutor;
 
-import commonenvironment.AlphaNumericComparitor;
-import fava.signatures.FnEach;
 import fava.signatures.FnMap;
  
 public class MatrixList {

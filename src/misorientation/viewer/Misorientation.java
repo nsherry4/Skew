@@ -372,8 +372,7 @@ public class Misorientation extends JFrame{
 					Coord<Integer> mapSize = new Coord<Integer>(width, height);
 					
 					ExecutorSet<Boolean> execset = Calculation.calculate(filenames, mapSize, writer);
-					ExecutorSetView view = new ExecutorSetView(Misorientation.this, execset);
-					
+					new ExecutorSetView(Misorientation.this, execset);
 					
 					readIntensities(new StringReader(writer.toString()));
 					

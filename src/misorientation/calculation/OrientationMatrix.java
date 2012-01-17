@@ -102,7 +102,6 @@ public class OrientationMatrix {
 			
 			return true;
 		}
-		
 		catch(Exception e)
 		{
 			System.out.println(inputFile);
