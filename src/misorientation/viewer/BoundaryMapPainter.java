@@ -77,20 +77,21 @@ public class BoundaryMapPainter extends MapPainter
 				coord = data.get(index);
 				//p.context.rectangle(x * cellSize, y * cellSize, cellSize + 1, cellSize + 1);
 				
-				
+				float fx = (float)x;
+				float fy = (float)y;
 				
 				if (coord.x >= 5)
 				{
 					
-					p.context.moveTo((x+1) * cellSize, y * cellSize);
-					p.context.lineTo((x+1) * cellSize, (y+1) * cellSize);
+					p.context.moveTo( (fx+1f) * cellSize, fy * cellSize );
+					p.context.lineTo( (fx+1f) * cellSize, (fy+1f) * cellSize );
 					
 				}
 
 				if (coord.y >= 5)
 				{
-					p.context.moveTo(x * cellSize, (y+1) * cellSize);
-					p.context.lineTo((x+1) * cellSize, (y+1) * cellSize);
+					p.context.moveTo(fx * cellSize, (fy+1f) * cellSize);
+					p.context.lineTo((fx+1f) * cellSize, (fy+1f) * cellSize);
 					
 				}
 				
