@@ -17,7 +17,7 @@ public class Magnitude
 	{
 		
 		//Construct a list of Grains from the data
-		FList<Grain> grains = new FList<Grain>();
+		data.grains = new FList<Grain>();
 		for (int y = 0; y < data.height; y++){
 			for (int x = 0; x < data.width; x++){
 
@@ -25,40 +25,40 @@ public class Magnitude
 				if (p == null) continue;
 				if (p.grain == -1) continue;
 				
-				if (grains.size() <= p.grain || grains.get(p.grain) == null)
+				if (data.grains.size() <= p.grain || data.grains.get(p.grain) == null)
 				{
-					grains.set(p.grain, new Grain(p.grain));
+					data.grains.set(p.grain, new Grain(p.grain));
 				}
 				
-				Grain g = grains.get(p.grain);
+				Grain g = data.grains.get(p.grain);
 				g.points.add(p);
 			}
 		}
 
 		//find the neighbours of each grain
 		int maxNeighbours = 0;
-		for (Grain grain : grains)
+		for (Grain grain : data.grains)
 		{
 			for (MisAnglePoint p : grain.points)
 			{
-				addNeighbour(grains, grain, data.goNorth(p));
-				addNeighbour(grains, grain, data.goEast(p));
-				addNeighbour(grains, grain, data.goSouth(p));
-				addNeighbour(grains, grain, data.goWest(p));
+				addNeighbour(grain, data, data.goNorth(p));
+				addNeighbour(grain, data, data.goEast(p));
+				addNeighbour(grain, data, data.goSouth(p));
+				addNeighbour(grain, data, data.goWest(p));
 				
-				addNeighbour(grains, grain, data.goNorthEast(p));
-				addNeighbour(grains, grain, data.goNorthWest(p));
-				addNeighbour(grains, grain, data.goSouthEast(p));
-				addNeighbour(grains, grain, data.goSouthWest(p));
+				addNeighbour(grain, data, data.goNorthEast(p));
+				addNeighbour(grain, data, data.goNorthWest(p));
+				addNeighbour(grain, data, data.goSouthEast(p));
+				addNeighbour(grain, data, data.goSouthWest(p));
 				
 			}
 			
 			maxNeighbours = Math.max(maxNeighbours, grain.neighbours.size());
 		}
 		
-		data.grains = grains;
 		
-		FList<Grain> sortedGrains = new FList<Grain>(grains);
+		
+		FList<Grain> sortedGrains = new FList<Grain>(data.grains);
 		sortedGrains.sort(new Comparator<Grain>() {
 			
 			@Override
@@ -79,12 +79,10 @@ public class Magnitude
 		
 	}
 	
-	private static void addNeighbour(List<Grain> grains, Grain g, MisAnglePoint p)
+	private static void addNeighbour(Grain g, MisAngleGrid data, MisAnglePoint p)
 	{
 		if (p == null) return;
-		int otherIndex = p.grain;
-		if (otherIndex < 0 || otherIndex == g.index) return;
-		Grain other = grains.get(otherIndex);
+		Grain other = data.getGrainAtPoint(p);
 		if (other != null) g.neighbours.add(other);
 	}
 	

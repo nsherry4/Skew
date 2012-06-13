@@ -122,5 +122,40 @@ public class MisAngleGrid
 	{
 		return get(p.x, p.y-1);
 	}
+	
+	public Grain getGrainAtPoint(MisAnglePoint p)
+	{
+		if (p == null) return null;
+		if (p.grain < 0) return null;
+		if (p.grain >= grains.size()) return null;
+		
+		return grains.get(p.grain);
+	}
+	
+	public Grain getGrainAtPoint(int x, int y)
+	{
+		return getGrainAtPoint(get(x, y));
+	}
 
+	public boolean selectGrainAtPoint(MisAnglePoint p)
+	{
+		if (p == null) return false;
+		return selectGrainAtPoint(p.x, p.y);
+	}
+	
+	public boolean selectGrainAtPoint(int x, int y)
+	{
+		for (Grain g : grains) { g.selected = false; }
+		Grain g = getGrainAtPoint(x, y);
+		if (g == null) return false;
+		g.selected = true;
+		return true;
+	}
+	
+	public Grain getSelectedGrain()
+	{
+		for (Grain g : grains) { if (g.selected) return g; }
+		return null;
+	}
+	
 }

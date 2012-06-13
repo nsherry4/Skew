@@ -12,6 +12,7 @@ public class Grain
 	public double magnitude = 0;
 	public Set<Grain> neighbours = new HashSet<Grain>();
 	public int colourIndex = -1;
+	public boolean selected = false;
 	public int index;
 	
 	public Grain(int index)
