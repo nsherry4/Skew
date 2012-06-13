@@ -10,14 +10,13 @@ import scidraw.drawing.map.palettes.AbstractPalette;
 public class EBSDPalette extends AbstractPalette
 {
 	
-	private final static double[][] ebsd = { 
-		{ 0.10, 0.24, 0.45, 0 }, //dark blue
-		//{ 0.13, 0.29, 0.53, 0.3f },
-		{ 0.16, 0.35, 0.65, 0.12f }, //light blue
-		{ 0.35, 0.69, 0.03, 0.12f }, //green
-		{ 0.89, 0.73, 0.00, 0.4f }, //yellow
-		{ 0.81, 0.36, 0.00, 0.24f }, //orange
-		{ 0.64, 0.00, 0.00, 0.12f }  //red
+	private final static int[] ebsd = { 
+		26,  61,  115, 0, //dark blue
+		41,  89,  166, 31, //light blue
+		89,  176, 8,   31, //green
+		227, 186, 0,   101, //yellow
+		207, 92,  0,   61, //orange
+		163, 0,   0,   31  //red
 	};
 	private List<Color> spectrum;
 
