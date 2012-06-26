@@ -7,10 +7,10 @@ package misorientation.calculation.misorientation;
  
 public class CubicSymOP {
 	 private int num;
-	 private double [][][]op;
+	 private float [][][]op;
 	 public CubicSymOP(){
 		 this.num=24;
-		 this.op = new double[24][3][3];
+		 this.op = new float[24][3][3];
 		 
 		 set(this.op[0],1, 0, 0,0, 1, 0, 0, 0, 1);
 				 
@@ -84,7 +84,7 @@ public class CubicSymOP {
 		  set(this.op[23],0, 0, -1,1, 0, 0, 0, -1, 0);
 		   
 	 }
-	private void set(double[][] is, int i, int j, int k, int l, int m, int n,
+	private void set(float[][] is, int i, int j, int k, int l, int m, int n,
 			int o, int p, int q) {
 		 
 		is[0][0]=i;
@@ -101,6 +101,6 @@ public class CubicSymOP {
 		
 	}
 	public int getNumOP(){return this.num;}
-	public double[][] getOP(int i){return this.op[i];}
+	public float[][] getOP(int i){return this.op[i];}
 
 }

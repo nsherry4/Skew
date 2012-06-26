@@ -1,5 +1,8 @@
 package misorientation.calculation.magnitude;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -97,13 +100,55 @@ public class Magnitude
 	
 	public static void calcMagnitude(MisAngleGrid data, Grain g)
 	{
-		double maxMag = 0;
+		double magAvg = 0;
+		double magMax = 0;
+		double magMin = Double.MAX_VALUE;
+		MisAnglePoint minPoint = null;
+		
+		
 		for (MisAnglePoint point : g.points)
 		{
-			maxMag = Math.max(maxMag, calcPointMagnitude(data, g, point));
+			point.grainMagnitude = calcPointMagnitude(data, g, point);
+			
+			magAvg += point.grainMagnitude;
+			
+			if (point.grainMagnitude > magMax)
+			{
+				magMax = point.grainMagnitude;
+			}
+			
+			if (point.grainMagnitude < magMin)
+			{
+				magMin = point.grainMagnitude;
+				minPoint = point;
+			}
+			
 		}
+		magAvg /= g.points.size();
+		g.magMin = magMin;
+		g.magAvg = magAvg;
+		g.magMax = magMax;
 		
-		g.magnitude = maxMag;
+		
+		//calculate the grain maximum misorientation angle.
+		//actually find the angle in the 95th percentile to avoid
+		//an errant pixel making the rest of a grain look flat
+		g.intraGrainCenter = minPoint;
+		//List<Double> intraGrainValues = new ArrayList<Double>(g.points.size()); 
+		double[] igv = new double[g.points.size()];
+		int count = 0;
+		for (MisAnglePoint point : g.points)
+		{
+			point.intraGrainMisorientation = Calculation.calculateAngle(point.orientation, minPoint.orientation);
+			igv[count++] = point.intraGrainMisorientation;
+			//intraGrainValues.add(point.intraGrainMisorientation);
+			//g.intraGrainMax = Math.max(g.intraGrainMax, point.intraGrainMisorientation);
+		}
+		Arrays.sort(igv);
+		//Collections.sort(intraGrainValues);
+		g.intraGrainMax = igv[(int)(g.points.size() * 0.95)];
+		
+		
 	}
 	
 	private static double calcPointMagnitude(MisAngleGrid data, Grain g, MisAnglePoint p)

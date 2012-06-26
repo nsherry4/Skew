@@ -6,19 +6,15 @@ package misorientation.calculation.misorientation;
  *
  */
  
+
 import java.util.ArrayList;
-import java.util.List;
 
-import plural.executor.map.MapExecutor;
-import plural.executor.map.implementations.PluralMapExecutor;
 
-import fava.signatures.FnMap;
- 
 public class MatrixList {
-	private static int startNum=1; //by default, assuming all index files are named with a number started from 1
-	private ArrayList<OrientationMatrix> values;
-	private int width;
-	private int height;
+	
+	public ArrayList<OrientationMatrix> values;
+	public int width;
+	public int height;
 	
 	
 	 
@@ -30,34 +26,11 @@ public class MatrixList {
 			values.add(new OrientationMatrix());
 		}
 	}
-	public int getWidth(){
-		return this.width;
-	}
-	public int getHeight(){
-		return this.height;
-	}
-	public OrientationMatrix getMatrix(int position){
-		return values.get(position);
-	}
-	 
-	public MapExecutor<String, String> loadMatrixList(List<String> filenames){
-		
-//		Collections.sort(filenames, new AlphaNumericComparitor());
-		
-		FnMap<String, String> eachFilename = new FnMap<String, String>(){
 
-			@Override
-			public String f(String filename) {
-				int index = IndexFileName.getFileNumber(filename)-startNum;
-				if (index >= values.size()) return "";
-				values.get(index).readOrientationMatrix(filename); 	
-				return "";
-			}};
-			
-		MapExecutor<String, String> exec = new PluralMapExecutor<String, String>(filenames, eachFilename);
-		exec.setName("Reading Files");
-		return exec;
-		
-	}
+	 
+
+	
 
 }
+
+

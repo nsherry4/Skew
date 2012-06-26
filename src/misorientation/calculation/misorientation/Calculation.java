@@ -14,6 +14,8 @@ package misorientation.calculation.misorientation;
 import java.util.List;
 
 import misorientation.calculation.magnitude.Magnitude;
+import misorientation.calculation.magnitude.OrientationMap;
+import misorientation.datasource.DataSource;
 import misorientation.model.MisAnglePoint;
 import misorientation.model.MisAngleGrid;
 
@@ -32,7 +34,7 @@ public class Calculation
 	private static CubicSymOP	symmetryOperators	= new CubicSymOP();
 
 
-	public static ExecutorSet<MisAngleGrid> calculate(final List<String> filenames, final Coord<Integer> mapSize)
+	public static ExecutorSet<MisAngleGrid> calculate(final List<String> filenames, DataSource ds, final Coord<Integer> mapSize)
 	{
 
 		// create empty data structures
@@ -40,11 +42,19 @@ public class Calculation
 		final MisAngleGrid anglelist = new MisAngleGrid(mapSize.x, mapSize.y);
 
 
-		// executors
-		final MapExecutor<String, String> loadFilesExec = matrixlist.loadMatrixList(filenames);
+		// executors		
+		//final MapExecutor<String, String> loadFilesExec = EBSD.loadMatrixListEBSD(matrixlist.values, filenames.get(0));
+		//final MapExecutor<String, String> loadFilesExec = S_IND.loadMatrixList(matrixlist.values, S_IND.startNum, filenames);
+		
+		final MapExecutor<String, String> loadFilesExec = ds.loadOMList(matrixlist.values, filenames);
+		
+		
 		final EachIndexExecutor calculateExec = calculateAngleList(matrixlist, anglelist, mapSize.x, mapSize.y);
 		final EachIndexExecutor calcGrainExec = calculateGrainMagnitude(anglelist);
 
+		
+		
+		
 		// define how the executors will operate
 		ExecutorSet<MisAngleGrid> execset = new ExecutorSet<MisAngleGrid>("Opening Data Set") {
 
@@ -68,6 +78,7 @@ public class Calculation
 				calcGrainExec.setWorkUnits(anglelist.grains.size());
 				calcGrainExec.executeBlocking();
 
+				OrientationMap.calculateOrientation(anglelist);
 				
 				return anglelist;
 
@@ -121,7 +132,7 @@ public class Calculation
 	private static void setMisAnglePoints(int i, MatrixList matrixlist, MisAngleGrid anglelist, int width, int height)
 	{
 
-		if (!matrixlist.getMatrix(i).matrixOK()) return;
+		if (!matrixlist.values.get(i).matrixOK()) return;
 
 
 		int n, w, e, s, nw, sw, se, ne, row, col, points = 0;
@@ -174,16 +185,16 @@ public class Calculation
 		}
 
 		MisAnglePoint point = anglelist.get(i);
-		point.orientation = matrixlist.getMatrix(i);
+		point.orientation = matrixlist.values.get(i);
 
 		if (n >= 0)
 		{ // has north neighbor
 			angle = 0.;
 
-			if (matrixlist.getMatrix(n).matrixOK())
+			if (matrixlist.values.get(n).matrixOK())
 			{
 
-				angle = calculateAngle(matrixlist.getMatrix(i), matrixlist.getMatrix(n));
+				angle = calculateAngle(matrixlist.values.get(i), matrixlist.values.get(n));
 
 				if (angle < 5.)
 				{
@@ -197,11 +208,11 @@ public class Calculation
 		if (s >= 0)
 		{ // has south neighbor
 			angle = 0.;
-			if (matrixlist.getMatrix(s).matrixOK())
+			if (matrixlist.values.get(s).matrixOK())
 			{
 
 
-				angle = calculateAngle(matrixlist.getMatrix(i), matrixlist.getMatrix(s));
+				angle = calculateAngle(matrixlist.values.get(i), matrixlist.values.get(s));
 
 				if (angle < 5.)
 				{
@@ -215,11 +226,11 @@ public class Calculation
 		if (w >= 0)
 		{ // has west neighbor
 			angle = 0.;
-			if (matrixlist.getMatrix(w).matrixOK())
+			if (matrixlist.values.get(w).matrixOK())
 			{
 
 
-				angle = calculateAngle(matrixlist.getMatrix(i), matrixlist.getMatrix(w));
+				angle = calculateAngle(matrixlist.values.get(i), matrixlist.values.get(w));
 
 				if (angle < 5.)
 				{
@@ -232,13 +243,13 @@ public class Calculation
 		if (e >= 0)
 		{ // has east neighbor
 			angle = 0.;
-			if (matrixlist.getMatrix(e).matrixOK())
+			if (matrixlist.values.get(e).matrixOK())
 			{
 				// angle =
 				// calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(e));
 
 
-				angle = calculateAngle(matrixlist.getMatrix(i), matrixlist.getMatrix(e));
+				angle = calculateAngle(matrixlist.values.get(i), matrixlist.values.get(e));
 
 				if (angle < 5.)
 				{
@@ -252,9 +263,9 @@ public class Calculation
 		if (nw >= 0)
 		{ // has north-west neighbor
 			angle = 0.;
-			if (matrixlist.getMatrix(nw).matrixOK())
+			if (matrixlist.values.get(nw).matrixOK())
 			{
-				angle = calculateAngle(matrixlist.getMatrix(i), matrixlist.getMatrix(nw));
+				angle = calculateAngle(matrixlist.values.get(i), matrixlist.values.get(nw));
 
 				if (angle < 5.)
 				{
@@ -266,9 +277,9 @@ public class Calculation
 		if (ne >= 0)
 		{// has north-east neighbor
 			angle = 0.;
-			if (matrixlist.getMatrix(ne).matrixOK())
+			if (matrixlist.values.get(ne).matrixOK())
 			{
-				angle = calculateAngle(matrixlist.getMatrix(i), matrixlist.getMatrix(ne));
+				angle = calculateAngle(matrixlist.values.get(i), matrixlist.values.get(ne));
 				if (angle < 5.)
 				{
 					angle_total += angle;
@@ -279,9 +290,9 @@ public class Calculation
 		if (sw >= 0)
 		{// has south-west neighbor
 			angle = 0.;
-			if (matrixlist.getMatrix(sw).matrixOK())
+			if (matrixlist.values.get(sw).matrixOK())
 			{
-				angle = calculateAngle(matrixlist.getMatrix(i), matrixlist.getMatrix(sw));
+				angle = calculateAngle(matrixlist.values.get(i), matrixlist.values.get(sw));
 
 				if (angle < 5.)
 				{
@@ -293,9 +304,9 @@ public class Calculation
 		if (se >= 0)
 		{// has south-east neighbor
 			angle = 0.;
-			if (matrixlist.getMatrix(se).matrixOK())
+			if (matrixlist.values.get(se).matrixOK())
 			{
-				angle = calculateAngle(matrixlist.getMatrix(i), matrixlist.getMatrix(se));
+				angle = calculateAngle(matrixlist.values.get(i), matrixlist.values.get(se));
 
 				if (angle < 5)
 				{
@@ -322,15 +333,15 @@ public class Calculation
 	public static double calculateAngle(OrientationMatrix gA, OrientationMatrix gB)
 	{
 
-		double[][] delta_g, mis;
+		float[][] delta_g, mis;
 
 		double minAngle = 400., temp;
 
 		// gA = mA.getMatrix();
-		delta_g = new double[3][3];
-		mis = new double[3][3];
+		delta_g = new float[3][3];
+		mis = new float[3][3];
 
-		prodmat(gB.getInverse(), gA.getDirect(), delta_g);
+		prodmat(gB.inverse, gA.direct, delta_g);
 
 		minAngle = -1;
 		for (int i = 0; i < symmetryOperators.getNumOP(); i++)
@@ -356,6 +367,24 @@ public class Calculation
 	}
 
 
+
+	public static void prodmat(float[][] a, float[][] b, float[][] ab)
+	{
+
+		int i, j, k;
+		int n = 3;
+
+		for (i = 0; i < n; i++)
+			for (j = 0; j < n; j++)
+				ab[i][j] = 0.f;
+
+
+		for (i = 0; i < n; i++)
+			for (j = 0; j < n; j++)
+				for (k = 0; k < n; k++)
+					ab[i][j] += a[i][k] * b[k][j];
+	}
+	
 	public static void prodmat(double[][] a, double[][] b, double[][] ab)
 	{
 
@@ -372,7 +401,29 @@ public class Calculation
 				for (k = 0; k < n; k++)
 					ab[i][j] += a[i][k] * b[k][j];
 	}
+	
+	
+	// calculate only the diagonal where x=y, since that is what misorientation uses
+	public static void prodmatDiag(float[][] a, float[][] b, float[][] ab)
+	{
 
+		int i, k;
+		int n = 3;
+
+		ab[0][0] = 0;
+		ab[1][1] = 0;
+		ab[2][2] = 0;
+
+		for (i = 0; i < n; i++)
+		{
+			for (k = 0; k < n; k++)
+			{
+				ab[i][i] += a[i][k] * b[k][i];
+			}
+		}
+	}
+	
+	
 	// calculate only the diagonal where x=y, since that is what misorientation uses
 	public static void prodmatDiag(double[][] a, double[][] b, double[][] ab)
 	{
@@ -446,5 +497,59 @@ public class Calculation
 
 	}
 
+	
+
+	public static boolean invert3(float[][] mat, float[][] imat)
+	{
+
+		int i, j;
+
+		float det;
+		boolean flag;
+
+		flag = true;
+
+
+
+
+		imat[0][0] = mat[1][1] * mat[2][2] - mat[1][2] * mat[2][1];
+
+		imat[0][1] = -mat[0][1] * mat[2][2] + mat[0][2] * mat[2][1];
+
+		imat[0][2] = mat[0][1] * mat[1][2] - mat[0][2] * mat[1][1];
+
+		imat[1][0] = -mat[1][0] * mat[2][2] + mat[2][0] * mat[1][2];
+
+		imat[1][1] = mat[0][0] * mat[2][2] - mat[2][0] * mat[0][2];
+
+		imat[1][2] = -mat[0][0] * mat[1][2] + mat[0][2] * mat[1][0];
+
+		imat[2][0] = mat[1][0] * mat[2][1] - mat[1][1] * mat[2][0];
+
+		imat[2][1] = -mat[0][0] * mat[2][1] + mat[0][1] * mat[2][0];
+
+		imat[2][2] = mat[0][0] * mat[1][1] - mat[1][0] * mat[0][1];
+
+		det = mat[0][0] * mat[1][2] * mat[2][1] + mat[0][1] * mat[1][0] * mat[2][2];
+
+		det = det + mat[0][2] * mat[1][1] * mat[2][0] - mat[0][2] * mat[1][0] * mat[2][1];
+
+		det = det - mat[0][1] * mat[1][2] * mat[2][0] - mat[0][0] * mat[1][1] * mat[2][2];
+
+		det = (-1.f) * det;
+
+		if (det != 0)
+		{
+			for (i = 0; i < 3; i++)
+				for (j = 0; j < 3; j++)
+					imat[i][j] = imat[i][j] / det;
+		}
+
+		else flag = false;
+
+
+		return flag;
+
+	}
 
 }

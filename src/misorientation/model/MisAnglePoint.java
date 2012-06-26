@@ -1,5 +1,8 @@
 package misorientation.model;
 
+import java.util.List;
+
+import scitypes.DirectionVector;
 import misorientation.calculation.misorientation.OrientationMatrix;
 
 /**
@@ -21,6 +24,11 @@ public class MisAnglePoint
 	public int grain = -1;
 	
 	public int index, x, y;
+	
+	public List<DirectionVector> orientationVectors;
+	
+	public double grainMagnitude;
+	public double intraGrainMisorientation = -1;
 	
 	public MisAnglePoint(int index, int x, int y)
 	{

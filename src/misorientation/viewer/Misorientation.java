@@ -8,17 +8,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
-import java.io.FilenameFilter;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -31,10 +31,18 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import ca.sciencestudio.process.xrd.calculation.Orientation;
+
+import commonenvironment.AbstractFile;
+
+
 import plural.executor.ExecutorSet;
 import plural.swing.ExecutorSetView;
 
 import misorientation.calculation.misorientation.Calculation;
+import misorientation.datasource.Acceptance;
+import misorientation.datasource.DataSource;
+import misorientation.datasource.DataSourceSelection;
 import misorientation.model.Grain;
 import misorientation.model.MisAnglePoint;
 import misorientation.model.MisAngleGrid;
@@ -42,17 +50,26 @@ import misorientation.viewer.drawing.BoundaryMapPainter;
 import misorientation.viewer.drawing.EBSDPalette;
 import misorientation.viewer.drawing.GrainPalette;
 import misorientation.viewer.drawing.SelectedGrainPainter;
+import misorientation.viewer.modes.subviews.GrainMagnitudeSubView;
+import misorientation.viewer.modes.subviews.IntraGrainSubView;
+import misorientation.viewer.modes.subviews.MisorientationSubView;
+import misorientation.viewer.modes.views.GrainLabelView;
+import misorientation.viewer.modes.views.GrainMagnitudeView;
+import misorientation.viewer.modes.views.InterGrainView;
+import misorientation.viewer.modes.views.LocalView;
+import misorientation.viewer.modes.views.MisorientationView;
+import misorientation.viewer.modes.views.OrientationView;
 
 
 import eventful.EventfulListener;
 import fava.datatypes.Pair;
 import fava.functionable.FList;
-import fava.signatures.FnMap;
 
 import scidraw.drawing.DrawingRequest;
 import scidraw.drawing.backends.Surface;
 import scidraw.drawing.map.MapDrawing;
 import scidraw.drawing.map.painters.MapPainter;
+import scidraw.drawing.map.painters.RasterColorMapPainter;
 import scidraw.drawing.map.painters.RasterSpectrumMapPainter;
 import scidraw.drawing.map.painters.axis.SpectrumCoordsAxisPainter;
 import scidraw.drawing.map.palettes.AbstractPalette;
@@ -61,9 +78,12 @@ import scidraw.drawing.painters.axis.TitleAxisPainter;
 import scidraw.swing.GraphicsPanel;
 import scidraw.swing.SavePicture;
 import scitypes.Coord;
+import scitypes.DirectionVector;
 import scitypes.SigDigits;
 import scitypes.Spectrum;
 import swidget.Swidget;
+import swidget.dialogues.fileio.SwidgetIO;
+import swidget.icons.IconSize;
 import swidget.icons.StockIcon;
 import swidget.widgets.ToolbarImageButton;
 import swidget.widgets.ZoomSlider;
@@ -89,7 +109,8 @@ public class Misorientation extends JFrame{
 	MapPainter misorientationPainter, grainPainter;
 	BoundaryMapPainter boundaryPainter;
 	SelectedGrainPainter selectedGrainPainter;
-	MapPainter blackPainter;
+	//OrientationPainter orientationPainter;
+	RasterColorMapPainter orientationPainter;
 	
 	FList<AbstractPalette> misorientationPalettes, grainPalettes;
 	
@@ -100,12 +121,16 @@ public class Misorientation extends JFrame{
 	
 	JSpinner scaleSpinner;
 	JLabel scaleLabel;
+	JPanel scalePanel;
 	
 	JComboBox viewSelector;
-	MisorientationViews viewMode = MisorientationViews.LOCAL_MISORIENTATION;
-
+	MisorientationView viewMode = new LocalView();
 	
-	float maxIntensity = 2f;
+	JComboBox subViewSelector;
+	MisorientationSubView subView = null;
+	
+	
+	//float maxIntensity = 2f;
 	
 	JScrollPane pane;
 	ZoomSlider zoomslider;
@@ -113,6 +138,7 @@ public class Misorientation extends JFrame{
 	
 	JLabel coords;
 	
+	public static final Color backgroundGray = new Color(0.1f, 0.1f, 0.1f);
 	
 
 	public Misorientation() {
@@ -138,7 +164,7 @@ public class Misorientation extends JFrame{
 		AbstractPalette thermal = new EBSDPalette();
 		AbstractPalette grainpalette = new GrainPalette();
 		
-		final Color backgroundGray = new Color(0.1f, 0.1f, 0.1f);
+		
 		AbstractPalette greyEmpty = new AbstractPalette() {
 						
 			@Override
@@ -147,25 +173,17 @@ public class Misorientation extends JFrame{
 				return null;
 			}
 		};
+
 		
-		AbstractPalette blackStrong = new AbstractPalette() {
-			
-			@Override
-			public Color getFillColour(double intensity, double maximum) {
-				double cutoff = 500000;
-				if (intensity > Math.max(cutoff, maxIntensity)) return Color.BLACK;
-				return null;
-			}
-		};
-		
-		misorientationPalettes = new FList<AbstractPalette>(blackStrong, greyEmpty, thermal);
+		misorientationPalettes = new FList<AbstractPalette>(greyEmpty, thermal);
 		misorientationPainter = new RasterSpectrumMapPainter(misorientationPalettes, null);
 		
-		grainPalettes = new FList<AbstractPalette>(blackStrong, greyEmpty, grainpalette);
+		grainPalettes = new FList<AbstractPalette>(greyEmpty, grainpalette);
 		grainPainter = new RasterSpectrumMapPainter(grainPalettes, null);
 		
 		boundaryPainter = new BoundaryMapPainter();
 		selectedGrainPainter = new SelectedGrainPainter();
+		orientationPainter = new RasterColorMapPainter();
 		
 		drawing.setPainters(new FList<MapPainter>(misorientationPainter, selectedGrainPainter, boundaryPainter));
 		
@@ -190,27 +208,8 @@ public class Misorientation extends JFrame{
 		add(pane, BorderLayout.CENTER);
 		
 		
-		JPanel statusbar = new JPanel();
+		JPanel statusbar = createBottomControls();
 		add(statusbar, BorderLayout.SOUTH);
-		
-		statusbar.setLayout(new BorderLayout());
-		zoomslider = new ZoomSlider(100, 500, 50);
-		statusbar.add(zoomslider, BorderLayout.EAST);
-		zoomslider.addListener(new EventfulListener() {
-			
-			@Override
-			public void change() {
-				setZoom(zoomslider.getValue() / 100f);
-			}
-		});
-		
-		coords = new JLabel();
-		coords.setHorizontalAlignment(JLabel.CENTER);
-		statusbar.add(coords, BorderLayout.CENTER);
-		
-		
-		statusbar.add(createScaleControl(), BorderLayout.WEST);
-		
 		
 		graphics.addMouseListener(new MouseListener() {
 			
@@ -238,7 +237,8 @@ public class Misorientation extends JFrame{
 				MisAnglePoint point = data.get(coord.x, coord.y);
 				if (point == null) return;
 				
-				data.selectGrainAtPoint(point);
+				boolean multiselect = e.getModifiersEx() == InputEvent.CTRL_DOWN_MASK;
+				if (e.getClickCount() > 1) data.selectGrainAtPoint(point, multiselect);
 				
 				
 				coords.setText("" +
@@ -275,7 +275,32 @@ public class Misorientation extends JFrame{
 		
 	}
 	
-	
+	private JPanel createBottomControls()
+	{
+		JPanel statusbar = new JPanel();
+		
+		
+		statusbar.setLayout(new BorderLayout());
+		zoomslider = new ZoomSlider(100, 500, 50);
+		statusbar.add(zoomslider, BorderLayout.EAST);
+		zoomslider.addListener(new EventfulListener() {
+			
+			@Override
+			public void change() {
+				setZoom(zoomslider.getValue() / 100f);
+			}
+		});
+		
+		coords = new JLabel(" ");
+		coords.setHorizontalAlignment(JLabel.CENTER);
+		statusbar.add(coords, BorderLayout.NORTH);
+		
+		scalePanel = createScaleControl();
+		statusbar.add(scalePanel, BorderLayout.WEST);
+		setSubView();
+		
+		return statusbar;
+	}
 
 	
 	private void setZoom(float newzoom)
@@ -309,39 +334,12 @@ public class Misorientation extends JFrame{
 		
 
 
-		scaleSpinner = new JSpinner();
-		
-		scaleSpinner.addChangeListener(new ChangeListener() {
-			
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				
-				settingsChanged();
-			}
-		});
-		
-		
-		scaleSpinner.addKeyListener(new KeyListener() {
-			
-			@Override
-			public void keyTyped(KeyEvent e) {}
-			
-			@Override
-			public void keyReleased(KeyEvent e) {}
-			
-			@Override
-			public void keyPressed(KeyEvent e) {
-				settingsChanged();
-			}
-		});
+		scaleSpinner = new JSpinner(viewMode.scaleSpinnerModel(null, null));
 		
 		panel.add(scaleSpinner, BorderLayout.CENTER);
 		
 		scaleLabel = new JLabel("Scale ");
 		panel.add(scaleLabel, BorderLayout.WEST);
-		
-		
-		setSpinnerModel(scaleSpinner, viewMode.scaleSpinnerModel(null), scaleLabel);
 		
 		return panel;
 		
@@ -360,50 +358,8 @@ public class Misorientation extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
-				JFileChooser chooser = new JFileChooser(new File("."));
-				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-				chooser.showOpenDialog(Misorientation.this);
-				final File f = chooser.getSelectedFile();
-				
-				if (f == null) return;
-				if (!f.isDirectory()) return;
-				
-				FList<String> filenames = new FList<String>(f.list(new FilenameFilter() {
-					
-					@Override
-					public boolean accept(File dir, String name) {
-						return name.toLowerCase().endsWith(".ind");
-					}
-				})).map(new FnMap<String, String>() {
+				actionOpenData();
 
-					@Override
-					public String f(String filename) {
-						return f.getPath() + "/" + filename;
-					}
-				});
-				
-				
-				
-				
-				try {
-					
-					Integer width = Integer.parseInt(JOptionPane.showInputDialog(Misorientation.this, "Map Width", 1));
-					Integer height = Integer.parseInt(JOptionPane.showInputDialog(Misorientation.this, "Map Height", 1));
-				
-					Coord<Integer> mapSize = new Coord<Integer>(width, height);
-					
-					ExecutorSet<MisAngleGrid> execset = Calculation.calculate(filenames, mapSize);
-					new ExecutorSetView(Misorientation.this, execset);
-					
-					setData(execset.getResult());
-										
-					
-				} catch (Exception ex){
-					ex.printStackTrace();
-				}
-				
-								
-				
 			}
 		});
 		
@@ -428,17 +384,14 @@ public class Misorientation extends JFrame{
 		});
 		
 		
-		viewSelector = new JComboBox(MisorientationViews.values());
+		viewSelector = new JComboBox(MisorientationView.getViews().toArray());
 		viewSelector.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
-				viewMode = (MisorientationViews)viewSelector.getSelectedItem();
-				double scale = viewMode.defaultScale(data);
-				setSpinnerModel(scaleSpinner, viewMode.scaleSpinnerModel(data), scaleLabel);
-				//setSpinner(scaleSpinner, scale);
-				maxIntensity = (float)scale;
+				viewMode = (MisorientationView)viewSelector.getSelectedItem();
+				setSubView();
 				settingsChanged();
 			}
 		});
@@ -457,54 +410,93 @@ public class Misorientation extends JFrame{
 		
 	}
 	
-	private void setSpinner(JSpinner spinner, Object object)
-	{
-		ChangeListener[] listeners = spinner.getChangeListeners();
-		
-		for (ChangeListener listener : listeners) {
-			spinner.removeChangeListener(listener);
-		}
-		
-		spinner.setValue(object);
-		
-		for (ChangeListener listener : listeners) {
-			spinner.addChangeListener(listener);
-		}
-		
-	}
 	
-	private void setSpinnerModel(JSpinner spinner, SpinnerModel model, JLabel label)
+	private void setSubView()
 	{
-		ChangeListener[] listeners = spinner.getChangeListeners();
+
+		if (scaleSpinner != null) scalePanel.remove(scaleSpinner);
+		scaleSpinner = null;
+		if (subViewSelector != null) scalePanel.remove(subViewSelector);
+		subViewSelector = null;
 		
-		for (ChangeListener listener : listeners) {
-			spinner.removeChangeListener(listener);
-		}
 		
-		if (model != null)
+		if (viewMode.hasSublist())
 		{
-			spinner.setModel(model);
-			spinner.setEnabled(true);
-			label.setEnabled(true);
+			List<MisorientationSubView> subviews = viewMode.getSubList();
+			subViewSelector = new JComboBox(subviews.toArray());
+			scalePanel.add(subViewSelector, BorderLayout.CENTER);
+			subView = subviews.get(0);
+			
+			subViewSelector.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent arg0)
+				{
+					subView = (MisorientationSubView) subViewSelector.getSelectedItem();
+					setScaleSpinner();
+					settingsChanged();
+				}
+			});
+			
 		}
 		else
 		{
-			spinner.setEnabled(false);
-			label.setEnabled(false);
+			subViewSelector = null;
+			subView = null;
 		}
+		
+		
+		setScaleSpinner();
+	}
+	
+	private void setScaleSpinner()
+	{
+
+		if (scaleSpinner != null) scalePanel.remove(scaleSpinner);
+		scaleSpinner = null;
+		
+		SpinnerModel model = viewMode.scaleSpinnerModel(data, subView);
+		
+		if (model == null) 
+		{
+			scaleLabel.setEnabled(false);
+			return;
+		}
+		scaleLabel.setEnabled(true);
+		
+		scaleSpinner = new JSpinner(model);
+		scalePanel.add(scaleSpinner, BorderLayout.EAST);
+	
+
+		scaleSpinner.addChangeListener(new ChangeListener() {
 			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				settingsChanged();
+			}
+		});
 		
-		for (ChangeListener listener : listeners) {
-			spinner.addChangeListener(listener);
-		}
 		
+		scaleSpinner.addKeyListener(new KeyListener() {
+			
+			@Override
+			public void keyTyped(KeyEvent e) {}
+			
+			@Override
+			public void keyReleased(KeyEvent e) {}
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				settingsChanged();
+			}
+		});
 	}
 	
 	private void settingsChanged()
 	{
-		maxIntensity = ((Double)scaleSpinner.getValue()).floatValue();
+		//if (viewMode.hasNumericScale()) maxIntensity = ((Double)scaleSpinner.getValue()).floatValue();
 		setZoom(zoom);
-		Misorientation.this.repaint();
+		repaint();
 	}
 	
 	private GraphicsPanel createGraphicsPanel()
@@ -558,8 +550,8 @@ public class Misorientation extends JFrame{
 				if (data == null) return;
 				if (data.width == 0 || data.height == 0) return;
 				
-				dr.maxYIntensity = maxIntensity;
-
+				double maxValue = getMaxScaleValue();
+				dr.maxYIntensity = (float) maxValue;
 				
 				setDR();
 
@@ -567,55 +559,112 @@ public class Misorientation extends JFrame{
 				dr.drawToVectorSurface = vector;
 
 								
-				Spectrum spectrumData = new Spectrum(data.size(), -1f);
+				Spectrum misorientationData = new Spectrum(data.size(), -1f);
 				
-				if (viewMode == MisorientationViews.LOCAL_MISORIENTATION) {
+				if (viewMode instanceof LocalView) 
+				{
 					drawing.setPainters(new FList<MapPainter>(misorientationPainter, selectedGrainPainter, boundaryPainter));
-					for (int i = 0; i < Math.min(data.size(), data.size()); i++)
+					for (int i = 0; i < data.size(); i++)
 					{
 						double v = data.get(i).average;
-						spectrumData.set(i, (float)v);
+						misorientationData.set(i, (float)v);
 					}
-				} else if (viewMode == MisorientationViews.GRAINLABELS) {
+					
+				} 
+				
+				else if (viewMode instanceof GrainLabelView) 
+				{
 					drawing.setPainters(new FList<MapPainter>(grainPainter, selectedGrainPainter, boundaryPainter));
-					for (int i = 0; i < Math.min(data.size(), data.size()); i++)
+					for (int i = 0; i < data.size(); i++)
 					{
 						int grainIndex = data.get(i).grain;
-						if (grainIndex < 0) { spectrumData.set(i, -1f); continue; }
+						if (grainIndex < 0) { misorientationData.set(i, -1f); continue; }
 						Grain g = data.grains.get(grainIndex);
-						if (g == null) { spectrumData.set(i, -1f); continue; }
-						else { spectrumData.set(i, g.colourIndex); }
+						if (g == null) { misorientationData.set(i, -1f); continue; }
+						else { misorientationData.set(i, g.colourIndex); }
 					}
-				} else if (viewMode == MisorientationViews.GRAIN_MISORIENTATION) {
+				} 
+				else if (viewMode instanceof GrainMagnitudeView) 
+				{
 					drawing.setPainters(new FList<MapPainter>(misorientationPainter, selectedGrainPainter, boundaryPainter));
-					for (int i = 0; i < Math.min(data.size(), data.size()); i++)
+					
+					GrainMagnitudeSubView mag = (GrainMagnitudeSubView)subViewSelector.getSelectedItem();
+										
+					for (int i = 0; i < data.size(); i++)
 					{
 						int grain = data.get(i).grain;
 						double v;
 						if (grain == -1)
 						{
 							v = -1;
-						} else { 
-							v = data.grains.get(grain).magnitude;
+						} else {
+							Grain g = data.grains.get(grain);
+							v = mag.select(new double[]{g.magMin, g.magMax, g.magAvg});
 						}
-						spectrumData.set(i, (float)v);
+						misorientationData.set(i, (float)v);
 					}
+				
+				} 
+				else if (viewMode instanceof OrientationView)
+				{
+					drawing.setPainters(new FList<MapPainter>(orientationPainter, selectedGrainPainter, boundaryPainter));
+					
+					List<Color> pixelColours = new FList<Color>(data.width * data.height);
+					for (int i = 0; i < data.width * data.height; i++){ pixelColours.add(backgroundGray); }
+					
+					Color c;
+					for (MisAnglePoint point : data.getBackingList())
+					{
+						if (point.orientationVectors == null)
+						{
+							c = backgroundGray;
+						}
+						else
+						{
+							DirectionVector dv = point.orientationVectors.get(subView.getIndex());
+							c = Orientation.directionToColor(dv, 1f);
+						}
+						pixelColours.set(point.index, c);
+					}
+					
+					orientationPainter.setPixels(pixelColours);
+					
+					
+					
 				}
-				
-				FList<Coord<Double>> boundaryData = data.getBackingList().map(new FnMap<MisAnglePoint, Coord<Double>>(){
+				else if (viewMode instanceof InterGrainView)
+				{
+					IntraGrainSubView igv = (IntraGrainSubView)subView;
+					
+					boolean relative = (igv.getIndex() == 0);
+					
+					if (relative) dr.maxYIntensity = 1;
+					
+					drawing.setPainters(new FList<MapPainter>(misorientationPainter, selectedGrainPainter, boundaryPainter));
+					for (int i = 0; i < data.size(); i++)
+					{
+						MisAnglePoint p = data.get(i);
+						if (p == null)	{ misorientationData.set(i, -1.0f); continue; }
 
-					@Override public Coord<Double> f(MisAnglePoint v) {
-						return new Coord<Double>(v.east, v.south);
-					}});
-				
+						Grain g = data.getGrainAtPoint(p);
+						if (g == null)	{ misorientationData.set(i, -1.0f); continue; }
+						
+						float v = (float) p.intraGrainMisorientation;
+						if (relative) v /= g.intraGrainMax;
+						misorientationData.set(i, (float)v);
+						
+					}
+										
+				}
+				 
 				
 				List<Pair<Float, String>> axisMarkings = new FList<Pair<Float,String>>();
 				
 				axisMarkings.add(  new Pair<Float, String>(0.0f, "" + 0)  );
-				axisMarkings.add(  new Pair<Float, String>(0.25f, "" + SigDigits.roundFloatTo((float)(maxIntensity * 0.25), 3))  );
-				axisMarkings.add(  new Pair<Float, String>(0.5f, "" + SigDigits.roundFloatTo((float)(maxIntensity * 0.5), 3))  );
-				axisMarkings.add(  new Pair<Float, String>(0.75f, "" + SigDigits.roundFloatTo((float)(maxIntensity * 0.75), 3))  );
-				axisMarkings.add(  new Pair<Float, String>(1f, "" + maxIntensity)  );
+				axisMarkings.add(  new Pair<Float, String>(0.25f, "" + SigDigits.roundFloatTo((float)(maxValue * 0.25), 3))  );
+				axisMarkings.add(  new Pair<Float, String>(0.5f, "" + SigDigits.roundFloatTo((float)(maxValue * 0.5), 3))  );
+				axisMarkings.add(  new Pair<Float, String>(0.75f, "" + SigDigits.roundFloatTo((float)(maxValue * 0.75), 3))  );
+				axisMarkings.add(  new Pair<Float, String>(1f, "" + SigDigits.roundFloatTo((float)maxValue, 3))  );
 				
 				
 				AxisPainter spectrum = new SpectrumCoordsAxisPainter(
@@ -637,20 +686,27 @@ public class Misorientation extends JFrame{
 				
 				AxisPainter titlePainter = new TitleAxisPainter(1.0f, null, null, title, null);
 				
-				if (viewMode == MisorientationViews.GRAINLABELS) 
+				if (
+						//viewMode == MisorientationViews.LABELS || 
+						//viewMode == MisorientationViews.ORIENTATION ||
+						//viewMode == MisorientationViews.INTRAGRAIN_MISORIENTATION
+						viewMode instanceof GrainLabelView ||
+						viewMode instanceof OrientationView ||
+						viewMode instanceof InterGrainView
+					) 
 				{
 					drawing.setAxisPainters(new FList<AxisPainter>(titlePainter));
 				} else {
 					drawing.setAxisPainters(new FList<AxisPainter>(spectrum, titlePainter));
 				}
-				
+
 				//set the painter and drawings data, and paint the screen
-				boundaryPainter.setPixels(boundaryData);
+				boundaryPainter.setData(data);
 				selectedGrainPainter.setData(data);
 				drawing.needsMapRepaint();
 				drawing.setDrawingRequest(dr);
-				misorientationPainter.setData(spectrumData);
-				grainPainter.setData(spectrumData);
+				misorientationPainter.setData(misorientationData);
+				grainPainter.setData(misorientationData);
 				drawing.setContext(backend);
 				drawing.draw();
 			}
@@ -685,6 +741,16 @@ public class Misorientation extends JFrame{
 		return graphics;
 	}
 	
+	private double getMaxScaleValue()
+	{
+		if (scaleSpinner == null) return -1;
+		
+		Object o = scaleSpinner.getValue();
+		if (o instanceof Double) return (Double)o;
+		
+		return -1;
+	}
+	
 	
 	public static void main(String[] args) {
 		
@@ -702,6 +768,128 @@ public class Misorientation extends JFrame{
 	}
 	
 
+	
+	
+	/*
+	
+		private void actionOpenData()
+	{
+
+		List<AbstractFile> files;
+		List<AbstractDSP> formats =  new ArrayList<AbstractDSP>(dataController.getDataSourcePlugins());
+				
+		String[][] exts = new String[formats.size()][];
+		String[] descs = new String[formats.size()];
+		for (int i = 0; i < formats.size(); i++)
+		{
+			exts[i] = formats.get(i).getFileExtensions().toArray(new String[]{});
+			descs[i] = formats.get(i).getDataFormat();
+		}
+
+		files = openNewDataset(exts, descs);
+		if (files == null) return;
+		
+		FList<String> filenames = FList.wrap(files).map(new FnMap<AbstractFile, String>() {
+
+			@Override
+			public String f(AbstractFile v)
+			{
+				return v.getFileName();
+			}});
+		
+		
+		loadFiles(filenames);
+		
+		
+
+	}
+	
+	*/
+	
+	public void actionOpenData()
+	{
+		
+
+		//list of all data formats
+		List<DataSource> formats = DataSource.getSources();
+		
+		//get info for open dialogue
+		String[][] exts = new String[formats.size()][1];
+		String[] descs = new String[formats.size()];
+		for (int i = 0; i < formats.size(); i++)
+		{
+			exts[i] = new String[]{formats.get(i).extension()};
+			descs[i] = formats.get(i).description();
+		}
+		
+		//get a list of filenames from the user
+		List<AbstractFile> absfiles = SwidgetIO.openFiles(this, "Select Data Files to Open", exts, descs, ".");
+		if (absfiles == null || absfiles.size() == 0) return;
+		
+		List<String> files = new ArrayList<String>();
+		for (AbstractFile af : absfiles)
+		{
+			files.add(af.getFileName());
+		}
+		
+		
+		//filter for just the working data sources
+		List<DataSource> acceptingFormats = new ArrayList<DataSource>();
+		List<DataSource> maybeFormats = new ArrayList<DataSource>();
+		for (DataSource ds : formats)
+		{
+			Acceptance acc = ds.accepts(files);
+			if (acc == Acceptance.ACCEPT) acceptingFormats.add(ds);
+			if (acc == Acceptance.MAYBE) maybeFormats.add(ds);
+		}
+		
+		
+		if (acceptingFormats.size() < 1) acceptingFormats = maybeFormats;
+		
+		if (acceptingFormats.size() > 1)
+		{
+			DataSourceSelection selection = new DataSourceSelection();
+			DataSource dsp = selection.pickDSP(this, acceptingFormats);
+			if (dsp != null) loadFiles(files, dsp);
+		}
+		else if (acceptingFormats.size() == 0)
+		{
+			JOptionPane.showMessageDialog(
+					this, 
+					"Could not determine the data format of the selected file(s)", 
+					"Open Failed", 
+					JOptionPane.ERROR_MESSAGE, 
+					StockIcon.BADGE_WARNING.toImageIcon(IconSize.ICON)
+				);
+		}
+		else
+		{
+			loadFiles(files, acceptingFormats.get(0));
+		}
+		
+	}
+	
+	private void loadFiles(List<String> filenames, DataSource ds)
+	{
+		
+		try {
+			
+			Integer width = Integer.parseInt(JOptionPane.showInputDialog(Misorientation.this, "Map Width", 1));
+			Integer height = Integer.parseInt(JOptionPane.showInputDialog(Misorientation.this, "Map Height", 1));
+		
+			Coord<Integer> mapSize = new Coord<Integer>(width, height);
+			
+			ExecutorSet<MisAngleGrid> execset = Calculation.calculate(filenames, ds,  mapSize);
+			new ExecutorSetView(Misorientation.this, execset);
+			
+			setData(execset.getResult());
+								
+			
+		} catch (Exception ex){
+			ex.printStackTrace();
+		}
+		
+	}
 	
 }
 

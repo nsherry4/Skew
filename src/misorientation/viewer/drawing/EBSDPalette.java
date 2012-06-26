@@ -29,7 +29,6 @@ public class EBSDPalette extends AbstractPalette
 	@Override
 	public Color getFillColour(double intensity, double maximum)
 	{
-			
 		double percentage;
 		percentage = intensity / maximum;
 		

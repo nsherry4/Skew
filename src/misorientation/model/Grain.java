@@ -9,11 +9,19 @@ public class Grain
 {
 	
 	public FList<MisAnglePoint> points = new FList<MisAnglePoint>();
-	public double magnitude = 0;
+	
+	public double magMin = 0;
+	public double magMax = 0;
+	public double magAvg = 0;
+	
 	public Set<Grain> neighbours = new HashSet<Grain>();
 	public int colourIndex = -1;
+	
 	public boolean selected = false;
 	public int index;
+	
+	public MisAnglePoint intraGrainCenter;
+	public double intraGrainMax = 0.0001;
 	
 	public Grain(int index)
 	{

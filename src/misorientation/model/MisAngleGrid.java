@@ -5,6 +5,7 @@ package misorientation.model;
  * @author Jinhui Qin, 2011
  *
  */
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -137,25 +138,30 @@ public class MisAngleGrid
 		return getGrainAtPoint(get(x, y));
 	}
 
-	public boolean selectGrainAtPoint(MisAnglePoint p)
+	public boolean selectGrainAtPoint(MisAnglePoint p, boolean deselectAll)
 	{
 		if (p == null) return false;
-		return selectGrainAtPoint(p.x, p.y);
+		return selectGrainAtPoint(p.x, p.y, deselectAll);
 	}
 	
-	public boolean selectGrainAtPoint(int x, int y)
+	public boolean selectGrainAtPoint(int x, int y, boolean multiselect)
 	{
-		for (Grain g : grains) { g.selected = false; }
 		Grain g = getGrainAtPoint(x, y);
 		if (g == null) return false;
-		g.selected = true;
-		return true;
+		
+		boolean alreadySelected = g.selected;
+		if (!multiselect) for (Grain grain : grains) { grain.selected = false; }
+		g.selected = !alreadySelected;
+		
+		return g.selected;
+		
 	}
 	
-	public Grain getSelectedGrain()
+	public List<Grain> getSelectedGrains()
 	{
-		for (Grain g : grains) { if (g.selected) return g; }
-		return null;
+		List<Grain> selected = new ArrayList<Grain>();
+		for (Grain g : grains) { if (g.selected) selected.add(g); }
+		return selected;
 	}
 	
 }
