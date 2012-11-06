@@ -111,9 +111,6 @@ public class SkewUI extends JFrame{
 		//////////////////////////
 		//UI
 		//////////////////////////
-		setPreferredSize(new Dimension(500, 650));
-		pack();
-		setLocationRelativeTo(null);
 		
 		setLayout(new BorderLayout());
 		
@@ -121,11 +118,16 @@ public class SkewUI extends JFrame{
 		
 		
 		createGraphicsPanel();
+		graphics.setPreferredSize(new Dimension(1000, 473));
+		
 		pane = new JScrollPane(graphics);
 		pane.setBorder(new EmptyBorder(0, 0, 0, 0));
 		pane.setBackground(Color.white);
 		pane.getViewport().setBackground(Color.white);
+		
 		add(pane, BorderLayout.CENTER);
+		
+
 		
 		
 		JPanel statusbar = createBottomControls();
@@ -176,6 +178,8 @@ public class SkewUI extends JFrame{
 			public void componentHidden(ComponentEvent e) {}
 		});
 		
+		pack();
+		setLocationRelativeTo(null);
 		setVisible(true);
 		
 	}
@@ -251,7 +255,7 @@ public class SkewUI extends JFrame{
 		toolbar.setFloatable(false);
 		
 		
-		ToolbarImageButton open = new ToolbarImageButton(StockIcon.DOCUMENT_OPEN, "Open IND Folder");
+		ToolbarImageButton open = new ToolbarImageButton(StockIcon.DOCUMENT_OPEN, "Open File(s)");
 		open.addActionListener(new ActionListener() {
 			
 			@Override
@@ -557,11 +561,7 @@ public class SkewUI extends JFrame{
 		new SkewUI();
 		
 	}
-	
 
-	
-
-	
 	
 }
 

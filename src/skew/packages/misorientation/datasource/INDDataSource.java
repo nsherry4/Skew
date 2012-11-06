@@ -70,7 +70,8 @@ public class INDDataSource extends MisorientationDataSource
 			public String f(String filename) {
 				int index = IndexFileName.getFileNumber(filename)-startNum;
 				if (index >= data.size()) return "";
-				loadOM(filename, data.get(index).orientation);
+				MisAnglePoint p = data.get(index);
+				p.hasOMData = loadOM(filename, p.orientation);
 				return "";
 			}};
 			
@@ -145,6 +146,7 @@ public class INDDataSource extends MisorientationDataSource
 
 			om.index = IndexFileName.getFileNumber(inputFile);
 			Calculation.invert3(om.inverse, om.direct);
+			
 			
 			return true;
 		}

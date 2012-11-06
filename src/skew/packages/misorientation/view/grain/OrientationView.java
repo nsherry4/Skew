@@ -105,7 +105,7 @@ public class OrientationView extends MisorientationView
 		Color c;
 		for (MisAnglePoint point : data.getBackingList())
 		{
-			if (point.orientationVectors == null)
+			if (!point.hasOMData)
 			{
 				c = backgroundGray;
 			}

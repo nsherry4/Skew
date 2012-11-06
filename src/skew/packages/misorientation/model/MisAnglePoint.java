@@ -21,7 +21,11 @@ public class MisAnglePoint implements SkewPoint
 	
 	public double	average;	// average of eight neighbors (if any<5)
 	public double	north, east, south, west;
+	
+	public boolean hasOMData = false;
+	
 	public OrientationMatrix orientation;
+	
 	public int grain = -1;
 	
 	protected int index, x, y;

@@ -77,7 +77,7 @@ public class SEQDataSource extends MisorientationDataSource
 			List<String> lines = FStringInput.lines(new File(filename)).toSink();
 			
 			//strip header
-			//lines.remove(0);
+			if (lines.get(0).trim().startsWith("IMAGE")) lines.remove(0);
 			
 			FnMap<String, String> eachFilename = new FnMap<String, String>(){
 	
@@ -88,14 +88,11 @@ public class SEQDataSource extends MisorientationDataSource
 					int index = seq.imageNumber();
 					
 					XRDPoint point = (XRDPoint)values.get(index);
+					
+					point.hasOMData = loadOrientationMatrix(seq, point.orientation);
+					
+					point.hasStrainData = loadStrain(seq, point);
 
-					OrientationMatrix om = point.orientation;
-					om.index = index;
-					
-					loadOrientationMatrix(seq, om);
-					
-					loadStrain(seq, point);
-					
 					return "";
 				}};
 				
@@ -120,7 +117,7 @@ public class SEQDataSource extends MisorientationDataSource
 		om.inverse = seq.orientationMatrix();
 		Calculation.invert3(om.inverse, om.direct);
 		om.index = seq.imageNumber();
-		
+				
 		return true;
 		
 	}
@@ -150,8 +147,6 @@ public class SEQDataSource extends MisorientationDataSource
 		point.stress[4] = stress[0][2];
 		point.stress[5] = stress[1][2];
 		point.stress[6] = SequenceEntry.vonMises(stress);
-		
-		point.hasStrain = true;
 		
 		return true;
 		

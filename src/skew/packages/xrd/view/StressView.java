@@ -58,7 +58,7 @@ public class StressView extends MisorientationView
 	{
 		XRDPoint point = (XRDPoint)skewpoint;
 		
-		if (!point.hasStrain) return "";
+		if (!point.hasOMData) return "";
 		
 		return "" + 
 				"XX: " + fmt(point.stress[0]) + ", " +
@@ -114,10 +114,10 @@ public class StressView extends MisorientationView
 	{
 		List<Pair<Float, String>> axisMarkings = new FList<Pair<Float,String>>();
 		
-		axisMarkings.add(  new Pair<Float, String>(0.0f, "" + 0)  );
-		axisMarkings.add(  new Pair<Float, String>(0.25f, "" + SigDigits.roundFloatTo((float)(maxValue * 0.25), 3))  );
-		axisMarkings.add(  new Pair<Float, String>(0.5f, "" + SigDigits.roundFloatTo((float)(maxValue * 0.5), 3))  );
-		axisMarkings.add(  new Pair<Float, String>(0.75f, "" + SigDigits.roundFloatTo((float)(maxValue * 0.75), 3))  );
+		axisMarkings.add(  new Pair<Float, String>(0f, "" + SigDigits.roundFloatTo((float)(-maxValue), 3))  );
+		axisMarkings.add(  new Pair<Float, String>(0.25f, "" + SigDigits.roundFloatTo((float)(-maxValue * 0.5), 3))  );
+		axisMarkings.add(  new Pair<Float, String>(0.5f, "" + 0)  );
+		axisMarkings.add(  new Pair<Float, String>(0.75f, "" + SigDigits.roundFloatTo((float)(maxValue * 0.5), 3))  );
 		axisMarkings.add(  new Pair<Float, String>(1f, "" + SigDigits.roundFloatTo((float)maxValue, 3))  );
 		
 		
@@ -181,7 +181,7 @@ public class StressView extends MisorientationView
 		Color c;
 		for (XRDPoint point : data.getBackingList())
 		{
-			if (!point.hasStrain)
+			if (!point.hasOMData)
 			{
 				c = Color.black;
 			}

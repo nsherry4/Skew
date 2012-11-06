@@ -75,10 +75,10 @@ public class EBSDDataSource extends MisorientationDataSource
 	
 					List<String> words = FStringInput.words(line).toSink();
 					int index = Integer.parseInt(words.get(0)) - 1;
-					OrientationMatrix om = values.get(index).orientation;
+					MisAnglePoint p = values.get(index);
+					OrientationMatrix om = p.orientation;
 					om.index = index;
-					loadOrientationMatrix(words, om);
-					
+					p.hasOMData = loadOrientationMatrix(words, om);
 					return "";
 				}};
 				
