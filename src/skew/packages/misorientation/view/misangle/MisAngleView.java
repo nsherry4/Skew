@@ -4,13 +4,12 @@ import java.util.List;
 
 import fava.datatypes.Pair;
 import fava.functionable.FList;
-import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.map.painters.RasterSpectrumMapPainter;
 import scidraw.drawing.map.painters.axis.SpectrumCoordsAxisPainter;
 import scidraw.drawing.map.palettes.AbstractPalette;
 import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.SigDigits;
-import skew.core.model.SkewGrid;
+import skew.core.model.ISkewGrid;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.packages.misorientation.drawing.EBSDPalette;
 import skew.packages.misorientation.view.MisorientationView;
@@ -40,7 +39,7 @@ public abstract class MisAngleView extends MisorientationView
 	}
 	
 	@Override
-	public List<AxisPainter> getAxisPainters(SkewGrid data, MapSubView subview, float maxValue)
+	public List<AxisPainter> getAxisPainters(ISkewGrid data, MapSubView subview, float maxValue)
 	{
 	
 		List<Pair<Float, String>> axisMarkings = new FList<Pair<Float,String>>();

@@ -17,8 +17,8 @@ import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.map.painters.RasterColorMapPainter;
 import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.DirectionVector;
-import skew.core.model.SkewGrid;
-import skew.core.model.SkewPoint;
+import skew.core.model.ISkewGrid;
+import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.packages.misorientation.model.MisAngleGrid;
 import skew.packages.misorientation.model.MisAnglePoint;
@@ -43,13 +43,13 @@ public class OrientationView extends MisorientationView
 	}
 
 	@Override
-	public SpinnerModel scaleSpinnerModel(SkewGrid data, MapSubView subView)
+	public SpinnerModel scaleSpinnerModel(ISkewGrid data, MapSubView subView)
 	{
 		return null;
 	}
 
 	@Override
-	public String getSummaryText(SkewPoint skewpoint, SkewGrid data)
+	public String getSummaryText(ISkewPoint skewpoint, ISkewGrid data)
 	{
 		return "";
 	}
@@ -71,15 +71,16 @@ public class OrientationView extends MisorientationView
 	}
 
 	@Override
-	public float getMaximumIntensity(SkewGrid data, MapSubView subview)
+	public float getMaximumIntensity(ISkewGrid data, MapSubView subview)
 	{
 		return 0;
 	}
 
 	
 	@Override
-	public List<MapPainter> getPainters(SkewGrid skewdata, MapSubView subview, float maximum)
+	public List<MapPainter> getPainters(ISkewGrid skewdata, MapSubView subview, float maximum)
 	{
+		@SuppressWarnings("unchecked")
 		MisAngleGrid<MisAnglePoint> data = (MisAngleGrid<MisAnglePoint>)skewdata;
 		
 		if (isUpdateRequired())
@@ -92,7 +93,7 @@ public class OrientationView extends MisorientationView
 	}
 
 	@Override
-	public List<AxisPainter> getAxisPainters(SkewGrid data, MapSubView subview, float maxValue)
+	public List<AxisPainter> getAxisPainters(ISkewGrid data, MapSubView subview, float maxValue)
 	{
 		return new FList<AxisPainter>();
 	}
@@ -121,8 +122,9 @@ public class OrientationView extends MisorientationView
 	}
 
 	@Override
-	public void writeData(SkewGrid skewdata, MapSubView subview, BufferedWriter writer) throws IOException
+	public void writeData(ISkewGrid skewdata, MapSubView subview, BufferedWriter writer) throws IOException
 	{
+		@SuppressWarnings("unchecked")
 		MisAngleGrid<MisAnglePoint> data = (MisAngleGrid<MisAnglePoint>)skewdata;
 		
 		writer.write("index, x, y, distance [001], direction [001], distance [110], direction [110], distance [111], direction [111]\n");
@@ -160,7 +162,11 @@ public class OrientationView extends MisorientationView
 		}
 	}
 	
-
+	@Override
+	public boolean canWriteData()
+	{
+		return true;
+	}
 	
 	
 }

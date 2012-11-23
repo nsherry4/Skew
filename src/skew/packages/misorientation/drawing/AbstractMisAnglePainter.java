@@ -2,7 +2,7 @@ package skew.packages.misorientation.drawing;
 
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.map.palettes.ThermalScalePalette;
-import skew.core.model.SkewGrid;
+import skew.core.model.ISkewGrid;
 import skew.packages.misorientation.model.MisAngleGrid;
 import skew.packages.misorientation.model.MisAnglePoint;
 
@@ -14,10 +14,11 @@ public abstract class AbstractMisAnglePainter extends MapPainter
 
 	public AbstractMisAnglePainter()
 	{
-		super(new ThermalScalePalette(), null);
+		super(new ThermalScalePalette());
 	}
 
-	public void setData(SkewGrid data)
+	@SuppressWarnings("unchecked")
+	public void setData(ISkewGrid data)
 	{
 		this.data = (MisAngleGrid<MisAnglePoint>)data;
 	}

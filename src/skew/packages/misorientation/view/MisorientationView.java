@@ -1,6 +1,6 @@
 package skew.packages.misorientation.view;
 
-import skew.core.model.SkewGrid;
+import skew.core.model.ISkewGrid;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
 import skew.packages.misorientation.drawing.BoundaryMapPainter;
@@ -21,7 +21,7 @@ public abstract class MisorientationView extends MapView
 		selectedGrainPainter = new SelectedGrainPainter();
 	}
 	
-	protected void setData(SkewGrid data, MapSubView subview)
+	protected void setData(ISkewGrid data, MapSubView subview)
 	{
 		boundaryPainter.setData(data);
 		selectedGrainPainter.setData(data);

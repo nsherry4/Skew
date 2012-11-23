@@ -27,18 +27,18 @@ import swidget.widgets.toggle.ComplexToggleGroup;
 public class DataSourceSelection extends JDialog
 {
 	
-	private Map<ComplexToggle, DataSource> toggleMap;
-	private DataSource selected;
+	private Map<ComplexToggle, IDataSource> toggleMap;
+	private IDataSource selected;
 	
 	public DataSourceSelection()
 	{
 		
 	}
 	
-	public DataSource pickDSP(Window parent, List<DataSource> dsps)
+	public IDataSource pickDSP(Window parent, List<IDataSource> dsps)
 	{	
 		
-		toggleMap = new HashMap<ComplexToggle, DataSource>();
+		toggleMap = new HashMap<ComplexToggle, IDataSource>();
 		
 		setTitle("Please Select Data Format");
 		Container c = getContentPane();
@@ -47,9 +47,9 @@ public class DataSourceSelection extends JDialog
 		setResizable(false);
 		setModal(true);
 		
-		TitleGradientPanel title = new TitleGradientPanel("Peakaboo can't decide what format this data is in.", true);
+		TitleGradientPanel title = new TitleGradientPanel("Skew can't decide what format this data is in.", true);
 		title.setBorder(Spacing.bMedium());
-		//JLabel title = new JLabel("<html><b>Peakaboo can't decide what format this data is</b></html>", JLabel.CENTER);
+		//JLabel title = new JLabel("<html><b>Skew can't decide what format this data is</b></html>", JLabel.CENTER);
 		//title.setFont(title.getFont().deriveFont(title.getFont().getSize() * 1.5f));
 		//title.setBorder(Spacing.bMedium());
 		c.add(title, BorderLayout.NORTH);
@@ -62,7 +62,7 @@ public class DataSourceSelection extends JDialog
 		final List<ComplexToggle> toggleButtons = new ArrayList<ComplexToggle>();
 		ComplexToggle toggle;
 		final ComplexToggleGroup group = new ComplexToggleGroup();
-		for (DataSource dsp : dsps)
+		for (IDataSource dsp : dsps)
 		{
 			toggle = new ComplexToggle("", dsp.title() + " File(s)", dsp.description());
 			toggleMap.put(toggle, dsp);

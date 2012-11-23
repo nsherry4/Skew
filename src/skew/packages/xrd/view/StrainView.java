@@ -18,8 +18,8 @@ import scidraw.drawing.map.palettes.AbstractPalette;
 import scidraw.drawing.map.palettes.ThermalScalePalette;
 import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.SigDigits;
-import skew.core.model.SkewGrid;
-import skew.core.model.SkewPoint;
+import skew.core.model.ISkewGrid;
+import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.packages.misorientation.model.MisAngleGrid;
 import skew.packages.misorientation.view.MisorientationView;
@@ -48,13 +48,13 @@ public class StrainView extends MisorientationView
 	}
 	
 	@Override
-	public SpinnerModel scaleSpinnerModel(SkewGrid data, MapSubView subView)
+	public SpinnerModel scaleSpinnerModel(ISkewGrid data, MapSubView subView)
 	{
 		return new SpinnerNumberModel(5.0, 0.1, 1000.0, 0.1);
 	}
 
 	@Override
-	public String getSummaryText(SkewPoint skewpoint, SkewGrid data)
+	public String getSummaryText(ISkewPoint skewpoint, ISkewGrid data)
 	{
 		XRDPoint point = (XRDPoint)skewpoint;
 		
@@ -92,13 +92,13 @@ public class StrainView extends MisorientationView
 	}
 
 	@Override
-	public float getMaximumIntensity(SkewGrid data, MapSubView subview)
+	public float getMaximumIntensity(ISkewGrid data, MapSubView subview)
 	{
 		return 1;
 	}
 
 	@Override
-	public List<MapPainter> getPainters(SkewGrid data, MapSubView subview, float maximum)
+	public List<MapPainter> getPainters(ISkewGrid data, MapSubView subview, float maximum)
 	{		
 		if (isUpdateRequired())
 		{
@@ -110,7 +110,7 @@ public class StrainView extends MisorientationView
 	}
 		
 	@Override
-	public List<AxisPainter> getAxisPainters(SkewGrid data, MapSubView subview, float maxValue)
+	public List<AxisPainter> getAxisPainters(ISkewGrid data, MapSubView subview, float maxValue)
 	{
 		List<Pair<Float, String>> axisMarkings = new FList<Pair<Float,String>>();
 		
@@ -144,8 +144,9 @@ public class StrainView extends MisorientationView
 
 	
 	@Override
-	public void writeData(SkewGrid skewdata, MapSubView subview, BufferedWriter writer) throws IOException
+	public void writeData(ISkewGrid skewdata, MapSubView subview, BufferedWriter writer) throws IOException
 	{
+		@SuppressWarnings("unchecked")
 		MisAngleGrid<XRDPoint> data = (MisAngleGrid<XRDPoint>)skewdata;
 		
 		writer.write("index, x, y, grain, xx, yy, zz, xy, xz, yz, von mises\n");
@@ -169,10 +170,17 @@ public class StrainView extends MisorientationView
 		}
 	}
 	
+	@Override
+	public boolean canWriteData()
+	{
+		return true;
+	}
+	
 
 	
-	private void setupPainters(SkewGrid skewdata, MapSubView subview, float maximum)
+	private void setupPainters(ISkewGrid skewdata, MapSubView subview, float maximum)
 	{
+		@SuppressWarnings("unchecked")
 		MisAngleGrid<XRDPoint> data = (MisAngleGrid<XRDPoint>)skewdata;
 		
 		List<Color> pixelColours = new FList<Color>(data.getWidth() * data.getHeight());

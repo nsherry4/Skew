@@ -11,7 +11,10 @@ package skew.packages.misorientation.datasource.calculation.misorientation;
  */
 
 
+import java.io.File;
 import java.util.List;
+
+import commonenvironment.IOOperations;
 
 
 import fava.functionable.FList;
@@ -23,7 +26,7 @@ import plural.executor.eachindex.implementations.PluralEachIndexExecutor;
 import plural.executor.map.MapExecutor;
 
 import scitypes.Coord;
-import skew.core.model.SkewGrid;
+import skew.core.model.ISkewGrid;
 import skew.packages.misorientation.datasource.MisorientationDataSource;
 import skew.packages.misorientation.datasource.calculation.magnitude.Magnitude;
 import skew.packages.misorientation.datasource.calculation.magnitude.OrientationMap;
@@ -37,7 +40,7 @@ public class Calculation
 
 
 	
-	public static ExecutorSet<SkewGrid> calculate(final List<String> filenames, MisorientationDataSource ds, final Coord<Integer> mapSize)
+	public static ExecutorSet<ISkewGrid> calculate(final List<String> filenames, MisorientationDataSource ds, final Coord<Integer> mapSize)
 	{
 
 		FList<MisAnglePoint> values = new FList<MisAnglePoint>(mapSize.x * mapSize.y);
@@ -46,7 +49,10 @@ public class Calculation
 			values.add(ds.createPoint(i, i % mapSize.x, i / mapSize.x));
 			
 		}
-		final MisAngleGrid<MisAnglePoint> anglelist = new MisAngleGrid<MisAnglePoint>(mapSize.x, mapSize.y, values);
+		
+		String datasetName = IOOperations.getCommonFileName(filenames);
+		
+		final MisAngleGrid<MisAnglePoint> anglelist = new MisAngleGrid<MisAnglePoint>(mapSize.x, mapSize.y, values, new File(datasetName).getName());
 
 
 		// executors		
@@ -63,10 +69,10 @@ public class Calculation
 		
 		
 		// define how the executors will operate
-		ExecutorSet<SkewGrid> execset = new ExecutorSet<SkewGrid>("Opening Data Set") {
+		ExecutorSet<ISkewGrid> execset = new ExecutorSet<ISkewGrid>("Opening Data Set") {
 
 			@Override
-			protected SkewGrid doMaps()
+			protected ISkewGrid execute()
 			{
 
 				//load files from disk

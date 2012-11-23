@@ -13,8 +13,8 @@ import fava.functionable.FList;
 
 import scidraw.drawing.map.painters.MapPainter;
 import scitypes.Spectrum;
-import skew.core.model.SkewGrid;
-import skew.core.model.SkewPoint;
+import skew.core.model.ISkewGrid;
+import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.packages.misorientation.model.Grain;
 import skew.packages.misorientation.model.MisAngleGrid;
@@ -29,8 +29,9 @@ public class MagnitudeView extends MisAngleView
 
 
 	@Override
-	public SpinnerModel scaleSpinnerModel(SkewGrid skewdata, MapSubView subView)
+	public SpinnerModel scaleSpinnerModel(ISkewGrid skewdata, MapSubView subView)
 	{
+		@SuppressWarnings("unchecked")
 		MisAngleGrid<MisAnglePoint> data = (MisAngleGrid<MisAnglePoint>)skewdata;
 		GrainMagnitudeSubView gms = (GrainMagnitudeSubView)subView;
 		
@@ -48,9 +49,10 @@ public class MagnitudeView extends MisAngleView
 	}
 
 	@Override
-	public String getSummaryText(SkewPoint skewpoint, SkewGrid skewdata)
+	public String getSummaryText(ISkewPoint skewpoint, ISkewGrid skewdata)
 	{
 	
+		@SuppressWarnings("unchecked")
 		MisAngleGrid<MisAnglePoint> data = (MisAngleGrid<MisAnglePoint>)skewdata;
 		MisAnglePoint point = (MisAnglePoint)skewpoint;
 		
@@ -88,7 +90,7 @@ public class MagnitudeView extends MisAngleView
 
 
 	@Override
-	public float getMaximumIntensity(SkewGrid data, MapSubView subview)
+	public float getMaximumIntensity(ISkewGrid data, MapSubView subview)
 	{
 		return 0;
 	}
@@ -96,8 +98,9 @@ public class MagnitudeView extends MisAngleView
 
 
 	@Override
-	public List<MapPainter> getPainters(SkewGrid skewdata, MapSubView subview, float maximum)
+	public List<MapPainter> getPainters(ISkewGrid skewdata, MapSubView subview, float maximum)
 	{
+		@SuppressWarnings("unchecked")
 		MisAngleGrid<MisAnglePoint> data = (MisAngleGrid<MisAnglePoint>)skewdata;
 		
 		if (isUpdateRequired())
@@ -137,8 +140,9 @@ public class MagnitudeView extends MisAngleView
 
 
 	@Override
-	public void writeData(SkewGrid skewdata, MapSubView subview, BufferedWriter writer) throws IOException
+	public void writeData(ISkewGrid skewdata, MapSubView subview, BufferedWriter writer) throws IOException
 	{
+		@SuppressWarnings("unchecked")
 		MisAngleGrid<MisAnglePoint> data = (MisAngleGrid<MisAnglePoint>)skewdata;
 		
 		writer.write("grain, min, avg, max\n");
@@ -147,6 +151,14 @@ public class MagnitudeView extends MisAngleView
 		{
 			writer.write(g.index + ", " + fmt(g.magMin) + ", " + fmt(g.magAvg) + ", " + fmt(g.magMax) + "\n");
 		}
+	}
+
+
+
+	@Override
+	public boolean canWriteData()
+	{
+		return true;
 	}
 
 }

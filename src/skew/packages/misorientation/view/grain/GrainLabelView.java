@@ -13,8 +13,8 @@ import scidraw.drawing.map.painters.RasterSpectrumMapPainter;
 import scidraw.drawing.map.palettes.AbstractPalette;
 import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.Spectrum;
-import skew.core.model.SkewGrid;
-import skew.core.model.SkewPoint;
+import skew.core.model.ISkewGrid;
+import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.packages.misorientation.drawing.GrainPalette;
 import skew.packages.misorientation.model.Grain;
@@ -26,7 +26,7 @@ import skew.packages.misorientation.view.MisorientationView;
 public class GrainLabelView extends MisorientationView
 {
 	
-	MapPainter grainPainter;
+	RasterSpectrumMapPainter grainPainter;
 	
 	AbstractPalette grainpalette = new GrainPalette();
 	
@@ -41,14 +41,15 @@ public class GrainLabelView extends MisorientationView
 	public String toString(){ return "Grain Labels"; }
 
 	@Override
-	public SpinnerModel scaleSpinnerModel(SkewGrid data, MapSubView subView)
+	public SpinnerModel scaleSpinnerModel(ISkewGrid data, MapSubView subView)
 	{
 		return null;
 	}
 
 	@Override
-	public String getSummaryText(SkewPoint skewpoint, SkewGrid skewdata)
+	public String getSummaryText(ISkewPoint skewpoint, ISkewGrid skewdata)
 	{
+		@SuppressWarnings("unchecked")
 		MisAngleGrid<MisAnglePoint> data = (MisAngleGrid<MisAnglePoint>)skewdata;
 		MisAnglePoint point = (MisAnglePoint)skewpoint;
 		
@@ -78,14 +79,15 @@ public class GrainLabelView extends MisorientationView
 	}
 
 	@Override
-	public float getMaximumIntensity(SkewGrid data, MapSubView subview)
+	public float getMaximumIntensity(ISkewGrid data, MapSubView subview)
 	{
 		return 0;
 	}
 
 	@Override
-	public List<MapPainter> getPainters(SkewGrid skewdata, MapSubView subview, float maximum)
+	public List<MapPainter> getPainters(ISkewGrid skewdata, MapSubView subview, float maximum)
 	{
+		@SuppressWarnings("unchecked")
 		MisAngleGrid<MisAnglePoint> data = (MisAngleGrid<MisAnglePoint>)skewdata;
 		
 		if (isUpdateRequired())
@@ -98,7 +100,7 @@ public class GrainLabelView extends MisorientationView
 	}
 
 	@Override
-	public List<AxisPainter> getAxisPainters(SkewGrid data, MapSubView subview, float maxValue)
+	public List<AxisPainter> getAxisPainters(ISkewGrid data, MapSubView subview, float maxValue)
 	{
 		return new FList<AxisPainter>();
 	}
@@ -122,8 +124,9 @@ public class GrainLabelView extends MisorientationView
 	}
 
 	@Override
-	public void writeData(SkewGrid skewdata, MapSubView subview, BufferedWriter writer) throws IOException
+	public void writeData(ISkewGrid skewdata, MapSubView subview, BufferedWriter writer) throws IOException
 	{
+		@SuppressWarnings("unchecked")
 		MisAngleGrid<MisAnglePoint> data = (MisAngleGrid<MisAnglePoint>)skewdata;
 		
 		writer.write("index, x, y, grain, size (px)\n");
@@ -141,6 +144,12 @@ public class GrainLabelView extends MisorientationView
 					grainsize + 
 				"\n");
 		}
+	}
+	
+	@Override
+	public boolean canWriteData()
+	{
+		return true;
 	}
 	
 }

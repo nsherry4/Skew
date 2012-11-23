@@ -13,8 +13,8 @@ import fava.functionable.FList;
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.Spectrum;
-import skew.core.model.SkewGrid;
-import skew.core.model.SkewPoint;
+import skew.core.model.ISkewGrid;
+import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.packages.misorientation.model.Grain;
 import skew.packages.misorientation.model.MisAngleGrid;
@@ -29,16 +29,17 @@ public class InterGrainView extends MisAngleView
 	public String toString(){ return "Intragrain Misorientation"; }
 
 	@Override
-	public SpinnerModel scaleSpinnerModel(SkewGrid data, MapSubView subView)
+	public SpinnerModel scaleSpinnerModel(ISkewGrid data, MapSubView subView)
 	{
 		IntraGrainSubView igv = (IntraGrainSubView)subView;
 		return igv.getSpinnerModel(data);
 	}
 
 	@Override
-	public String getSummaryText(SkewPoint skewpoint, SkewGrid skewdata)
+	public String getSummaryText(ISkewPoint skewpoint, ISkewGrid skewdata)
 	{
 		
+		@SuppressWarnings("unchecked")
 		MisAngleGrid<MisAnglePoint> data = (MisAngleGrid<MisAnglePoint>)skewdata;
 		MisAnglePoint point = (MisAnglePoint)skewpoint;
 	
@@ -72,7 +73,7 @@ public class InterGrainView extends MisAngleView
 	}
 
 	@Override
-	public float getMaximumIntensity(SkewGrid data, MapSubView subview)
+	public float getMaximumIntensity(ISkewGrid data, MapSubView subview)
 	{
 		IntraGrainSubView igsv = (IntraGrainSubView)subview;
 		
@@ -82,7 +83,7 @@ public class InterGrainView extends MisAngleView
 	}
 
 	@Override
-	public List<AxisPainter> getAxisPainters(SkewGrid data, MapSubView subview, float maxValue)
+	public List<AxisPainter> getAxisPainters(ISkewGrid data, MapSubView subview, float maxValue)
 	{
 		IntraGrainSubView igsv = (IntraGrainSubView)subview;
 		boolean relative = igsv.getIndex() == 0;
@@ -92,8 +93,9 @@ public class InterGrainView extends MisAngleView
 	}
 	
 	@Override
-	public List<MapPainter> getPainters(SkewGrid skewdata, MapSubView subview, float maximum)
+	public List<MapPainter> getPainters(ISkewGrid skewdata, MapSubView subview, float maximum)
 	{
+		@SuppressWarnings("unchecked")
 		MisAngleGrid<MisAnglePoint> data = (MisAngleGrid<MisAnglePoint>)skewdata;
 		
 		if (isUpdateRequired())
@@ -131,8 +133,9 @@ public class InterGrainView extends MisAngleView
 	}
 
 	@Override
-	public void writeData(SkewGrid skewdata, MapSubView subview, BufferedWriter writer) throws IOException
+	public void writeData(ISkewGrid skewdata, MapSubView subview, BufferedWriter writer) throws IOException
 	{
+		@SuppressWarnings("unchecked")
 		MisAngleGrid<MisAnglePoint> data = (MisAngleGrid<MisAnglePoint>)skewdata;
 		
 		writer.write("index, x, y, grain, value, percent\n");
@@ -157,6 +160,12 @@ public class InterGrainView extends MisAngleView
 					"\n"
 				);
 		}
+	}
+	
+	@Override
+	public boolean canWriteData()
+	{
+		return true;
 	}
 	
 }

@@ -17,7 +17,6 @@ import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -38,10 +37,11 @@ import scidraw.drawing.DrawingRequest;
 import scidraw.drawing.backends.Surface;
 import scidraw.drawing.map.MapDrawing;
 import scidraw.swing.GraphicsPanel;
+import skew.core.Version;
 import skew.core.controller.SkewController;
 import skew.core.viewer.modes.subviews.MapSubView;
-import skew.core.viewer.modes.views.DummyView;
 import skew.core.viewer.modes.views.MapView;
+import skew.core.viewer.modes.views.impl.DummyView;
 import swidget.Swidget;
 import swidget.dialogues.AboutDialogue;
 import swidget.icons.IconFactory;
@@ -58,8 +58,9 @@ import swidget.widgets.ZoomSlider;
  *
  */
 
-public class SkewUI extends JFrame{
+public class SkewUI extends JPanel {
 
+	SkewTabs parent;
 	
 	SkewController controller;
 	
@@ -82,19 +83,18 @@ public class SkewUI extends JFrame{
 	ZoomSlider zoomslider;
 	float zoom = 1;
 	
+	public ToolbarImageButton savetext;
+	
 	public JLabel coords;
 	
 	
 	
 
-	public SkewUI() 
+	public SkewUI(SkewTabs parent) 
 	{
 		
-		controller = new SkewController(this);		
-		
-		setTitle("Skew");
-		
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.parent = parent;
+		controller = new SkewController(this, parent);		
 		
 		
 		
@@ -178,9 +178,7 @@ public class SkewUI extends JFrame{
 			public void componentHidden(ComponentEvent e) {}
 		});
 		
-		pack();
-		setLocationRelativeTo(null);
-		setVisible(true);
+
 		
 	}
 	
@@ -255,6 +253,7 @@ public class SkewUI extends JFrame{
 		toolbar.setFloatable(false);
 		
 		
+			
 		ToolbarImageButton open = new ToolbarImageButton(StockIcon.DOCUMENT_OPEN, "Open File(s)");
 		open.addActionListener(new ActionListener() {
 			
@@ -266,6 +265,16 @@ public class SkewUI extends JFrame{
 			}
 		});
 
+		ToolbarImageButton tab = new ToolbarImageButton(StockIcon.WINDOW_TAB_NEW, "New Tab");
+		tab.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				parent.newTab();
+
+			}
+		});
 		
 		ToolbarImageButton save = new ToolbarImageButton(StockIcon.DEVICE_CAMERA, "Save Picture");
 		save.addActionListener(new ActionListener() {
@@ -290,7 +299,7 @@ public class SkewUI extends JFrame{
 		});
 		
 		
-		ToolbarImageButton savetext = new ToolbarImageButton(StockIcon.DOCUMENT_EXPORT, "Export Map Data");
+		savetext = new ToolbarImageButton(StockIcon.DOCUMENT_EXPORT, "Export Map Data");
 		savetext.addActionListener(new ActionListener() {
 			
 			@Override
@@ -299,6 +308,7 @@ public class SkewUI extends JFrame{
 				controller.actionSaveText();
 			}
 		});
+		savetext.setEnabled(false);
 		
 		
 		ToolbarImageButton about = new ToolbarImageButton(StockIcon.MISC_ABOUT, "About");
@@ -308,25 +318,27 @@ public class SkewUI extends JFrame{
 			public void actionPerformed(ActionEvent e)
 			{
 				new AboutDialogue(
-						SkewUI.this,
-						"Skew",
-						"Crystallographic Misorientation Viewer",
+						parent,
+						Version.name + " " + Version.short_version,
+						Version.description,
 						"www.sciencestudioproject.com",
 						"Copyright (c) 2012 by<br>The University of Western Ontario<br>and<br>The Canadian Light Source Inc.",
 						IOOperations.readTextFromJar("/skew/licence.txt"),
 						IOOperations.readTextFromJar("/skew/credits.txt"),
-						"logo",
+						"skew",
 						"",
-						"1.0",
+						Version.long_version,
 						"",
-						"June 2012",
+						Version.date,
 						true
 				);
 			}
 		});
 		
 		
+		
 		toolbar.add(open);
+		toolbar.add(tab);
 		toolbar.add(save);
 		
 		
@@ -556,9 +568,9 @@ public class SkewUI extends JFrame{
 	public static void main(String[] args) {
 		
 		Swidget.initialize();
-		IconFactory.customPath = "/skew/core/icons";
+		IconFactory.customPath = "/skew/core/icons/";
 		
-		new SkewUI();
+		new SkewTabs();
 		
 	}
 

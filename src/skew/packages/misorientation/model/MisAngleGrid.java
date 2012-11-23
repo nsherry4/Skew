@@ -8,75 +8,37 @@ package skew.packages.misorientation.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import skew.core.model.SkewGrid;
-import skew.core.model.SkewPoint;
+import skew.core.model.ISkewPoint;
+import skew.core.model.impl.SkewGrid;
 import skew.packages.misorientation.datasource.calculation.magnitude.GrainIdentify;
 
 
-public class MisAngleGrid<T extends MisAnglePoint> implements SkewGrid
+public class MisAngleGrid<T extends MisAnglePoint> extends SkewGrid<T>
 {
 	
-	private List<T>                  values;
-	
-	protected int                   width;
-	protected int                   height;
 	public List<Grain>               grains;
-
 	public int grainCount = 0;
 
-
-
-	/*
-	public MisAngleGrid(int width, int height)
+	public MisAngleGrid(int width, int height, List<T> points, String name)
 	{
-		this.width = width;
-		this.height = height;
-				
-		this.values = new FList<MisAnglePoint>(width * height);
-		for (int i = 0; i < width * height; i++)
-		{
-			values.add(new MisAnglePoint(i, i % width, i / width));
-		}
-		
-		this.grains = new FList<Grain>();
-
-	}
-	*/
-	
-	public MisAngleGrid(int width, int height, List<T> points)
-	{
-		this.width = width;
-		this.height = height;
-		
-		this.values = points;
-		
+		super(width, height, points, name);
 		this.grains = new ArrayList<Grain>();
 	}
 	
+	
 	@Override
-	public int size()
+	public boolean setPointSelected(ISkewPoint p, boolean deselectAll)
 	{
-		return values.size();
+		if (p == null) return false;
+		return selectGrainAtPoint(p.getX(), p.getY(), deselectAll);
 	}
+	
+	
 	
 	
 	public List<T> getBackingList()
 	{
 		return values;
-	}
-	
-	@Override
-	public T get(int position)
-	{
-		if (position < 0) return null;
-		if (position >= values.size()) return null;
-		return values.get(position);
-	}
-
-	@Override
-	public T get(int x, int y)
-	{
-		return get(width * y + x);
 	}
 
 
@@ -87,42 +49,42 @@ public class MisAngleGrid<T extends MisAnglePoint> implements SkewGrid
 	
 	public T goNorth(MisAnglePoint p)
 	{
-		return get(p.x-1, p.y);
+		return get(p.getX()-1, p.getY());
 	}
 	
 	public T goNorthEast(MisAnglePoint p)
 	{
-		return get(p.x-1, p.y+1);
+		return get(p.getX()-1, p.getY()+1);
 	}
 	
 	public T goNorthWest(MisAnglePoint p)
 	{
-		return get(p.x-1, p.y-1);
+		return get(p.getX()-1, p.getY()-1);
 	}
 	
 	public T goEast(MisAnglePoint p)
 	{
-		return get(p.x, p.y+1);
+		return get(p.getX(), p.getY()+1);
 	}
 	
 	public T goSouth(MisAnglePoint p)
 	{
-		return get(p.x+1, p.y);
+		return get(p.getX()+1, p.getY());
 	}
 	
 	public T goSouthEast(MisAnglePoint p)
 	{
-		return get(p.x+1, p.y+1);
+		return get(p.getX()+1, p.getY()+1);
 	}
 	
 	public T goSouthWest(MisAnglePoint p)
 	{
-		return get(p.x+1, p.y-1);
+		return get(p.getX()+1, p.getY()-1);
 	}
 	
 	public T goWest(MisAnglePoint p)
 	{
-		return get(p.x, p.y-1);
+		return get(p.getX(), p.getY()-1);
 	}
 	
 	public Grain getGrainAtPoint(MisAnglePoint p)
@@ -137,13 +99,6 @@ public class MisAngleGrid<T extends MisAnglePoint> implements SkewGrid
 	public Grain getGrainAtPoint(int x, int y)
 	{
 		return getGrainAtPoint(get(x, y));
-	}
-
-	@Override
-	public boolean setPointSelected(SkewPoint p, boolean deselectAll)
-	{
-		if (p == null) return false;
-		return selectGrainAtPoint(p.getX(), p.getY(), deselectAll);
 	}
 	
 	public boolean selectGrainAtPoint(int x, int y, boolean multiselect)
@@ -166,16 +121,5 @@ public class MisAngleGrid<T extends MisAnglePoint> implements SkewGrid
 		return selected;
 	}
 
-	@Override
-	public int getWidth()
-	{
-		return width;
-	}
-
-	@Override
-	public int getHeight()
-	{
-		return height;
-	}
 	
 }

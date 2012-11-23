@@ -22,17 +22,19 @@ import commonenvironment.AbstractFile;
 import scidraw.swing.SavePicture;
 import scitypes.Coord;
 import skew.core.datasource.Acceptance;
-import skew.core.datasource.DataSource;
+import skew.core.datasource.IDataSource;
 import skew.core.datasource.DataSourceSelection;
-import skew.core.datasource.DummyDataSource;
-import skew.core.model.DummyGrid;
-import skew.core.model.SkewGrid;
-import skew.core.model.SkewPoint;
+import skew.core.datasource.DataSources;
+import skew.core.datasource.impl.DummyDataSource;
+import skew.core.model.ISkewGrid;
+import skew.core.model.ISkewPoint;
+import skew.core.model.impl.DummyGrid;
 import skew.core.viewer.SettingType;
+import skew.core.viewer.SkewTabs;
 import skew.core.viewer.SkewUI;
 import skew.core.viewer.modes.subviews.MapSubView;
-import skew.core.viewer.modes.views.DummyView;
 import skew.core.viewer.modes.views.MapView;
+import skew.core.viewer.modes.views.impl.DummyView;
 import swidget.dialogues.fileio.SwidgetIO;
 import swidget.icons.IconSize;
 import swidget.icons.StockIcon;
@@ -40,8 +42,8 @@ import swidget.icons.StockIcon;
 public class SkewController
 {
 
-	public DataSource dataSource = null;
-	public SkewGrid data = null;
+	public IDataSource dataSource = null;
+	public ISkewGrid data = null;
 	
 	public MapView viewMode = null;
 	public MapSubView subView = null;
@@ -49,10 +51,12 @@ public class SkewController
 	private File dir;
 	
 	SkewUI ui;
+	SkewTabs window;
 	
-	public SkewController(SkewUI ui)
+	public SkewController(SkewUI ui, SkewTabs window)
 	{
 		this.ui = ui;
+		this.window = window;
 		data = new DummyGrid();
 		dataSource = new DummyDataSource();
 		viewMode = new DummyView();
@@ -63,12 +67,13 @@ public class SkewController
 	
 
 	
-	public void setData(SkewGrid newdata, DataSource ds)
+	public void setData(ISkewGrid newdata, IDataSource ds)
 	{
 		if (newdata == null || ds == null) return;
 		data = newdata;
 		dataSource = ds;
 		ui.settingsChanged(SettingType.DATA);
+		window.setTabTitle(ui, data.datasetName());
 	}
 	
 	public void actionSaveText()
@@ -84,7 +89,7 @@ public class SkewController
 			writer.close();
 			
 			InputStream is = new FileInputStream(tempfile);
-			SwidgetIO.saveFile(ui, "Save Data as Text...", "txt", "Text File", ".", is);
+			SwidgetIO.saveFile(window, "Save Data as Text...", "txt", "Text File", ".", is);
 			is.close();
 			
 			tempfile.delete();
@@ -95,10 +100,10 @@ public class SkewController
 		}
 	}
 	
-	public void actionOpenData()
+	public boolean actionOpenData()
 	{
 		//list of all data formats
-		List<DataSource> formats = DataSource.getSources();
+		List<IDataSource> formats = DataSources.getSources();
 		
 		//get info for open dialogue
 		String[][] exts = new String[formats.size()][1];
@@ -110,8 +115,8 @@ public class SkewController
 		}
 		
 		//get a list of filenames from the user
-		List<AbstractFile> absfiles = SwidgetIO.openFiles(ui, "Select Data Files to Open", exts, descs, ".");
-		if (absfiles == null || absfiles.size() == 0) return;
+		List<AbstractFile> absfiles = SwidgetIO.openFiles(window, "Select Data Files to Open", exts, descs, ".");
+		if (absfiles == null || absfiles.size() == 0) return false;
 		
 		List<String> files = new ArrayList<String>();
 		for (AbstractFile af : absfiles)
@@ -121,9 +126,9 @@ public class SkewController
 		
 		
 		//filter for just the working data sources
-		List<DataSource> acceptingFormats = new ArrayList<DataSource>();
-		List<DataSource> maybeFormats = new ArrayList<DataSource>();
-		for (DataSource ds : formats)
+		List<IDataSource> acceptingFormats = new ArrayList<IDataSource>();
+		List<IDataSource> maybeFormats = new ArrayList<IDataSource>();
+		for (IDataSource ds : formats)
 		{
 			Acceptance acc = ds.accepts(files);
 			if (acc == Acceptance.ACCEPT) acceptingFormats.add(ds);
@@ -133,23 +138,24 @@ public class SkewController
 		
 		if (acceptingFormats.size() < 1) acceptingFormats = maybeFormats;
 		
-		DataSource ds = null;
+		IDataSource ds = null;
 		
 		if (acceptingFormats.size() > 1)
 		{
 			DataSourceSelection selection = new DataSourceSelection();
-			ds = selection.pickDSP(ui, acceptingFormats);
+			ds = selection.pickDSP(window, acceptingFormats);
 			if (ds != null) loadFiles(files, ds);
 		}
 		else if (acceptingFormats.size() == 0)
 		{
 			JOptionPane.showMessageDialog(
-					ui, 
+					window, 
 					"Could not determine the data format of the selected file(s)", 
 					"Open Failed", 
 					JOptionPane.ERROR_MESSAGE, 
 					StockIcon.BADGE_WARNING.toImageIcon(IconSize.ICON)
 				);
+			return false;
 		}
 		else
 		{
@@ -157,21 +163,21 @@ public class SkewController
 			loadFiles(files, ds);
 		}
 		
+		return true;
 	}
 	
-	private void loadFiles(List<String> filenames, DataSource ds)
+	private void loadFiles(List<String> filenames, IDataSource ds)
 	{
 		
 		try {
 			
-			Integer width = Integer.parseInt(JOptionPane.showInputDialog(ui, "Map Width", 1));
-			Integer height = Integer.parseInt(JOptionPane.showInputDialog(ui, "Map Height", 1));
+			Integer width = Integer.parseInt(JOptionPane.showInputDialog(window, "Map Width", 1));
+			Integer height = Integer.parseInt(JOptionPane.showInputDialog(window, "Map Height", 1));
 		
 			Coord<Integer> mapSize = new Coord<Integer>(width, height);
 			
-			ExecutorSet<SkewGrid> execset = ds.calculate(filenames, mapSize);
-			new ExecutorSetView(ui, execset);
-			
+			ExecutorSet<ISkewGrid> execset = ds.calculate(filenames, mapSize);
+			new ExecutorSetView(window, execset);
 			setData(execset.getResult(), ds);					
 			
 		}
@@ -197,7 +203,7 @@ public class SkewController
 		Coord<Integer> coord = ui.drawing.getMapCoordinateAtPoint(x, y, false);
 		if (coord == null) return;
 		
-		SkewPoint point = data.get(coord.x, coord.y);
+		ISkewPoint point = data.get(coord.x, coord.y);
 		if (point == null) return;
 		
 		
@@ -220,7 +226,7 @@ public class SkewController
 	{
 		if (data != null) {
 			new SavePicture(
-					ui, ui.graphics, dir.getAbsolutePath()
+					window, ui.graphics, dir.getAbsolutePath()
 				);
 		}
 	}
@@ -233,8 +239,10 @@ public class SkewController
 		if (newview == null)
 		{
 			ui.viewSelector.setSelectedItem(viewMode);
+			ui.savetext.setEnabled(false);
 			return;
 		}
+		ui.savetext.setEnabled(newview.canWriteData());
 		viewMode = newview;
 		ui.setSubViewUI();
 		ui.settingsChanged(SettingType.VIEW);

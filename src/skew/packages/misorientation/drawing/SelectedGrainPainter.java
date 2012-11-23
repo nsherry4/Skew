@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.geom.Ellipse2D;
 
 import scidraw.drawing.painters.PainterData;
-import skew.core.model.SkewPoint;
+import skew.core.model.ISkewPoint;
 import skew.packages.misorientation.model.Grain;
 
 public class SelectedGrainPainter extends AbstractMisAnglePainter
@@ -26,7 +26,7 @@ public class SelectedGrainPainter extends AbstractMisAnglePainter
 			if (g == null) continue;
 			if (!g.selected) continue;
 				
-			for (SkewPoint point : g.points)
+			for (ISkewPoint point : g.points)
 			{
 				if (  (point.getX() % 2 == 1 && point.getY() % 2 == 1)  ||  (point.getX() % 2 == 0 && point.getY() % 2 == 0)  ){
 					//p.context.rectangle(cellSize * point.x, cellSize * point.y, cellSize, cellSize);
@@ -47,7 +47,7 @@ public class SelectedGrainPainter extends AbstractMisAnglePainter
 			if (g == null) continue;
 			if (!g.selected) continue;
 				
-			for (SkewPoint point : g.points)
+			for (ISkewPoint point : g.points)
 			{
 				if (!(  (point.getX() % 2 == 1 && point.getY() % 2 == 1)  ||  (point.getX() % 2 == 0 && point.getY() % 2 == 0)  )){
 					p.context.addShape(new Ellipse2D.Double(cellSize * point.getX() + pad, cellSize * point.getY() + pad, cellSize - (2*pad), cellSize - (2*pad)));

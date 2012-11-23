@@ -5,7 +5,7 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import skew.core.model.SkewGrid;
+import skew.core.model.ISkewGrid;
 import skew.packages.misorientation.datasource.calculation.misorientation.Calculation;
 import skew.packages.misorientation.model.Grain;
 import skew.packages.misorientation.model.MisAngleGrid;
@@ -97,7 +97,7 @@ public class Magnitude
 		
 	}
 	
-	public static void calcMagnitude(SkewGrid data, Grain g)
+	public static void calcMagnitude(ISkewGrid data, Grain g)
 	{
 		double magAvg = 0;
 		double magMax = 0;
@@ -150,7 +150,7 @@ public class Magnitude
 		
 	}
 	
-	private static double calcPointMagnitude(SkewGrid data, Grain g, MisAnglePoint p)
+	private static double calcPointMagnitude(ISkewGrid data, Grain g, MisAnglePoint p)
 	{
 		double sum = 0;
 		for (MisAnglePoint point : g.points)

@@ -3,7 +3,7 @@ package skew.packages.misorientation.model;
 import java.util.HashSet;
 import java.util.Set;
 
-import skew.core.model.SkewPoint;
+import skew.core.model.ISkewPoint;
 
 import fava.functionable.FList;
 
@@ -22,7 +22,7 @@ public class Grain
 	public boolean selected = false;
 	public int index;
 	
-	public SkewPoint intraGrainCenter;
+	public ISkewPoint intraGrainCenter;
 	public double intraGrainMax = 0.0001;
 	
 	public Grain(int index)

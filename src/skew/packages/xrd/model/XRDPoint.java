@@ -8,6 +8,7 @@ public class XRDPoint extends MisAnglePoint
 	public boolean hasStrainData = false;
 	public double[] strain = new double[7];
 	public double[] stress = new double[7];
+	public double pixdev = 0;
 	
 	public XRDPoint(int index, int x, int y)
 	{

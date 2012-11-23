@@ -3,7 +3,7 @@ package skew.packages.misorientation.model;
 import java.util.List;
 
 import scitypes.DirectionVector;
-import skew.core.model.SkewPoint;
+import skew.core.model.impl.SkewPoint;
 import skew.packages.misorientation.datasource.calculation.misorientation.OrientationMatrix;
 
 /**
@@ -16,7 +16,7 @@ import skew.packages.misorientation.datasource.calculation.misorientation.Orient
  * @author Jinhui Qin, 2011
  * 
  */
-public class MisAnglePoint implements SkewPoint
+public class MisAnglePoint extends SkewPoint
 {
 	
 	public double	average;	// average of eight neighbors (if any<5)
@@ -28,8 +28,6 @@ public class MisAnglePoint implements SkewPoint
 	
 	public int grain = -1;
 	
-	protected int index, x, y;
-	
 	public List<DirectionVector> orientationVectors;
 	
 	public double grainMagnitude;
@@ -37,6 +35,8 @@ public class MisAnglePoint implements SkewPoint
 	
 	public MisAnglePoint(int index, int x, int y)
 	{
+		super(x, y, index);
+		
 		average = -1.;
 		south = -1.;
 		east = -1.;
@@ -45,43 +45,8 @@ public class MisAnglePoint implements SkewPoint
 		grain = -1;
 		
 		orientation = new OrientationMatrix();
-		
-		this.index = index;
-		this.x = x;
-		this.y = y;
 	}
 
-	@Override
-	public int getIndex()
-	{
-		return index;
-	}
 
-	public void setIndex(int index)
-	{
-		this.index = index;
-	}
-
-	@Override
-	public int getX()
-	{
-		return x;
-	}
-
-	public void setX(int x)
-	{
-		this.x = x;
-	}
-
-	@Override
-	public int getY()
-	{
-		return y;
-	}
-
-	public void setY(int y)
-	{
-		this.y = y;
-	}
 
 }
