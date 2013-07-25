@@ -7,7 +7,6 @@ import java.util.List;
 import javax.swing.SpinnerModel;
 
 import fava.functionable.FList;
-
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.map.painters.RasterSpectrumMapPainter;
 import scidraw.drawing.map.palettes.AbstractPalette;
@@ -16,10 +15,10 @@ import scitypes.Spectrum;
 import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
+import skew.models.Grain.Grain;
+import skew.models.Misorientation.MisAngleGrid;
+import skew.models.Misorientation.MisAnglePoint;
 import skew.packages.misorientation.drawing.GrainPalette;
-import skew.packages.misorientation.model.Grain;
-import skew.packages.misorientation.model.MisAngleGrid;
-import skew.packages.misorientation.model.MisAnglePoint;
 import skew.packages.misorientation.view.MisorientationView;
 
 

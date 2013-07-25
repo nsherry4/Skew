@@ -1,10 +1,11 @@
-package skew.packages.misorientation.model;
+package skew.models.Misorientation;
 
 import java.util.List;
 
 import scitypes.DirectionVector;
 import skew.core.model.impl.SkewPoint;
-import skew.packages.misorientation.datasource.calculation.misorientation.OrientationMatrix;
+import skew.models.OrientationMatrix.IOrientationMatrix;
+import skew.models.OrientationMatrix.OrientationMatrix;
 
 /**
  * MisAnglePoint defines the structure for storing the mis-angle for one scan
@@ -22,9 +23,7 @@ public class MisAnglePoint extends SkewPoint
 	public double	average;	// average of eight neighbors (if any<5)
 	public double	north, east, south, west;
 	
-	public boolean hasOMData = false;
-	
-	public OrientationMatrix orientation;
+	public IOrientationMatrix orientation;
 	
 	public int grain = -1;
 	

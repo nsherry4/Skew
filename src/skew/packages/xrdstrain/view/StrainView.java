@@ -1,4 +1,4 @@
-package skew.packages.xrd.view;
+package skew.packages.xrdstrain.view;
 
 import java.awt.Color;
 import java.io.BufferedWriter;
@@ -10,7 +10,6 @@ import javax.swing.SpinnerNumberModel;
 
 import fava.datatypes.Pair;
 import fava.functionable.FList;
-
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.map.painters.RasterColorMapPainter;
 import scidraw.drawing.map.painters.axis.SpectrumCoordsAxisPainter;
@@ -20,19 +19,20 @@ import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.SigDigits;
 import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
+import skew.core.model.impl.SkewGrid;
 import skew.core.viewer.modes.subviews.MapSubView;
-import skew.packages.misorientation.model.MisAngleGrid;
-import skew.packages.misorientation.view.MisorientationView;
+import skew.core.viewer.modes.views.MapView;
+import skew.models.XRDStrain.IXRDStrainPoint;
 import skew.packages.xrd.model.XRDPoint;
-import skew.packages.xrd.subview.StressSubView;
+import skew.packages.xrd.subview.StrainSubView;
 
-public class StressView extends MisorientationView
+public class StrainView extends MapView
 {
 	
 	RasterColorMapPainter painter;
 	AbstractPalette palette;
 	
-	public StressView()
+	public StrainView()
 	{
 		super();
 		
@@ -44,7 +44,7 @@ public class StressView extends MisorientationView
 	@Override
 	public String toString()
 	{
-		return "Stress";
+		return "Strain";
 	}
 	
 	@Override
@@ -56,17 +56,16 @@ public class StressView extends MisorientationView
 	@Override
 	public String getSummaryText(ISkewPoint skewpoint, ISkewGrid data)
 	{
-		XRDPoint point = (XRDPoint)skewpoint;
-		
-		if (!point.hasOMData) return "";
+		IXRDStrainPoint point = (IXRDStrainPoint)skewpoint;
+		if (! point.getHasStrainData()) return "";
 		
 		return "" + 
-				"XX: " + fmt(point.stress[0]) + ", " +
-				"YY: " + fmt(point.stress[1]) + ", " +
-				"ZZ: " + fmt(point.stress[2]) + ", " +
-				"XY: " + fmt(point.stress[3]) + ", " +
-				"XZ: " + fmt(point.stress[4]) + ", " +
-				"YZ: " + fmt(point.stress[5]) + ", ";
+				"XX: " + fmt(point.strain()[0]) + ", " +
+				"YY: " + fmt(point.strain()[1]) + ", " +
+				"ZZ: " + fmt(point.strain()[2]) + ", " +
+				"XY: " + fmt(point.strain()[3]) + ", " +
+				"XZ: " + fmt(point.strain()[4]) + ", " +
+				"YZ: " + fmt(point.strain()[5]) + ", ";
 				
 	}
 
@@ -81,13 +80,13 @@ public class StressView extends MisorientationView
 	public List<MapSubView> getSubList()
 	{
 		return new FList<MapSubView>(
-				new StressSubView(0),
-				new StressSubView(1),
-				new StressSubView(2),
-				new StressSubView(3),
-				new StressSubView(4),
-				new StressSubView(5),
-				new StressSubView(6)
+				new StrainSubView(0),
+				new StrainSubView(1),
+				new StrainSubView(2),
+				new StrainSubView(3),
+				new StrainSubView(4),
+				new StrainSubView(5),
+				new StrainSubView(6)
 			);
 	}
 
@@ -102,11 +101,10 @@ public class StressView extends MisorientationView
 	{		
 		if (isUpdateRequired())
 		{
-			super.setData(data, subview);
 			setupPainters(data, subview, maximum);
 			setUpdateComplete();
 		}
-		return new FList<MapPainter>(painter, super.boundaryPainter, super.selectedGrainPainter);
+		return new FList<MapPainter>(painter);
 	}
 		
 	@Override
@@ -135,7 +133,7 @@ public class StressView extends MisorientationView
 				false, 
 				"Strain", 
 				1,
-				false,
+				true,
 				axisMarkings);
 		
 		
@@ -147,24 +145,23 @@ public class StressView extends MisorientationView
 	public void writeData(ISkewGrid skewdata, MapSubView subview, BufferedWriter writer) throws IOException
 	{
 		@SuppressWarnings("unchecked")
-		MisAngleGrid<XRDPoint> data = (MisAngleGrid<XRDPoint>)skewdata;
+		SkewGrid<IXRDStrainPoint> data = (SkewGrid<IXRDStrainPoint>)skewdata;
 		
-		writer.write("index, x, y, grain, xx, yy, zz, xy, xz, yz, von mises\n");
+		writer.write("index, x, y, xx, yy, zz, xy, xz, yz, von mises\n");
 		
-		for (XRDPoint point : data.getBackingList())
+		for (IXRDStrainPoint point : data.getBackingList())
 		{
 			writer.write(
 					point.getIndex() + ", " + 
 					point.getX() + ", " + 
 					point.getY() + ", " +
-					point.grain + ", " + 
-					fmt(point.stress[0]) + ", " +
-					fmt(point.stress[1]) + ", " + 
-					fmt(point.stress[2]) + ", " + 
-					fmt(point.stress[3]) + ", " + 
-					fmt(point.stress[4]) + ", " + 
-					fmt(point.stress[5]) + ", " +
-					fmt(point.stress[6]) + 
+					fmt(point.strain()[0]) + ", " +
+					fmt(point.strain()[1]) + ", " + 
+					fmt(point.strain()[2]) + ", " + 
+					fmt(point.strain()[3]) + ", " + 
+					fmt(point.strain()[4]) + ", " + 
+					fmt(point.strain()[5]) + ", " +
+					fmt(point.strain()[6]) + 
 					"\n"
 				);
 		}
@@ -175,29 +172,28 @@ public class StressView extends MisorientationView
 	{
 		return true;
 	}
+	
 
 	
 	private void setupPainters(ISkewGrid skewdata, MapSubView subview, float maximum)
 	{
 		@SuppressWarnings("unchecked")
-		MisAngleGrid<XRDPoint> data = (MisAngleGrid<XRDPoint>)skewdata;
+		SkewGrid<IXRDStrainPoint> data = (SkewGrid<IXRDStrainPoint>)skewdata;
 		
 		List<Color> pixelColours = new FList<Color>(data.getWidth() * data.getHeight());
 		for (int i = 0; i < data.getWidth() * data.getHeight(); i++){ pixelColours.add(Color.black); }
 		
 		Color c;
-		for (XRDPoint point : data.getBackingList())
+		for (IXRDStrainPoint point : data.getBackingList())
 		{
-			if (!point.hasOMData)
+			if (point.getHasStrainData()) 
 			{
-				c = Color.black;
-			}
-			else
-			{
-				double v = subview.select(point.stress);
+				double v = subview.select(point.strain());
 				c = palette.getFillColour(v, maximum);
+				pixelColours.set(point.getIndex(), c);
+			} else {
+				c = backgroundGray;
 			}
-			pixelColours.set(point.getIndex(), c);
 		}
 		
 		painter.setPixels(pixelColours);

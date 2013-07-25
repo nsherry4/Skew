@@ -15,23 +15,20 @@ import java.io.File;
 import java.util.List;
 
 import commonenvironment.IOOperations;
-
-
 import fava.functionable.FList;
 import fava.signatures.FnEach;
-
 import plural.executor.ExecutorSet;
 import plural.executor.eachindex.EachIndexExecutor;
 import plural.executor.eachindex.implementations.PluralEachIndexExecutor;
 import plural.executor.map.MapExecutor;
-
 import scitypes.Coord;
 import skew.core.model.ISkewGrid;
+import skew.models.Misorientation.MisAngleGrid;
+import skew.models.Misorientation.MisAnglePoint;
+import skew.models.OrientationMatrix.IOrientationMatrix;
 import skew.packages.misorientation.datasource.MisorientationDataSource;
 import skew.packages.misorientation.datasource.calculation.magnitude.Magnitude;
 import skew.packages.misorientation.datasource.calculation.magnitude.OrientationMap;
-import skew.packages.misorientation.model.MisAngleGrid;
-import skew.packages.misorientation.model.MisAnglePoint;
 
 public class Calculation
 {
@@ -342,7 +339,7 @@ public class Calculation
 
 	}
 
-	public static double calculateAngle(OrientationMatrix gA, OrientationMatrix gB)
+	public static double calculateAngle(IOrientationMatrix gA, IOrientationMatrix gB)
 	{
 
 		float[][] delta_g, mis;
@@ -353,7 +350,7 @@ public class Calculation
 		delta_g = new float[3][3];
 		mis = new float[3][3];
 
-		prodmat(gB.inverse, gA.direct, delta_g);
+		prodmat(gB.getInverse(), gA.getDirect(), delta_g);
 
 		minAngle = -1;
 		for (int i = 0; i < symmetryOperators.getNumOP(); i++)

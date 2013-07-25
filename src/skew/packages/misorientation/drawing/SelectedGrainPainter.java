@@ -5,7 +5,7 @@ import java.awt.geom.Ellipse2D;
 
 import scidraw.drawing.painters.PainterData;
 import skew.core.model.ISkewPoint;
-import skew.packages.misorientation.model.Grain;
+import skew.models.Grain.Grain;
 
 public class SelectedGrainPainter extends AbstractMisAnglePainter
 {

@@ -61,8 +61,14 @@ public class PixDevDataSource extends BasicDataSource
 		final List<PixDev> values = new ArrayList<PixDev>();
 		for (int y = 0; y < mapsize.y; y++) {
 			for (int x = 0; x < mapsize.x; x++) {
-				float val = Float.parseFloat(tokens.get(x + y*mapsize.x));
-				values.add(new PixDev(x, y, x + y*mapsize.x, val));
+				int index = x + y*mapsize.x;
+				if (index >= tokens.size()) 
+				{
+					values.add(new PixDev(x, y, index, 0));
+					continue;
+				}
+				float val = Float.parseFloat(tokens.get(index));
+				values.add(new PixDev(x, y, index, val));
 			}
 		}
 		

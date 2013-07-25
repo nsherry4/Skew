@@ -6,11 +6,10 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import skew.core.model.ISkewGrid;
+import skew.models.Grain.Grain;
+import skew.models.Misorientation.MisAngleGrid;
+import skew.models.Misorientation.MisAnglePoint;
 import skew.packages.misorientation.datasource.calculation.misorientation.Calculation;
-import skew.packages.misorientation.model.Grain;
-import skew.packages.misorientation.model.MisAngleGrid;
-import skew.packages.misorientation.model.MisAnglePoint;
-
 import fava.functionable.FList;
 
 public class Magnitude

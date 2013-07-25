@@ -11,10 +11,10 @@ import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.SigDigits;
 import skew.core.model.ISkewGrid;
 import skew.core.viewer.modes.subviews.MapSubView;
+import skew.core.viewer.modes.views.MapView;
 import skew.packages.misorientation.drawing.EBSDPalette;
-import skew.packages.misorientation.view.MisorientationView;
 
-public abstract class MisAngleView extends MisorientationView
+public abstract class MisAngleView extends MapView
 {
 
 	AbstractPalette thermal;

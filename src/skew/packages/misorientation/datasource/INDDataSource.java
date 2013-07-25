@@ -9,16 +9,17 @@ import java.util.List;
 
 import fava.functionable.FList;
 import fava.signatures.FnMap;
-
 import plural.executor.map.MapExecutor;
 import plural.executor.map.implementations.PluralMapExecutor;
 import skew.core.datasource.Acceptance;
 import skew.core.viewer.modes.views.MapView;
+import skew.core.viewer.modes.views.impl.CompositeView;
+import skew.models.Misorientation.MisAngleGrid;
+import skew.models.Misorientation.MisAnglePoint;
+import skew.models.OrientationMatrix.IOrientationMatrix;
 import skew.packages.misorientation.datasource.calculation.misorientation.Calculation;
 import skew.packages.misorientation.datasource.calculation.misorientation.IndexFileName;
-import skew.packages.misorientation.datasource.calculation.misorientation.OrientationMatrix;
-import skew.packages.misorientation.model.MisAngleGrid;
-import skew.packages.misorientation.model.MisAnglePoint;
+import skew.packages.misorientation.view.GrainSecondaryView;
 import skew.packages.misorientation.view.grain.GrainLabelView;
 import skew.packages.misorientation.view.grain.OrientationView;
 import skew.packages.misorientation.view.misangle.InterGrainView;
@@ -71,7 +72,7 @@ public class INDDataSource extends MisorientationDataSource
 				int index = IndexFileName.getFileNumber(filename)-startNum;
 				if (index >= data.size()) return "";
 				MisAnglePoint p = data.get(index);
-				p.hasOMData = loadOM(filename, p.orientation);
+				p.orientation.setHasOMData(loadOM(filename, p.orientation));
 				return "";
 			}};
 			
@@ -81,7 +82,7 @@ public class INDDataSource extends MisorientationDataSource
 	}
 	
 	
-	public boolean loadOM(String inputFile, OrientationMatrix om)
+	public boolean loadOM(String inputFile, IOrientationMatrix om)
 	{
 		BufferedReader reader = null;
 		String line;
@@ -136,16 +137,16 @@ public class INDDataSource extends MisorientationDataSource
 				list.removeAll(Arrays.asList(""));
 				tokens = list.toArray(tokens);
 
-				om.inverse[i][0] = Float.parseFloat(tokens[0]);// Float.parseFloat(tokens[0]);
-				om.inverse[i][1] = Float.parseFloat(tokens[1]);// Float.parseFloat(tokens[1]);
-				om.inverse[i][2] = Float.parseFloat(tokens[2]);// Float.parseFloat(tokens[2]);
+				om.getInverse()[i][0] = Float.parseFloat(tokens[0]);// Float.parseFloat(tokens[0]);
+				om.getInverse()[i][1] = Float.parseFloat(tokens[1]);// Float.parseFloat(tokens[1]);
+				om.getInverse()[i][2] = Float.parseFloat(tokens[2]);// Float.parseFloat(tokens[2]);
 			}
 
 			// close the file
 			reader.close();
 
-			om.index = IndexFileName.getFileNumber(inputFile);
-			Calculation.invert3(om.inverse, om.direct);
+			om.setMatrixIndex(IndexFileName.getFileNumber(inputFile));
+			Calculation.invert3(om.getInverse(), om.getDirect());
 			
 			
 			return true;
@@ -175,11 +176,11 @@ public class INDDataSource extends MisorientationDataSource
 	public List<MapView> getViews()
 	{
 		return new FList<MapView>(
-				new LocalView(),
-				new InterGrainView(),
-				new MagnitudeView(),
-				new OrientationView(),
-				new GrainLabelView()
+				new CompositeView(new LocalView(), new GrainSecondaryView()),
+				new CompositeView(new InterGrainView(), new GrainSecondaryView()),
+				new CompositeView(new MagnitudeView(), new GrainSecondaryView()),
+				new CompositeView(new OrientationView(), new GrainSecondaryView()),
+				new CompositeView(new GrainLabelView(), new GrainSecondaryView())
 			);
 
 	}

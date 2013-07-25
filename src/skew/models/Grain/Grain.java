@@ -1,10 +1,10 @@
-package skew.packages.misorientation.model;
+package skew.models.Grain;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import skew.core.model.ISkewPoint;
-
+import skew.models.Misorientation.MisAnglePoint;
 import fava.functionable.FList;
 
 public class Grain

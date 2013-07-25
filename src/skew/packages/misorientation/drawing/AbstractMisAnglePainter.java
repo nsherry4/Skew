@@ -3,8 +3,8 @@ package skew.packages.misorientation.drawing;
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.map.palettes.ThermalScalePalette;
 import skew.core.model.ISkewGrid;
-import skew.packages.misorientation.model.MisAngleGrid;
-import skew.packages.misorientation.model.MisAnglePoint;
+import skew.models.Misorientation.MisAngleGrid;
+import skew.models.Misorientation.MisAnglePoint;
 
 
 public abstract class AbstractMisAnglePainter extends MapPainter

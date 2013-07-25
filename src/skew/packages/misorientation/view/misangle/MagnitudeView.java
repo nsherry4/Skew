@@ -10,15 +10,14 @@ import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 
 import fava.functionable.FList;
-
 import scidraw.drawing.map.painters.MapPainter;
 import scitypes.Spectrum;
 import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
-import skew.packages.misorientation.model.Grain;
-import skew.packages.misorientation.model.MisAngleGrid;
-import skew.packages.misorientation.model.MisAnglePoint;
+import skew.models.Grain.Grain;
+import skew.models.Misorientation.MisAngleGrid;
+import skew.models.Misorientation.MisAnglePoint;
 import skew.packages.misorientation.subview.GrainMagnitudeSubView;
 
 
@@ -105,11 +104,10 @@ public class MagnitudeView extends MisAngleView
 		
 		if (isUpdateRequired())
 		{
-			super.setData(data, subview);
 			setupPainters(data, subview);
 			setUpdateComplete();
 		}
-		return new FList<MapPainter>(super.misorientationPainter, super.boundaryPainter, super.selectedGrainPainter);
+		return new FList<MapPainter>(super.misorientationPainter);
 	}
 	
 	

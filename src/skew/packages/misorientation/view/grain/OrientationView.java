@@ -10,9 +10,7 @@ import java.util.List;
 import javax.swing.SpinnerModel;
 
 import ca.sciencestudio.process.xrd.util.Orientation;
-
 import fava.functionable.FList;
-
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.map.painters.RasterColorMapPainter;
 import scidraw.drawing.painters.axis.AxisPainter;
@@ -20,19 +18,20 @@ import scitypes.DirectionVector;
 import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
-import skew.packages.misorientation.model.MisAngleGrid;
-import skew.packages.misorientation.model.MisAnglePoint;
+import skew.core.viewer.modes.views.MapView;
+import skew.models.Misorientation.MisAngleGrid;
+import skew.models.Misorientation.MisAnglePoint;
 import skew.packages.misorientation.subview.OrientationSubView;
-import skew.packages.misorientation.view.MisorientationView;
 
 
-public class OrientationView extends MisorientationView
+public class OrientationView extends MapView
 {
 
 	protected RasterColorMapPainter orientationPainter;
 	
 	public OrientationView()
 	{
+		super();
 		orientationPainter = new RasterColorMapPainter();
 	}
 	
@@ -85,11 +84,10 @@ public class OrientationView extends MisorientationView
 		
 		if (isUpdateRequired())
 		{
-			super.setData(data, subview);
 			setupPainters(data, subview);
 			setUpdateComplete();
 		}
-		return new FList<MapPainter>(orientationPainter, super.boundaryPainter, super.selectedGrainPainter);
+		return new FList<MapPainter>(orientationPainter);
 	}
 
 	@Override
@@ -106,7 +104,7 @@ public class OrientationView extends MisorientationView
 		Color c;
 		for (MisAnglePoint point : data.getBackingList())
 		{
-			if (!point.hasOMData)
+			if (!point.orientation.getHasOMData())
 			{
 				c = backgroundGray;
 			}

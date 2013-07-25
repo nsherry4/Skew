@@ -75,8 +75,8 @@ public class SkewUI extends JPanel {
 	JLabel scaleLabel;
 	JPanel scalePanel;
 
-	public JComboBox viewSelector;
-	JComboBox subViewSelector;
+	public JComboBox<MapView> viewSelector;
+	JComboBox<MapSubView> subViewSelector;
 	
 
 	JScrollPane pane;

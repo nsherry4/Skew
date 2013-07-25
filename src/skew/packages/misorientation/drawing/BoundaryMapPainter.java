@@ -3,10 +3,9 @@ package skew.packages.misorientation.drawing;
 
 import java.awt.Color;
 
-
 import scidraw.drawing.backends.Surface.EndCap;
 import scidraw.drawing.painters.PainterData;
-import skew.packages.misorientation.model.MisAnglePoint;
+import skew.models.Misorientation.MisAnglePoint;
 
 /**
  * 

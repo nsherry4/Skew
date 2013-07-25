@@ -79,6 +79,8 @@ public abstract class MapView
 	public abstract void writeData(ISkewGrid data, MapSubView subview, BufferedWriter writer) throws IOException; 
 	public abstract boolean canWriteData();
 	
+	
+	
 	protected static String formatGrainValue(double value)
 	{
 		if (value < 0) return "None";

@@ -2,9 +2,8 @@ package skew.packages.misorientation.datasource.calculation.magnitude;
 
 import java.util.List;
 
-import skew.packages.misorientation.model.MisAngleGrid;
-import skew.packages.misorientation.model.MisAnglePoint;
-
+import skew.models.Misorientation.MisAngleGrid;
+import skew.models.Misorientation.MisAnglePoint;
 import fava.functionable.FList;
 
 

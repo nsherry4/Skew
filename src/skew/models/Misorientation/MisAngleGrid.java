@@ -1,4 +1,4 @@
-package skew.packages.misorientation.model;
+package skew.models.Misorientation;
 
 /**
  * MisAnglePointList defines the structure for storing the mis-angles for all scan points in an area scan. 
@@ -10,6 +10,7 @@ import java.util.List;
 
 import skew.core.model.ISkewPoint;
 import skew.core.model.impl.SkewGrid;
+import skew.models.Grain.Grain;
 import skew.packages.misorientation.datasource.calculation.magnitude.GrainIdentify;
 
 
