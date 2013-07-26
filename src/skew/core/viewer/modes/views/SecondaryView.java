@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.swing.SpinnerModel;
 
-import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 
@@ -14,13 +13,13 @@ public abstract class SecondaryView extends MapView
 {
 
 	@Override
-	public SpinnerModel scaleSpinnerModel(ISkewGrid data, MapSubView subView)
+	public SpinnerModel scaleSpinnerModel(MapSubView subView)
 	{
 		return null;
 	}
 
 	@Override
-	public String getSummaryText(ISkewPoint point, ISkewGrid data)
+	public String getSummaryText(ISkewPoint point)
 	{
 		return "";
 	}
@@ -38,14 +37,14 @@ public abstract class SecondaryView extends MapView
 	}
 
 	@Override
-	public float getMaximumIntensity(ISkewGrid data, MapSubView subview)
+	public float getMaximumIntensity(MapSubView subview)
 	{
 		return 0;
 	}
 
 
 	@Override
-	public void writeData(ISkewGrid data, MapSubView subview, BufferedWriter writer) throws IOException
+	public void writeData(MapSubView subview, BufferedWriter writer) throws IOException
 	{
 		
 	}

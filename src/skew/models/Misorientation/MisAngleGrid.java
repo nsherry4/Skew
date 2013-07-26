@@ -20,18 +20,18 @@ public class MisAngleGrid<T extends MisAnglePoint> extends SkewGrid<T>
 	public List<Grain>               grains;
 	public int grainCount = 0;
 
-	public MisAngleGrid(int width, int height, List<T> points, String name)
+	public MisAngleGrid(int width, int height, List<T> points)
 	{
-		super(width, height, points, name);
+		super(width, height, points);
 		this.grains = new ArrayList<Grain>();
 	}
 	
 	
 	@Override
-	public boolean setPointSelected(ISkewPoint p, boolean deselectAll)
+	public boolean setPointSelected(int x, int y, boolean deselectAll)
 	{
-		if (p == null) return false;
-		return selectGrainAtPoint(p.getX(), p.getY(), deselectAll);
+		if (get(x, y) == null) return false;
+		return selectGrainAtPoint(x, y, deselectAll);
 	}
 	
 	

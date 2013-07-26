@@ -9,28 +9,30 @@ import javax.swing.SpinnerModel;
 
 import fava.datatypes.Pair;
 import fava.functionable.FList;
-
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.map.painters.axis.SpectrumCoordsAxisPainter;
 import scidraw.drawing.map.palettes.AbstractPalette;
 import scidraw.drawing.painters.axis.AxisPainter;
-import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.painter.RasterColorMapWrapper;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
 import skew.packages.pixeldeviation.model.PixDev;
+import skew.packages.pixeldeviation.model.PixDevGrid;
 
 public class PixelDeviationComparisonView extends MapView
 {
 
 	RasterColorMapWrapper painter;
 	AbstractPalette palette;
+	PixDevGrid model;
 	
-	public PixelDeviationComparisonView()
+	public PixelDeviationComparisonView(PixDevGrid model)
 	{
 		super();
-			
+		
+		this.model = model;
+		
 		painter = new RasterColorMapWrapper() {
 			
 			@Override
@@ -58,13 +60,13 @@ public class PixelDeviationComparisonView extends MapView
 	}
 	
 	@Override
-	public SpinnerModel scaleSpinnerModel(ISkewGrid data, MapSubView subView)
+	public SpinnerModel scaleSpinnerModel(MapSubView subView)
 	{
 		return null;
 	}
 
 	@Override
-	public String getSummaryText(ISkewPoint point, ISkewGrid data)
+	public String getSummaryText(ISkewPoint point)
 	{
 		return "Comparative Pixel Deviation";
 	}
@@ -82,22 +84,22 @@ public class PixelDeviationComparisonView extends MapView
 	}
 
 	@Override
-	public float getMaximumIntensity(ISkewGrid data, MapSubView subview)
+	public float getMaximumIntensity(MapSubView subview)
 	{
 		return 1;
 	}
 
 
 	@Override
-	public List<MapPainter> getPainters(ISkewGrid data, MapSubView subview, float maximum)
+	public List<MapPainter> getPainters(MapSubView subview, float maximum)
 	{
-		painter.setData(data);
+		painter.setData(model);
 		return new FList<MapPainter>(painter);
 	}
 
 	
 	@Override
-	public List<AxisPainter> getAxisPainters(ISkewGrid data, MapSubView subview, float maxValue)
+	public List<AxisPainter> getAxisPainters(MapSubView subview, float maxValue)
 	{
 		List<Pair<Float, String>> axisMarkings = new FList<Pair<Float,String>>();
 		
@@ -130,7 +132,7 @@ public class PixelDeviationComparisonView extends MapView
 	}
 
 	@Override
-	public void writeData(ISkewGrid data, MapSubView subview, BufferedWriter writer) throws IOException
+	public void writeData(MapSubView subview, BufferedWriter writer) throws IOException
 	{
 		return;
 	}

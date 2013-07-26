@@ -7,8 +7,8 @@ import skew.core.model.impl.SkewGrid;
 public class PixDevGrid extends SkewGrid<PixDev>
 {
 
-	public PixDevGrid(int width, int height, List<PixDev> points, String name)
+	public PixDevGrid(int width, int height, List<PixDev> points)
 	{
-		super(width, height, points, name);
+		super(width, height, points);
 	}
 }

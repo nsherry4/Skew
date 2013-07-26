@@ -9,9 +9,10 @@ import scidraw.drawing.map.painters.axis.SpectrumCoordsAxisPainter;
 import scidraw.drawing.map.palettes.AbstractPalette;
 import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.SigDigits;
-import skew.core.model.ISkewGrid;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
+import skew.models.Misorientation.MisAngleGrid;
+import skew.models.Misorientation.MisAnglePoint;
 import skew.packages.misorientation.drawing.EBSDPalette;
 
 public abstract class MisAngleView extends MapView
@@ -25,10 +26,13 @@ public abstract class MisAngleView extends MapView
 	
 	
 	protected AxisPainter spectrum;
+	MisAngleGrid<? extends MisAnglePoint> misorientationModel;
 	
-	public MisAngleView()
+	public MisAngleView(MisAngleGrid<? extends MisAnglePoint> misorientationModel)
 	{
 		super();
+		
+		this.misorientationModel = misorientationModel;
 		
 		thermal = new EBSDPalette();
 		
@@ -39,7 +43,7 @@ public abstract class MisAngleView extends MapView
 	}
 	
 	@Override
-	public List<AxisPainter> getAxisPainters(ISkewGrid data, MapSubView subview, float maxValue)
+	public List<AxisPainter> getAxisPainters(MapSubView subview, float maxValue)
 	{
 	
 		List<Pair<Float, String>> axisMarkings = new FList<Pair<Float,String>>();

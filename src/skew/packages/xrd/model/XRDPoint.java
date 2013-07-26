@@ -11,10 +11,10 @@ public class XRDPoint extends MisAnglePoint implements IXRDStrainPoint
 	public IXRDStrainPoint str;
 	public double pixdev = 0;
 	
-	public XRDPoint(int index, int x, int y)
+	public XRDPoint(int x, int y, int index)
 	{
-		super(index, x, y);
-		str = new XRDStrainPoint(index, x, y);
+		super(x, y, index);
+		str = new XRDStrainPoint(x, y, index);
 	}
 
 	@Override

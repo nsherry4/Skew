@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
-import commonenvironment.IOOperations;
 import fava.functionable.FList;
 import fava.functionable.FStringInput;
 import fava.signatures.FnMap;
@@ -18,6 +17,7 @@ import skew.core.viewer.modes.views.MapView;
 import skew.models.XRDStrain.IXRDStrainPoint;
 import skew.models.XRDStrain.XRDStrainPoint;
 import skew.packages.misorientation.datasource.calculation.misorientation.IndexFileName;
+import skew.packages.xrdstrain.XRDStrain;
 import skew.packages.xrdstrain.view.StrainView;
 
 public class SubtractionDataSource extends BasicDataSource
@@ -30,7 +30,7 @@ public class SubtractionDataSource extends BasicDataSource
 		super("dif", "Strain Difference", "Strain Difference");
 		views = new ArrayList<MapView>();
 		
-		views.add(new StrainView());
+		
 	}
 
 	@Override
@@ -70,6 +70,7 @@ public class SubtractionDataSource extends BasicDataSource
 					p.strain()[3] = Double.parseDouble(contents.get(4));	//YY
 					p.strain()[4] = Double.parseDouble(contents.get(5));	//YZ
 					p.strain()[5] = Double.parseDouble(contents.get(8));	//ZZ
+					p.strain()[6] = XRDStrain.vonMises(p.strain());
 					
 					p.setHasStrainData(true);
 					
@@ -83,8 +84,9 @@ public class SubtractionDataSource extends BasicDataSource
 			}
 		});
 		
-		return new SkewGrid<IXRDStrainPoint>(mapsize.y, mapsize.x, points, IOOperations.getCommonFileName(filenames));
-		
+		SkewGrid<IXRDStrainPoint> model = new SkewGrid<IXRDStrainPoint>(mapsize.y, mapsize.x, points);
+		views.add(new StrainView(model));
+		return model;
 	}
 
 }

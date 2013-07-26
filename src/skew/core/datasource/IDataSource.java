@@ -4,7 +4,7 @@ import java.util.List;
 
 import plural.executor.ExecutorSet;
 import scitypes.Coord;
-import skew.core.model.ISkewGrid;
+import skew.core.model.ISkewDataset;
 import skew.core.viewer.modes.views.MapView;
 
 
@@ -20,6 +20,6 @@ public interface IDataSource
 	
 	public List<MapView> getViews();	
 	
-	public ExecutorSet<ISkewGrid> calculate(List<String> filenames, Coord<Integer> mapsize);
+	public ExecutorSet<ISkewDataset> calculate(List<String> filenames, Coord<Integer> mapsize);
 
 }

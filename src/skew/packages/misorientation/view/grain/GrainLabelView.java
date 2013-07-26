@@ -12,27 +12,27 @@ import scidraw.drawing.map.painters.RasterSpectrumMapPainter;
 import scidraw.drawing.map.palettes.AbstractPalette;
 import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.Spectrum;
-import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
+import skew.core.viewer.modes.views.MapView;
 import skew.models.Grain.Grain;
 import skew.models.Misorientation.MisAngleGrid;
 import skew.models.Misorientation.MisAnglePoint;
 import skew.packages.misorientation.drawing.GrainPalette;
-import skew.packages.misorientation.view.MisorientationView;
 
 
-public class GrainLabelView extends MisorientationView
+public class GrainLabelView extends MapView
 {
 	
 	RasterSpectrumMapPainter grainPainter;
 	
 	AbstractPalette grainpalette = new GrainPalette();
+	private MisAngleGrid<? extends MisAnglePoint> model;
 	
 	
-	
-	public GrainLabelView()
+	public GrainLabelView(MisAngleGrid<? extends MisAnglePoint> model)
 	{
+		this.model = model;
 		List<AbstractPalette> grainPalettes = new FList<AbstractPalette>(super.greyEmpty, grainpalette);
 		grainPainter = new RasterSpectrumMapPainter(grainPalettes, null);
 	}
@@ -40,23 +40,22 @@ public class GrainLabelView extends MisorientationView
 	public String toString(){ return "Grain Labels"; }
 
 	@Override
-	public SpinnerModel scaleSpinnerModel(ISkewGrid data, MapSubView subView)
+	public SpinnerModel scaleSpinnerModel(MapSubView subView)
 	{
 		return null;
 	}
 
 	@Override
-	public String getSummaryText(ISkewPoint skewpoint, ISkewGrid skewdata)
+	public String getSummaryText(ISkewPoint skewpoint)
 	{
-		@SuppressWarnings("unchecked")
-		MisAngleGrid<MisAnglePoint> data = (MisAngleGrid<MisAnglePoint>)skewdata;
+		
 		MisAnglePoint point = (MisAnglePoint)skewpoint;
 		
 		String grain = formatGrainValue(point.grain);
 		String result = "Grain: " + grain;
 		
 		Grain g;
-		try { g = data.grains.get(point.grain); }
+		try { g = model.grains.get(point.grain); }
 		catch (ArrayIndexOutOfBoundsException e) { return result; }
 		if (g == null) return result;
 		
@@ -78,43 +77,40 @@ public class GrainLabelView extends MisorientationView
 	}
 
 	@Override
-	public float getMaximumIntensity(ISkewGrid data, MapSubView subview)
+	public float getMaximumIntensity(MapSubView subview)
 	{
 		return 0;
 	}
 
 	@Override
-	public List<MapPainter> getPainters(ISkewGrid skewdata, MapSubView subview, float maximum)
+	public List<MapPainter> getPainters(MapSubView subview, float maximum)
 	{
-		@SuppressWarnings("unchecked")
-		MisAngleGrid<MisAnglePoint> data = (MisAngleGrid<MisAnglePoint>)skewdata;
 		
 		if (isUpdateRequired())
 		{
-			super.setData(data, subview);
-			setupPainters(data, subview);
+			setupPainters(subview);
 			setUpdateComplete();
 		}
-		return new FList<MapPainter>(grainPainter, super.boundaryPainter, super.selectedGrainPainter);
+		return new FList<MapPainter>(grainPainter);
 	}
 
 	@Override
-	public List<AxisPainter> getAxisPainters(ISkewGrid data, MapSubView subview, float maxValue)
+	public List<AxisPainter> getAxisPainters(MapSubView subview, float maxValue)
 	{
 		return new FList<AxisPainter>();
 	}
 
 	
-	private void setupPainters(MisAngleGrid<MisAnglePoint> data, MapSubView subview)
+	private void setupPainters(MapSubView subview)
 	{
 		
-		Spectrum misorientationData = new Spectrum(data.size());
+		Spectrum misorientationData = new Spectrum(model.size());
 		
-		for (int i = 0; i < data.size(); i++)
+		for (int i = 0; i < model.size(); i++)
 		{
-			int grainIndex = data.get(i).grain;
+			int grainIndex = model.get(i).grain;
 			if (grainIndex < 0) { misorientationData.set(i, -1f); continue; }
-			Grain g = data.grains.get(grainIndex);
+			Grain g = model.grains.get(grainIndex);
 			if (g == null) { misorientationData.set(i, -1f); continue; }
 			else { misorientationData.set(i, g.colourIndex); }
 		}
@@ -123,16 +119,13 @@ public class GrainLabelView extends MisorientationView
 	}
 
 	@Override
-	public void writeData(ISkewGrid skewdata, MapSubView subview, BufferedWriter writer) throws IOException
-	{
-		@SuppressWarnings("unchecked")
-		MisAngleGrid<MisAnglePoint> data = (MisAngleGrid<MisAnglePoint>)skewdata;
-		
+	public void writeData(MapSubView subview, BufferedWriter writer) throws IOException
+	{	
 		writer.write("index, x, y, grain, size (px)\n");
 		
-		for (MisAnglePoint point : data.getBackingList())
+		for (MisAnglePoint point : model.getBackingList())
 		{
-			Grain g = data.getGrainAtPoint(point);
+			Grain g = model.getGrainAtPoint(point);
 			String grainsize = fmt(-1f);
 			if (g != null) grainsize = g.points.size() + "";
 			writer.write(

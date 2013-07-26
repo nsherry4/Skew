@@ -69,7 +69,7 @@ public class DummyGrid implements ISkewGrid
 	}
 
 	@Override
-	public boolean setPointSelected(ISkewPoint p, boolean deselectAll)
+	public boolean setPointSelected(int x, int y, boolean deselectAll)
 	{
 		return false;
 	}
@@ -86,10 +86,5 @@ public class DummyGrid implements ISkewGrid
 		return 0;
 	}
 
-	@Override
-	public String datasetName()
-	{
-		return "Dataset";
-	}
 
 }

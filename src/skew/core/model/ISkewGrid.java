@@ -10,12 +10,10 @@ public interface ISkewGrid
 
 	public abstract ISkewPoint get(int x, int y);
 
-	public abstract boolean setPointSelected(ISkewPoint p, boolean deselectAll);
+	public abstract boolean setPointSelected(int x, int y, boolean deselectAll);
 
 	public abstract int getWidth();
 
 	public abstract int getHeight();
 	
-	public abstract String datasetName();
-
 }

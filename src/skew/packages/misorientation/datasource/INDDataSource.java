@@ -65,6 +65,7 @@ public class INDDataSource extends MisorientationDataSource
 	@Override
 	public MapExecutor<String, String> loadPoints(final MisAngleGrid<? extends MisAnglePoint> data, List<String> filenames)
 	{
+		misModel = data;
 		FnMap<String, String> eachFilename = new FnMap<String, String>(){
 
 			@Override
@@ -176,11 +177,11 @@ public class INDDataSource extends MisorientationDataSource
 	public List<MapView> getViews()
 	{
 		return new FList<MapView>(
-				new CompositeView(new LocalView(), new GrainSecondaryView()),
-				new CompositeView(new InterGrainView(), new GrainSecondaryView()),
-				new CompositeView(new MagnitudeView(), new GrainSecondaryView()),
-				new CompositeView(new OrientationView(), new GrainSecondaryView()),
-				new CompositeView(new GrainLabelView(), new GrainSecondaryView())
+				new CompositeView(new LocalView(misModel), new GrainSecondaryView(misModel)),
+				new CompositeView(new InterGrainView(misModel), new GrainSecondaryView(misModel)),
+				new CompositeView(new MagnitudeView(misModel), new GrainSecondaryView(misModel)),
+				new CompositeView(new OrientationView(misModel), new GrainSecondaryView(misModel)),
+				new CompositeView(new GrainLabelView(misModel), new GrainSecondaryView(misModel))
 			);
 
 	}

@@ -15,7 +15,6 @@ import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.map.painters.RasterColorMapPainter;
 import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.DirectionVector;
-import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
@@ -28,10 +27,12 @@ public class OrientationView extends MapView
 {
 
 	protected RasterColorMapPainter orientationPainter;
+	private MisAngleGrid<? extends MisAnglePoint> model;
 	
-	public OrientationView()
+	public OrientationView(MisAngleGrid<? extends MisAnglePoint> model)
 	{
 		super();
+		this.model = model;
 		orientationPainter = new RasterColorMapPainter();
 	}
 	
@@ -42,13 +43,13 @@ public class OrientationView extends MapView
 	}
 
 	@Override
-	public SpinnerModel scaleSpinnerModel(ISkewGrid data, MapSubView subView)
+	public SpinnerModel scaleSpinnerModel(MapSubView subView)
 	{
 		return null;
 	}
 
 	@Override
-	public String getSummaryText(ISkewPoint skewpoint, ISkewGrid data)
+	public String getSummaryText(ISkewPoint skewpoint)
 	{
 		return "";
 	}
@@ -70,39 +71,36 @@ public class OrientationView extends MapView
 	}
 
 	@Override
-	public float getMaximumIntensity(ISkewGrid data, MapSubView subview)
+	public float getMaximumIntensity(MapSubView subview)
 	{
 		return 0;
 	}
 
 	
 	@Override
-	public List<MapPainter> getPainters(ISkewGrid skewdata, MapSubView subview, float maximum)
-	{
-		@SuppressWarnings("unchecked")
-		MisAngleGrid<MisAnglePoint> data = (MisAngleGrid<MisAnglePoint>)skewdata;
-		
+	public List<MapPainter> getPainters(MapSubView subview, float maximum)
+	{		
 		if (isUpdateRequired())
 		{
-			setupPainters(data, subview);
+			setupPainters(subview);
 			setUpdateComplete();
 		}
 		return new FList<MapPainter>(orientationPainter);
 	}
 
 	@Override
-	public List<AxisPainter> getAxisPainters(ISkewGrid data, MapSubView subview, float maxValue)
+	public List<AxisPainter> getAxisPainters(MapSubView subview, float maxValue)
 	{
 		return new FList<AxisPainter>();
 	}
 	
-	private void setupPainters(MisAngleGrid<MisAnglePoint> data, MapSubView subview)
+	private void setupPainters(MapSubView subview)
 	{
-		List<Color> pixelColours = new FList<Color>(data.getWidth() * data.getHeight());
-		for (int i = 0; i < data.getWidth() * data.getHeight(); i++){ pixelColours.add(backgroundGray); }
+		List<Color> pixelColours = new FList<Color>(model.getWidth() * model.getHeight());
+		for (int i = 0; i < model.getWidth() * model.getHeight(); i++){ pixelColours.add(backgroundGray); }
 		
 		Color c;
-		for (MisAnglePoint point : data.getBackingList())
+		for (MisAnglePoint point : model.getBackingList())
 		{
 			if (!point.orientation.getHasOMData())
 			{
@@ -120,14 +118,11 @@ public class OrientationView extends MapView
 	}
 
 	@Override
-	public void writeData(ISkewGrid skewdata, MapSubView subview, BufferedWriter writer) throws IOException
-	{
-		@SuppressWarnings("unchecked")
-		MisAngleGrid<MisAnglePoint> data = (MisAngleGrid<MisAnglePoint>)skewdata;
-		
+	public void writeData(MapSubView subview, BufferedWriter writer) throws IOException
+	{		
 		writer.write("index, x, y, distance [001], direction [001], distance [110], direction [110], distance [111], direction [111]\n");
 		
-		for (MisAnglePoint point : data.getBackingList())
+		for (MisAnglePoint point : model.getBackingList())
 		{
 			if (point.orientationVectors == null)
 			{

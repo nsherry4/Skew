@@ -23,8 +23,7 @@ import skew.core.model.impl.SkewGrid;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
 import skew.models.XRDStrain.IXRDStrainPoint;
-import skew.packages.xrd.model.XRDPoint;
-import skew.packages.xrd.subview.StrainSubView;
+import skew.packages.xrdstrain.subview.StrainSubView;
 
 public class StrainView extends MapView
 {
@@ -32,9 +31,13 @@ public class StrainView extends MapView
 	RasterColorMapPainter painter;
 	AbstractPalette palette;
 	
-	public StrainView()
+	SkewGrid<IXRDStrainPoint> model;
+	
+	public StrainView(SkewGrid<IXRDStrainPoint> model)
 	{
 		super();
+		
+		this.model = model;
 		
 		painter = new RasterColorMapPainter();
 		palette = new ThermalScalePalette(false, true);
@@ -48,13 +51,13 @@ public class StrainView extends MapView
 	}
 	
 	@Override
-	public SpinnerModel scaleSpinnerModel(ISkewGrid data, MapSubView subView)
+	public SpinnerModel scaleSpinnerModel(MapSubView subView)
 	{
 		return new SpinnerNumberModel(5.0, 0.1, 1000.0, 0.1);
 	}
 
 	@Override
-	public String getSummaryText(ISkewPoint skewpoint, ISkewGrid data)
+	public String getSummaryText(ISkewPoint skewpoint)
 	{
 		IXRDStrainPoint point = (IXRDStrainPoint)skewpoint;
 		if (! point.getHasStrainData()) return "";
@@ -91,24 +94,24 @@ public class StrainView extends MapView
 	}
 
 	@Override
-	public float getMaximumIntensity(ISkewGrid data, MapSubView subview)
+	public float getMaximumIntensity(MapSubView subview)
 	{
 		return 1;
 	}
 
 	@Override
-	public List<MapPainter> getPainters(ISkewGrid data, MapSubView subview, float maximum)
+	public List<MapPainter> getPainters(MapSubView subview, float maximum)
 	{		
 		if (isUpdateRequired())
 		{
-			setupPainters(data, subview, maximum);
+			setupPainters(model, subview, maximum);
 			setUpdateComplete();
 		}
 		return new FList<MapPainter>(painter);
 	}
 		
 	@Override
-	public List<AxisPainter> getAxisPainters(ISkewGrid data, MapSubView subview, float maxValue)
+	public List<AxisPainter> getAxisPainters(MapSubView subview, float maxValue)
 	{
 		List<Pair<Float, String>> axisMarkings = new FList<Pair<Float,String>>();
 		
@@ -142,14 +145,12 @@ public class StrainView extends MapView
 
 	
 	@Override
-	public void writeData(ISkewGrid skewdata, MapSubView subview, BufferedWriter writer) throws IOException
+	public void writeData(MapSubView subview, BufferedWriter writer) throws IOException
 	{
-		@SuppressWarnings("unchecked")
-		SkewGrid<IXRDStrainPoint> data = (SkewGrid<IXRDStrainPoint>)skewdata;
-		
+
 		writer.write("index, x, y, xx, yy, zz, xy, xz, yz, von mises\n");
 		
-		for (IXRDStrainPoint point : data.getBackingList())
+		for (IXRDStrainPoint point : model.getBackingList())
 		{
 			writer.write(
 					point.getIndex() + ", " + 
@@ -177,15 +178,14 @@ public class StrainView extends MapView
 	
 	private void setupPainters(ISkewGrid skewdata, MapSubView subview, float maximum)
 	{
-		@SuppressWarnings("unchecked")
-		SkewGrid<IXRDStrainPoint> data = (SkewGrid<IXRDStrainPoint>)skewdata;
 		
-		List<Color> pixelColours = new FList<Color>(data.getWidth() * data.getHeight());
-		for (int i = 0; i < data.getWidth() * data.getHeight(); i++){ pixelColours.add(Color.black); }
+		List<Color> pixelColours = new FList<Color>(model.getWidth() * model.getHeight());
+		for (int i = 0; i < model.getWidth() * model.getHeight(); i++){ pixelColours.add(Color.black); }
 		
 		Color c;
-		for (IXRDStrainPoint point : data.getBackingList())
-		{
+
+		for (IXRDStrainPoint point : model.getBackingList())
+		{	
 			if (point.getHasStrainData()) 
 			{
 				double v = subview.select(point.strain());

@@ -20,6 +20,8 @@ import skew.packages.pixeldeviation.view.PixelDeviationComparisonView;
 public class PixDevDataSource extends BasicDataSource
 {
 
+	private PixDevGrid model;
+	
 	public PixDevDataSource()
 	{
 		super("xpdm", "XRD Pixel Deviation Map", "XPDM");
@@ -38,7 +40,7 @@ public class PixDevDataSource extends BasicDataSource
 	@Override
 	public List<MapView> getViews()
 	{
-		return new FList<MapView>(new PixelDeviationComparisonView());
+		return new FList<MapView>(new PixelDeviationComparisonView(model));
 	}
 
 	@Override
@@ -73,7 +75,8 @@ public class PixDevDataSource extends BasicDataSource
 		}
 		
 		//return data structure
-		return new PixDevGrid(mapsize.x, mapsize.y, values, new File(filename).getName());
+		model = new PixDevGrid(mapsize.x, mapsize.y, values);
+		return model; 
 		
 	}
 

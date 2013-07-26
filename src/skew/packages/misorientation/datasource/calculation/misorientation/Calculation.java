@@ -22,7 +22,9 @@ import plural.executor.eachindex.EachIndexExecutor;
 import plural.executor.eachindex.implementations.PluralEachIndexExecutor;
 import plural.executor.map.MapExecutor;
 import scitypes.Coord;
+import skew.core.model.ISkewDataset;
 import skew.core.model.ISkewGrid;
+import skew.core.model.impl.SkewDataset;
 import skew.models.Misorientation.MisAngleGrid;
 import skew.models.Misorientation.MisAnglePoint;
 import skew.models.OrientationMatrix.IOrientationMatrix;
@@ -37,7 +39,7 @@ public class Calculation
 
 
 	
-	public static ExecutorSet<ISkewGrid> calculate(final List<String> filenames, MisorientationDataSource ds, final Coord<Integer> mapSize)
+	public static ExecutorSet<ISkewDataset> calculate(final List<String> filenames, final MisorientationDataSource ds, final Coord<Integer> mapSize)
 	{
 
 		FList<MisAnglePoint> values = new FList<MisAnglePoint>(mapSize.x * mapSize.y);
@@ -48,8 +50,10 @@ public class Calculation
 		}
 		
 		String datasetName = IOOperations.getCommonFileName(filenames);
+		final String name = new File(datasetName).getName();
+		final String path = new File(filenames.get(0)).getParent();
 		
-		final MisAngleGrid<MisAnglePoint> anglelist = new MisAngleGrid<MisAnglePoint>(mapSize.x, mapSize.y, values, new File(datasetName).getName());
+		final MisAngleGrid<MisAnglePoint> anglelist = new MisAngleGrid<MisAnglePoint>(mapSize.x, mapSize.y, values);
 
 
 		// executors		
@@ -66,10 +70,10 @@ public class Calculation
 		
 		
 		// define how the executors will operate
-		ExecutorSet<ISkewGrid> execset = new ExecutorSet<ISkewGrid>("Opening Data Set") {
+		ExecutorSet<ISkewDataset> execset = new ExecutorSet<ISkewDataset>("Opening Data Set") {
 
 			@Override
-			protected ISkewGrid execute()
+			protected ISkewDataset execute()
 			{
 
 				//load files from disk
@@ -90,7 +94,7 @@ public class Calculation
 
 				OrientationMap.calculateOrientation(anglelist);
 								
-				return anglelist;
+				return new SkewDataset(name, path, anglelist, ds);
 
 
 			}
@@ -100,6 +104,8 @@ public class Calculation
 		execset.addExecutor(calculateExec);
 		execset.addExecutor(calcGrainExec);
 
+		
+		
 		return execset;
 
 	}

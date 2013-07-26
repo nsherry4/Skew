@@ -12,7 +12,6 @@ import fava.functionable.FList;
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.Spectrum;
-import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.models.Grain.Grain;
@@ -25,28 +24,30 @@ public class InterGrainView extends MisAngleView
 {
 
 
+	public InterGrainView(MisAngleGrid<? extends MisAnglePoint> misorientationModel) {
+		super(misorientationModel);
+	}
+
 	public String toString(){ return "Intragrain Misorientation"; }
 
 	@Override
-	public SpinnerModel scaleSpinnerModel(ISkewGrid data, MapSubView subView)
+	public SpinnerModel scaleSpinnerModel(MapSubView subView)
 	{
 		IntraGrainSubView igv = (IntraGrainSubView)subView;
-		return igv.getSpinnerModel(data);
+		return igv.getSpinnerModel(misorientationModel);
 	}
 
 	@Override
-	public String getSummaryText(ISkewPoint skewpoint, ISkewGrid skewdata)
+	public String getSummaryText(ISkewPoint skewpoint)
 	{
 		
-		@SuppressWarnings("unchecked")
-		MisAngleGrid<MisAnglePoint> data = (MisAngleGrid<MisAnglePoint>)skewdata;
 		MisAnglePoint point = (MisAnglePoint)skewpoint;
 	
 		String grain = formatGrainValue(point.grain);
 		String result = "Grain :" + grain;
 		
 		Grain g;
-		try { g = data.grains.get(point.grain); }
+		try { g = misorientationModel.grains.get(point.grain); }
 		catch (ArrayIndexOutOfBoundsException e) { return result; }			
 		
 		if (g == null) return result; 
@@ -72,7 +73,7 @@ public class InterGrainView extends MisAngleView
 	}
 
 	@Override
-	public float getMaximumIntensity(ISkewGrid data, MapSubView subview)
+	public float getMaximumIntensity(MapSubView subview)
 	{
 		IntraGrainSubView igsv = (IntraGrainSubView)subview;
 		
@@ -82,31 +83,29 @@ public class InterGrainView extends MisAngleView
 	}
 
 	@Override
-	public List<AxisPainter> getAxisPainters(ISkewGrid data, MapSubView subview, float maxValue)
+	public List<AxisPainter> getAxisPainters(MapSubView subview, float maxValue)
 	{
 		IntraGrainSubView igsv = (IntraGrainSubView)subview;
 		boolean relative = igsv.getIndex() == 0;
 		
-		if (!relative) return super.getAxisPainters(data, subview, maxValue);
+		if (!relative) return super.getAxisPainters(subview, maxValue);
 		return new FList<AxisPainter>();
 	}
 	
 	@Override
-	public List<MapPainter> getPainters(ISkewGrid skewdata, MapSubView subview, float maximum)
+	public List<MapPainter> getPainters(MapSubView subview, float maximum)
 	{
-		@SuppressWarnings("unchecked")
-		MisAngleGrid<MisAnglePoint> data = (MisAngleGrid<MisAnglePoint>)skewdata;
-		
+
 		if (isUpdateRequired())
 		{
-			setupPainters(data, subview);
+			setupPainters(misorientationModel, subview);
 			setUpdateComplete();
 		}
 		return new FList<MapPainter>(super.misorientationPainter);
 	}
 	
 	
-	private void setupPainters(MisAngleGrid<MisAnglePoint> data, MapSubView subview)
+	private void setupPainters(MisAngleGrid<? extends MisAnglePoint> data, MapSubView subview)
 	{
 		Spectrum misorientationData = new Spectrum(data.size());
 		IntraGrainSubView igsv = (IntraGrainSubView)subview;
@@ -131,17 +130,15 @@ public class InterGrainView extends MisAngleView
 	}
 
 	@Override
-	public void writeData(ISkewGrid skewdata, MapSubView subview, BufferedWriter writer) throws IOException
+	public void writeData(MapSubView subview, BufferedWriter writer) throws IOException
 	{
-		@SuppressWarnings("unchecked")
-		MisAngleGrid<MisAnglePoint> data = (MisAngleGrid<MisAnglePoint>)skewdata;
 		
 		writer.write("index, x, y, grain, value, percent\n");
 		
-		for (MisAnglePoint point : data.getBackingList())
+		for (MisAnglePoint point : misorientationModel.getBackingList())
 		{
 			
-			Grain g = data.getGrainAtPoint(point);
+			Grain g = misorientationModel.getGrainAtPoint(point);
 			String relative = "";
 			if (g != null) {
 				relative = fmt(point.intraGrainMisorientation / g.intraGrainMax);

@@ -9,7 +9,6 @@ import javax.swing.SpinnerModel;
 import fava.functionable.FList;
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.painters.axis.AxisPainter;
-import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
@@ -33,17 +32,18 @@ public class CompositeView extends MapView
 	
 	
 
-
+	@Override
 	public boolean canWriteData() {
 		return primary.canWriteData();
 	}
 
-
+	@Override
 	public void setUpdateRequired() {
 		primary.setUpdateRequired();
 		for (MapView s : secondary){ s.setUpdateRequired(); }
 	}
 
+	@Override
 	public boolean isUpdateRequired() {
 		
 		boolean required = primary.isUpdateRequired();
@@ -51,43 +51,52 @@ public class CompositeView extends MapView
 		return required;
 	}
 
-	public SpinnerModel scaleSpinnerModel(ISkewGrid data, MapSubView subView) {
-		return primary.scaleSpinnerModel(data, subView);
+	@Override
+	public SpinnerModel scaleSpinnerModel(MapSubView subView) {
+		return primary.scaleSpinnerModel(subView);
 	}
 
-	public String getSummaryText(ISkewPoint point, ISkewGrid data) {
-		return primary.getSummaryText(point, data);
+	@Override
+	public String getSummaryText(ISkewPoint point) {
+		return primary.getSummaryText(point);
 	}
 
+	@Override
 	public boolean hasSublist() {
 		return primary.hasSublist();
 	}
 
+	@Override
 	public List<MapSubView> getSubList() {
 		return primary.getSubList();
 	}
 
-	public float getMaximumIntensity(ISkewGrid data, MapSubView subview) {
-		return primary.getMaximumIntensity(data, subview);
+	@Override
+	public float getMaximumIntensity(MapSubView subview) {
+		return primary.getMaximumIntensity(subview);
 	}
 
-	public List<MapPainter> getPainters(ISkewGrid data, MapSubView subview,	float maximum) {
-		List<MapPainter> painters = primary.getPainters(data, subview, maximum);
-		for (MapView s : secondary) { painters.addAll(s.getPainters(data, null, 0)); }
+	@Override
+	public List<MapPainter> getPainters(MapSubView subview,	float maximum) {
+		List<MapPainter> painters = primary.getPainters(subview, maximum);
+		for (MapView s : secondary) { painters.addAll(s.getPainters(null, 0)); }
 		return painters;
 	}
 
-	public List<AxisPainter> getAxisPainters(ISkewGrid data, MapSubView subview, float maximum) {
-		List<AxisPainter> painters = primary.getAxisPainters(data, subview, maximum);
-		for (MapView s : secondary) { painters.addAll(s.getAxisPainters(data, null, 0)); }
+	@Override
+	public List<AxisPainter> getAxisPainters(MapSubView subview, float maximum) {
+		List<AxisPainter> painters = primary.getAxisPainters(subview, maximum);
+		for (MapView s : secondary) { painters.addAll(s.getAxisPainters(null, 0)); }
 		return painters;
 	}
 
 
-	public void writeData(ISkewGrid data, MapSubView subview, BufferedWriter writer) throws IOException {
-		primary.writeData(data, subview, writer);
+	@Override
+	public void writeData(MapSubView subview, BufferedWriter writer) throws IOException {
+		primary.writeData(subview, writer);
 	}
-	
+
+	@Override
 	public String toString() {
 		return primary.toString();
 	}

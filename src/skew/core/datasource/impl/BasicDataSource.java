@@ -1,12 +1,16 @@
 package skew.core.datasource.impl;
 
+import java.io.File;
 import java.util.List;
 
+import commonenvironment.IOOperations;
 import plural.executor.DummyExecutor;
 import plural.executor.ExecutorSet;
 import scitypes.Coord;
 import skew.core.datasource.IDataSource;
+import skew.core.model.ISkewDataset;
 import skew.core.model.ISkewGrid;
+import skew.core.model.impl.SkewDataset;
 
 public abstract class BasicDataSource implements IDataSource
 {
@@ -40,19 +44,25 @@ public abstract class BasicDataSource implements IDataSource
 
 
 	@Override
-	public final ExecutorSet<ISkewGrid> calculate(final List<String> filenames, final Coord<Integer> mapsize)
+	public final ExecutorSet<ISkewDataset> calculate(final List<String> filenames, final Coord<Integer> mapsize)
 	{
 		final DummyExecutor exec = new DummyExecutor(true);
 		
-		ExecutorSet<ISkewGrid> execset = new ExecutorSet<ISkewGrid>("Opening Data Set") {
+		ExecutorSet<ISkewDataset> execset = new ExecutorSet<ISkewDataset>("Opening Data Set") {
 
 			@Override
-			protected ISkewGrid execute()
+			protected ISkewDataset execute()
 			{
 				exec.advanceState();
 				ISkewGrid grid = load(filenames, mapsize);
 				exec.advanceState();
-				return grid;
+				
+				return new SkewDataset(
+						new File(IOOperations.getCommonFileName(filenames)).getName(), 
+						new File(filenames.get(0)).getParent(), 
+						grid,
+						BasicDataSource.this
+					);
 			}};
 		
 		execset.addExecutor(exec, "Loading Data...");

@@ -12,16 +12,13 @@ public class SkewGrid<T extends ISkewPoint> implements ISkewGrid
 	
 	protected int                   width;
 	protected int                   height;
-	
-	protected String                name;
-	
-	public SkewGrid(int width, int height, List<T> points, String name)
+		
+	public SkewGrid(int width, int height, List<T> points)
 	{
 		this.width = width;
 		this.height = height;
 		
 		this.values = points;
-		this.name = name;
 	}
 	
 	
@@ -45,6 +42,7 @@ public class SkewGrid<T extends ISkewPoint> implements ISkewGrid
 		return get(width * y + x);
 	}
 	
+	
 	@Override
 	public int getWidth()
 	{
@@ -58,7 +56,7 @@ public class SkewGrid<T extends ISkewPoint> implements ISkewGrid
 	}
 	
 	@Override
-	public boolean setPointSelected(ISkewPoint p, boolean deselectAll)
+	public boolean setPointSelected(int x, int y, boolean deselectAll)
 	{
 		return false;
 	}
@@ -70,10 +68,6 @@ public class SkewGrid<T extends ISkewPoint> implements ISkewGrid
 	}
 
 
-	@Override
-	public String datasetName()
-	{
-		return name;
-	}
+
 
 }

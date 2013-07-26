@@ -4,6 +4,7 @@ import java.awt.Dimension;
 
 import javax.swing.JFrame;
 
+import skew.core.controller.SkewController;
 import swidget.widgets.tabbedinterface.TabbedInterface;
 
 
@@ -27,8 +28,7 @@ public class SkewTabs extends JFrame
 			protected void destroyComponent(SkewUI component){}
 
 			@Override
-			protected void titleChanged(String title)
-			{
+			protected void tabsChanged(String title) {
 				setTitle(title + " - Skew");
 			}};
 			
@@ -48,9 +48,14 @@ public class SkewTabs extends JFrame
 	}
 
 	
-	public void newTab()
+	public SkewUI newTab()
 	{
-		tabs.newTab();
+		return tabs.newTab();
+	}
+	
+	public void addTab(SkewUI ui)
+	{
+		tabs.addTab(ui);
 	}
 	
 	public void setTabTitle(SkewUI component, String title)

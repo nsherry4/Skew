@@ -26,19 +26,21 @@ import javax.swing.SpinnerModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.xml.crypto.Data;
 
 import com.ezware.dialog.task.TaskDialogs;
 
 import commonenvironment.IOOperations;
-
 import eventful.EventfulListener;
-
 import scidraw.drawing.DrawingRequest;
 import scidraw.drawing.backends.Surface;
 import scidraw.drawing.map.MapDrawing;
 import scidraw.swing.GraphicsPanel;
 import skew.core.Version;
 import skew.core.controller.SkewController;
+import skew.core.model.ISkewDataset;
+import skew.core.model.impl.DummyGrid;
+import skew.core.model.impl.SkewDataset;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
 import skew.core.viewer.modes.views.impl.DummyView;
@@ -61,9 +63,9 @@ import swidget.widgets.ZoomSlider;
 public class SkewUI extends JPanel {
 
 	SkewTabs parent;
-	
 	SkewController controller;
 	
+	boolean dummy= true;
 	
 	public GraphicsPanel graphics;
 	
@@ -89,12 +91,19 @@ public class SkewUI extends JPanel {
 	
 	
 	
+	public SkewUI(SkewTabs parent)
+	{
+		this(parent, new SkewController(parent));
+	}
+	
 
-	public SkewUI(SkewTabs parent) 
+	public SkewUI(SkewTabs parent, final SkewController controller) 
 	{
 		
 		this.parent = parent;
-		controller = new SkewController(this, parent);		
+		
+		this.controller = controller;
+		controller.setUI(this);
 		
 		
 		
@@ -132,6 +141,8 @@ public class SkewUI extends JPanel {
 		
 		JPanel statusbar = createBottomControls();
 		add(statusbar, BorderLayout.SOUTH);
+		
+		viewsUpdated();
 		
 		graphics.addMouseListener(new MouseListener() {
 			
@@ -260,8 +271,20 @@ public class SkewUI extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
-				controller.actionOpenData();
-
+				
+				ISkewDataset dataset = SkewController.actionOpenData(parent, controller.data.path());
+				if (dataset != null) {
+					//create new UI
+					SkewUI ui = new SkewUI(parent);
+					ui.dummy = false;
+					parent.addTab(ui);
+					ui.controller.setData(dataset);
+					parent.tabs.setActiveTab(ui);
+					
+					//remove this one, if a placeholder
+					if (dummy) parent.tabs.closeTab(SkewUI.this);
+				}
+				
 			}
 		});
 
@@ -288,7 +311,9 @@ public class SkewUI extends JPanel {
 		});
 		
 		
-		viewSelector = new JComboBox(controller.dataSource.getViews().toArray());
+		viewSelector = new JComboBox(controller.data.datasource().getViews().toArray());
+		
+		
 		viewSelector.addActionListener(new ActionListener() {
 			
 			@Override
@@ -308,7 +333,7 @@ public class SkewUI extends JPanel {
 				controller.actionSaveText();
 			}
 		});
-		savetext.setEnabled(false);
+		savetext.setVisible(false);
 		
 		
 		ToolbarImageButton about = new ToolbarImageButton(StockIcon.MISC_ABOUT, "About");
@@ -338,7 +363,7 @@ public class SkewUI extends JPanel {
 		
 		
 		toolbar.add(open);
-		toolbar.add(tab);
+		//toolbar.add(tab);
 		toolbar.add(save);
 		
 		
@@ -399,14 +424,14 @@ public class SkewUI extends JPanel {
 		if (scaleSpinner != null) scalePanel.remove(scaleSpinner);
 		scaleSpinner = null;
 		
-		SpinnerModel model = controller.viewMode.scaleSpinnerModel(controller.data, controller.subView);
+		SpinnerModel model = controller.viewMode.scaleSpinnerModel(controller.subView);
 		
 		if (model == null) 
 		{
-			scaleLabel.setEnabled(false);
+			scaleLabel.setVisible(false);
 			return;
 		}
-		scaleLabel.setEnabled(true);
+		scaleLabel.setVisible(true);
 		
 		scaleSpinner = new JSpinner(model);
 		scalePanel.add(scaleSpinner, BorderLayout.EAST);
@@ -442,17 +467,41 @@ public class SkewUI extends JPanel {
 		
 		if (type == SettingType.DATA)
 		{
-			viewSelector.removeAllItems();
-			for (MapView view : controller.dataSource.getViews())
-			{
-				viewSelector.addItem(view);
-			}
-			controller.viewMode = controller.dataSource.getViews().get(0);
+			viewsUpdated();
+			controller.viewMode = controller.data.datasource().getViews().get(0);
 		}
 		
 		setZoom(zoom);
 		repaint();
 	}
+	
+	
+	private void viewsUpdated()
+	{
+		List<MapView> views = controller.data.datasource().getViews();
+		
+		viewSelector.removeAllItems();
+		if (views.size() == 0) {
+			viewSelector.setVisible(false);
+			zoomslider.setVisible(false);
+			graphics.setBackground(this.getBackground());
+		} else if (views.size() == 1) {
+			viewSelector.setVisible(false);
+			zoomslider.setVisible(true);
+			graphics.setBackground(Color.white);
+		} else {
+		
+			viewSelector.setVisible(true);
+			zoomslider.setVisible(true);
+			graphics.setBackground(Color.white);
+			for (MapView view : controller.data.datasource().getViews())
+			{
+				viewSelector.addItem(view);
+			}
+		}
+		
+	}
+	
 	
 	private GraphicsPanel createGraphicsPanel()
 	{
@@ -461,7 +510,6 @@ public class SkewUI extends JPanel {
 			
 			{
 				drawing.setDrawingRequest(dr);
-				setBackground(Color.white);
 			}
 			
 			
@@ -489,10 +537,10 @@ public class SkewUI extends JPanel {
 					dr.imageWidth = getWidth();
 					dr.imageHeight = getHeight();
 					
-					dr.dataHeight = controller.data.getHeight(); //map.height;
-					dr.dataWidth = controller.data.getWidth(); //map.width;
-					dr.uninterpolatedHeight = controller.data.getHeight(); //map.height;
-					dr.uninterpolatedWidth = controller.data.getWidth(); //map.width;
+					dr.dataHeight = controller.data.grid().getHeight(); //map.height;
+					dr.dataWidth = controller.data.grid().getWidth(); //map.width;
+					dr.uninterpolatedHeight = controller.data.grid().getHeight(); //map.height;
+					dr.uninterpolatedWidth = controller.data.grid().getWidth(); //map.width;
 				} catch (NullPointerException e) {
 					TaskDialogs.showException(e);
 					e.printStackTrace();
@@ -503,16 +551,16 @@ public class SkewUI extends JPanel {
 			protected void drawGraphics(Surface backend, boolean vector) {
 				
 				if (controller.data == null) return;
-				if (controller.data.getWidth() == 0 || controller.data.getHeight() == 0) return;
+				if (controller.data.grid().getWidth() == 0 || controller.data.grid().getHeight() == 0) return;
 				if (controller.viewMode instanceof DummyView) return;
 				
 				
 				float maxValue = (float)getMaxScaleValue();
-				if (maxValue == -1) maxValue = controller.viewMode.getMaximumIntensity(controller.data, controller.subView);		
+				if (maxValue == -1) maxValue = controller.viewMode.getMaximumIntensity(controller.subView);		
 				dr.maxYIntensity = (float) maxValue;
 				
-				drawing.setPainters(controller.viewMode.getPainters(controller.data, controller.subView, maxValue));
-				drawing.setAxisPainters(controller.viewMode.getAxisPainters(controller.data, controller.subView, maxValue));
+				drawing.setPainters(controller.viewMode.getPainters(controller.subView, maxValue));
+				drawing.setAxisPainters(controller.viewMode.getAxisPainters(controller.subView, maxValue));
 				
 				dr.drawToVectorSurface = vector;
 				setDR();

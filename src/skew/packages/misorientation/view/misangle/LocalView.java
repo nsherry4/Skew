@@ -10,7 +10,6 @@ import javax.swing.SpinnerNumberModel;
 import fava.functionable.FList;
 import scidraw.drawing.map.painters.MapPainter;
 import scitypes.Spectrum;
-import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.models.Misorientation.MisAngleGrid;
@@ -19,16 +18,20 @@ import skew.models.Misorientation.MisAnglePoint;
 
 public class LocalView extends MisAngleView
 {
+	public LocalView(MisAngleGrid<? extends MisAnglePoint> misorientationModel) {
+		super(misorientationModel);
+	}
+
 	public String toString(){ return "Local Misorientation"; }
 
 	@Override
-	public SpinnerModel scaleSpinnerModel(ISkewGrid data, MapSubView subView)
+	public SpinnerModel scaleSpinnerModel(MapSubView subView)
 	{
 		return new SpinnerNumberModel(2, 0.0, 180.0, 0.1);
 	}
 
 	@Override
-	public String getSummaryText(ISkewPoint skewpoint, ISkewGrid data)
+	public String getSummaryText(ISkewPoint skewpoint)
 	{
 		
 		MisAnglePoint point = (MisAnglePoint)skewpoint;
@@ -62,33 +65,31 @@ public class LocalView extends MisAngleView
 	}
 
 	@Override
-	public float getMaximumIntensity(ISkewGrid data, MapSubView subview)
+	public float getMaximumIntensity(MapSubView subview)
 	{
 		return 0;
 	}
 
 	@Override
-	public List<MapPainter> getPainters(ISkewGrid data, MapSubView subview, float maximum)
+	public List<MapPainter> getPainters(MapSubView subview, float maximum)
 	{
 		if (isUpdateRequired())
 		{
-			setupPainters(data, subview);
+			setupPainters(subview);
 			setUpdateComplete();
 		}
 		return new FList<MapPainter>(super.misorientationPainter);
 	}
 	
 	
-	private void setupPainters(ISkewGrid skewdata, MapSubView subview)
+	private void setupPainters(MapSubView subview)
 	{
-		@SuppressWarnings("unchecked")
-		MisAngleGrid<MisAnglePoint> data = (MisAngleGrid<MisAnglePoint>)skewdata;
 		
-		Spectrum misorientationData = new Spectrum(data.size());
+		Spectrum misorientationData = new Spectrum(misorientationModel.size());
 
-		for (int i = 0; i < data.size(); i++)
+		for (int i = 0; i < misorientationModel.size(); i++)
 		{
-			double v = data.get(i).average;
+			double v = misorientationModel.get(i).average;
 			misorientationData.set(i, (float)v);
 		}
 		
@@ -96,14 +97,12 @@ public class LocalView extends MisAngleView
 	}
 
 	@Override
-	public void writeData(ISkewGrid skewdata, MapSubView subview, BufferedWriter writer) throws IOException
+	public void writeData(MapSubView subview, BufferedWriter writer) throws IOException
 	{
-		@SuppressWarnings("unchecked")
-		MisAngleGrid<MisAnglePoint> data = (MisAngleGrid<MisAnglePoint>)skewdata;
-		
+	
 		writer.write("index, x, y, grain, average, north, east, south, west \n");
 		
-		for (MisAnglePoint point : data.getBackingList())
+		for (MisAnglePoint point : misorientationModel.getBackingList())
 		{
 			writer.write(
 					point.getIndex() + ", " + 

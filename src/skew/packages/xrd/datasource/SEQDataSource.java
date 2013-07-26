@@ -1,6 +1,7 @@
 package skew.packages.xrd.datasource;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import ca.sciencestudio.process.xrd.util.SequenceEntry;
@@ -13,11 +14,13 @@ import fava.signatures.FnMap;
 import plural.executor.map.MapExecutor;
 import plural.executor.map.implementations.PluralMapExecutor;
 import skew.core.datasource.Acceptance;
+import skew.core.model.impl.SkewGrid;
 import skew.core.viewer.modes.views.MapView;
 import skew.core.viewer.modes.views.impl.CompositeView;
 import skew.models.Misorientation.MisAngleGrid;
 import skew.models.Misorientation.MisAnglePoint;
 import skew.models.OrientationMatrix.IOrientationMatrix;
+import skew.models.XRDStrain.IXRDStrainPoint;
 import skew.packages.misorientation.datasource.MisorientationDataSource;
 import skew.packages.misorientation.datasource.calculation.misorientation.Calculation;
 import skew.packages.misorientation.view.GrainSecondaryView;
@@ -34,9 +37,11 @@ public class SEQDataSource extends MisorientationDataSource
 {
 
 	
+	SkewGrid<IXRDStrainPoint> strainModel;
+	
 	public MisAnglePoint createPoint(int index, int x, int y)
 	{
-		return new XRDPoint(index, x, y);
+		return new XRDPoint(x, y, index);
 	}
 	
 	@Override
@@ -70,6 +75,14 @@ public class SEQDataSource extends MisorientationDataSource
 	{
 
 		
+		misModel = values;
+		ArrayList<IXRDStrainPoint> strainList = new ArrayList<IXRDStrainPoint>();
+		strainModel = new SkewGrid<IXRDStrainPoint>(misModel.getWidth(), misModel.getHeight(), strainList);
+		for (MisAnglePoint p : values.getBackingList())
+		{
+			XRDPoint point = (XRDPoint)p;
+			strainList.add(point.str);
+		}
 		
 		final String filename = filenames.get(0); 
 		
@@ -91,7 +104,6 @@ public class SEQDataSource extends MisorientationDataSource
 					XRDPoint point = (XRDPoint)values.get(index);
 					
 					point.orientation.setHasOMData(loadOrientationMatrix(seq, point.orientation));
-					
 					point.str.setHasStrainData(loadStrain(seq, point));
 
 					return "";
@@ -160,13 +172,13 @@ public class SEQDataSource extends MisorientationDataSource
 	public List<MapView> getViews()
 	{
 		return new FList<MapView>(
-				new CompositeView(new LocalView(), new GrainSecondaryView()),
-				new CompositeView(new InterGrainView(), new GrainSecondaryView()),
-				new CompositeView(new MagnitudeView(), new GrainSecondaryView()),
-				new CompositeView(new OrientationView(), new GrainSecondaryView()),
-				new CompositeView(new GrainLabelView(), new GrainSecondaryView()),
-				new CompositeView(new StrainView(), new GrainSecondaryView()),
-				new CompositeView(new StressView(), new GrainSecondaryView())
+				new CompositeView(new LocalView(misModel), new GrainSecondaryView(misModel)),
+				new CompositeView(new InterGrainView(misModel), new GrainSecondaryView(misModel)),
+				new CompositeView(new MagnitudeView(misModel), new GrainSecondaryView(misModel)),
+				new CompositeView(new OrientationView(misModel), new GrainSecondaryView(misModel)),
+				new CompositeView(new GrainLabelView(misModel), new GrainSecondaryView(misModel)),
+				new CompositeView(new StrainView(strainModel), new GrainSecondaryView(misModel)),
+				new CompositeView(new StressView(strainModel), new GrainSecondaryView(misModel))
 			);
 
 	}

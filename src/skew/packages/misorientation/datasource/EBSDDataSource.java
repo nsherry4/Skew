@@ -19,7 +19,6 @@ import skew.core.viewer.modes.views.impl.CompositeView;
 import skew.models.Misorientation.MisAngleGrid;
 import skew.models.Misorientation.MisAnglePoint;
 import skew.models.OrientationMatrix.IOrientationMatrix;
-import skew.models.OrientationMatrix.OrientationMatrix;
 import skew.packages.misorientation.datasource.calculation.misorientation.Calculation;
 import skew.packages.misorientation.view.GrainSecondaryView;
 import skew.packages.misorientation.view.grain.GrainLabelView;
@@ -60,6 +59,7 @@ public class EBSDDataSource extends MisorientationDataSource
 	public MapExecutor<String, String> loadPoints(final MisAngleGrid<? extends MisAnglePoint> values, List<String> filenames)
 	{
 		
+		misModel = values;
 		final String filename = filenames.get(0); 
 		
 		try 
@@ -127,11 +127,11 @@ public class EBSDDataSource extends MisorientationDataSource
 	public List<MapView> getViews()
 	{
 		return new FList<MapView>(
-				new CompositeView(new LocalView(), new GrainSecondaryView()),
-				new CompositeView(new InterGrainView(), new GrainSecondaryView()),
-				new CompositeView(new MagnitudeView(), new GrainSecondaryView()),
-				new CompositeView(new OrientationView(), new GrainSecondaryView()),
-				new CompositeView(new GrainLabelView(), new GrainSecondaryView())
+				new CompositeView(new LocalView(misModel), new GrainSecondaryView(misModel)),
+				new CompositeView(new InterGrainView(misModel), new GrainSecondaryView(misModel)),
+				new CompositeView(new MagnitudeView(misModel), new GrainSecondaryView(misModel)),
+				new CompositeView(new OrientationView(misModel), new GrainSecondaryView(misModel)),
+				new CompositeView(new GrainLabelView(misModel), new GrainSecondaryView(misModel))
 			);
 
 	}

@@ -3,12 +3,11 @@ package skew.core.datasource.impl;
 import java.util.List;
 
 import fava.functionable.FList;
-
 import plural.executor.ExecutorSet;
 import scitypes.Coord;
 import skew.core.datasource.Acceptance;
 import skew.core.datasource.IDataSource;
-import skew.core.model.ISkewGrid;
+import skew.core.model.ISkewDataset;
 import skew.core.viewer.modes.views.MapView;
 import skew.core.viewer.modes.views.impl.DummyView;
 
@@ -43,11 +42,12 @@ public class DummyDataSource implements IDataSource
 	@Override
 	public List<MapView> getViews()
 	{
-		return new FList<MapView>(new DummyView());
+		//return new FList<MapView>(new DummyView());
+		return new FList<MapView>();
 	}
 
 	@Override
-	public ExecutorSet<ISkewGrid> calculate(List<String> filenames, Coord<Integer> mapsize)
+	public ExecutorSet<ISkewDataset> calculate(List<String> filenames, Coord<Integer> mapsize)
 	{
 		return null;
 	}

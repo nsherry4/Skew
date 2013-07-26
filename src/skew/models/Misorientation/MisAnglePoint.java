@@ -32,7 +32,7 @@ public class MisAnglePoint extends SkewPoint
 	public double grainMagnitude;
 	public double intraGrainMisorientation = -1;
 	
-	public MisAnglePoint(int index, int x, int y)
+	public MisAnglePoint(int x, int y, int index)
 	{
 		super(x, y, index);
 		

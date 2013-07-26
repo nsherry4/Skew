@@ -11,7 +11,6 @@ import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.map.palettes.AbstractPalette;
 import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.SigDigits;
-import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 
@@ -67,16 +66,16 @@ public abstract class MapView
 	}
 	
 	
-	public abstract SpinnerModel scaleSpinnerModel(ISkewGrid data, MapSubView subView);
-	public abstract String getSummaryText(ISkewPoint point, ISkewGrid data);
+	public abstract SpinnerModel scaleSpinnerModel(MapSubView subView);
+	public abstract String getSummaryText(ISkewPoint point);
 	public abstract boolean hasSublist();
 	public abstract List<MapSubView> getSubList();
 
-	public abstract float getMaximumIntensity(ISkewGrid data, MapSubView subview);
-	public abstract List<MapPainter> getPainters(ISkewGrid data, MapSubView subview, float maximum);
-	public abstract List<AxisPainter> getAxisPainters(ISkewGrid data, MapSubView subview, float maxValue);
+	public abstract float getMaximumIntensity(MapSubView subview);
+	public abstract List<MapPainter> getPainters(MapSubView subview, float maximum);
+	public abstract List<AxisPainter> getAxisPainters(MapSubView subview, float maxValue);
 	
-	public abstract void writeData(ISkewGrid data, MapSubView subview, BufferedWriter writer) throws IOException; 
+	public abstract void writeData(MapSubView subview, BufferedWriter writer) throws IOException; 
 	public abstract boolean canWriteData();
 	
 	

@@ -17,8 +17,8 @@ import plural.executor.ExecutorSet;
 import plural.swing.ExecutorSetView;
 
 import com.ezware.dialog.task.TaskDialogs;
-import commonenvironment.AbstractFile;
 
+import commonenvironment.AbstractFile;
 import scidraw.swing.SavePicture;
 import scitypes.Coord;
 import skew.core.datasource.Acceptance;
@@ -26,9 +26,10 @@ import skew.core.datasource.IDataSource;
 import skew.core.datasource.DataSourceSelection;
 import skew.core.datasource.DataSources;
 import skew.core.datasource.impl.DummyDataSource;
-import skew.core.model.ISkewGrid;
+import skew.core.model.ISkewDataset;
 import skew.core.model.ISkewPoint;
 import skew.core.model.impl.DummyGrid;
+import skew.core.model.impl.SkewDataset;
 import skew.core.viewer.SettingType;
 import skew.core.viewer.SkewTabs;
 import skew.core.viewer.SkewUI;
@@ -42,8 +43,7 @@ import swidget.icons.StockIcon;
 public class SkewController
 {
 
-	public IDataSource dataSource = null;
-	public ISkewGrid data = null;
+	public ISkewDataset data = null;
 	
 	public MapView viewMode = null;
 	public MapSubView subView = null;
@@ -53,27 +53,29 @@ public class SkewController
 	SkewUI ui;
 	SkewTabs window;
 	
-	public SkewController(SkewUI ui, SkewTabs window)
+	public SkewController(SkewTabs window)
 	{
-		this.ui = ui;
 		this.window = window;
-		data = new DummyGrid();
-		dataSource = new DummyDataSource();
+		data = new SkewDataset("No Dataset", ".", new DummyGrid(), new DummyDataSource());
 		viewMode = new DummyView();
 		
 		dir = new File("~");
 		
 	}
 	
+	public void setUI(SkewUI ui)
+	{
+		this.ui = ui;
+	}
+	
 
 	
-	public void setData(ISkewGrid newdata, IDataSource ds)
+	public void setData(ISkewDataset newdata)
 	{
-		if (newdata == null || ds == null) return;
+		if (newdata == null) return;
 		data = newdata;
-		dataSource = ds;
 		ui.settingsChanged(SettingType.DATA);
-		window.setTabTitle(ui, data.datasetName());
+		window.setTabTitle(ui, data.name());
 	}
 	
 	public void actionSaveText()
@@ -85,7 +87,7 @@ public class SkewController
 			
 			OutputStream os = new FileOutputStream(tempfile);
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
-			viewMode.writeData(data, subView, writer);
+			viewMode.writeData(subView, writer);
 			writer.close();
 			
 			InputStream is = new FileInputStream(tempfile);
@@ -100,7 +102,7 @@ public class SkewController
 		}
 	}
 	
-	public boolean actionOpenData()
+	public static ISkewDataset actionOpenData(SkewTabs window, String path)
 	{
 		//list of all data formats
 		List<IDataSource> formats = DataSources.getSources();
@@ -115,8 +117,8 @@ public class SkewController
 		}
 		
 		//get a list of filenames from the user
-		List<AbstractFile> absfiles = SwidgetIO.openFiles(window, "Select Data Files to Open", exts, descs, ".");
-		if (absfiles == null || absfiles.size() == 0) return false;
+		List<AbstractFile> absfiles = SwidgetIO.openFiles(window, "Select Data Files to Open", exts, descs, path);
+		if (absfiles == null || absfiles.size() == 0) return null;
 		
 		List<String> files = new ArrayList<String>();
 		for (AbstractFile af : absfiles)
@@ -144,7 +146,8 @@ public class SkewController
 		{
 			DataSourceSelection selection = new DataSourceSelection();
 			ds = selection.pickDSP(window, acceptingFormats);
-			if (ds != null) loadFiles(files, ds);
+			if (ds != null) return loadFiles(window, files, ds);
+			return null;
 		}
 		else if (acceptingFormats.size() == 0)
 		{
@@ -155,18 +158,17 @@ public class SkewController
 					JOptionPane.ERROR_MESSAGE, 
 					StockIcon.BADGE_WARNING.toImageIcon(IconSize.ICON)
 				);
-			return false;
+			return null;
 		}
 		else
 		{
 			ds = acceptingFormats.get(0);
-			loadFiles(files, ds);
+			return loadFiles(window, files, ds);
 		}
 		
-		return true;
 	}
 	
-	private void loadFiles(List<String> filenames, IDataSource ds)
+	private static ISkewDataset loadFiles(SkewTabs window, List<String> filenames, IDataSource ds)
 	{
 		
 		try {
@@ -176,15 +178,16 @@ public class SkewController
 		
 			Coord<Integer> mapSize = new Coord<Integer>(width, height);
 			
-			ExecutorSet<ISkewGrid> execset = ds.calculate(filenames, mapSize);
+			ExecutorSet<ISkewDataset> execset = ds.calculate(filenames, mapSize);
 			new ExecutorSetView(window, execset);
-			setData(execset.getResult(), ds);					
+			return execset.getResult();					
 			
 		}
 		catch (Exception ex)
 		{
 			TaskDialogs.showException(ex);
 			ex.printStackTrace();
+			return null;
 		}
 		
 	}
@@ -203,18 +206,17 @@ public class SkewController
 		Coord<Integer> coord = ui.drawing.getMapCoordinateAtPoint(x, y, false);
 		if (coord == null) return;
 		
-		ISkewPoint point = data.get(coord.x, coord.y);
+		if (doubleclick) data.grid().setPointSelected(coord.x, coord.y, multiselect);
+		
+		
+		ISkewPoint point = data.grid().get(coord.x, coord.y);
 		if (point == null) return;
-		
-		
-		if (doubleclick) data.setPointSelected(point, multiselect);
-		
 		
 		ui.coords.setText("" +
 				"(X: " + coord.x + 
 				", Y:" + coord.y  + 
 				")    " + 
-				viewMode.getSummaryText(point, data)
+				viewMode.getSummaryText(point)
 			);
 		
 		ui.settingsChanged(SettingType.SELECTION);
@@ -239,10 +241,10 @@ public class SkewController
 		if (newview == null)
 		{
 			ui.viewSelector.setSelectedItem(viewMode);
-			ui.savetext.setEnabled(false);
+			ui.savetext.setVisible(false);
 			return;
 		}
-		ui.savetext.setEnabled(newview.canWriteData());
+		ui.savetext.setVisible(newview.canWriteData());
 		viewMode = newview;
 		ui.setSubViewUI();
 		ui.settingsChanged(SettingType.VIEW);
