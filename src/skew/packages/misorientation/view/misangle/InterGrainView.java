@@ -8,16 +8,15 @@ import java.util.List;
 
 import javax.swing.SpinnerModel;
 
-import fava.functionable.FList;
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.Spectrum;
-import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.models.Grain.Grain;
 import skew.models.Misorientation.MisAngleGrid;
 import skew.models.Misorientation.MisAnglePoint;
 import skew.packages.misorientation.subview.IntraGrainSubView;
+import fava.functionable.FList;
 
 
 public class InterGrainView extends MisAngleView
@@ -34,20 +33,20 @@ public class InterGrainView extends MisAngleView
 	public SpinnerModel scaleSpinnerModel(MapSubView subView)
 	{
 		IntraGrainSubView igv = (IntraGrainSubView)subView;
-		return igv.getSpinnerModel(misorientationModel);
+		return igv.getSpinnerModel(misModel);
 	}
 
 	@Override
-	public String getSummaryText(ISkewPoint skewpoint)
+	public String getSummaryText(int x, int y)
 	{
 		
-		MisAnglePoint point = (MisAnglePoint)skewpoint;
+		MisAnglePoint point = misModel.get(x, y);
 	
 		String grain = formatGrainValue(point.grain);
 		String result = "Grain :" + grain;
 		
 		Grain g;
-		try { g = misorientationModel.grains.get(point.grain); }
+		try { g = misModel.grains.get(point.grain); }
 		catch (ArrayIndexOutOfBoundsException e) { return result; }			
 		
 		if (g == null) return result; 
@@ -98,7 +97,7 @@ public class InterGrainView extends MisAngleView
 
 		if (isUpdateRequired())
 		{
-			setupPainters(misorientationModel, subview);
+			setupPainters(misModel, subview);
 			setUpdateComplete();
 		}
 		return new FList<MapPainter>(super.misorientationPainter);
@@ -135,10 +134,10 @@ public class InterGrainView extends MisAngleView
 		
 		writer.write("index, x, y, grain, value, percent\n");
 		
-		for (MisAnglePoint point : misorientationModel.getBackingList())
+		for (MisAnglePoint point : misModel.getBackingList())
 		{
 			
-			Grain g = misorientationModel.getGrainAtPoint(point);
+			Grain g = misModel.getGrainAtPoint(point);
 			String relative = "";
 			if (g != null) {
 				relative = fmt(point.intraGrainMisorientation / g.intraGrainMax);

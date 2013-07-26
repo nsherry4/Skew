@@ -2,10 +2,10 @@ package skew.packages.misorientation.datasource.calculation.magnitude;
 
 import java.util.List;
 
-import ca.sciencestudio.process.xrd.util.Orientation;
 import scitypes.DirectionVector;
 import skew.models.Misorientation.MisAngleGrid;
 import skew.models.Misorientation.MisAnglePoint;
+import ca.sciencestudio.process.xrd.util.Orientation;
 
 
 public class OrientationMap

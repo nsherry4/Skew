@@ -7,7 +7,6 @@ import plural.executor.map.MapExecutor;
 import scitypes.Coord;
 import skew.core.datasource.IDataSource;
 import skew.core.model.ISkewDataset;
-import skew.core.model.ISkewGrid;
 import skew.models.Misorientation.MisAngleGrid;
 import skew.models.Misorientation.MisAnglePoint;
 import skew.packages.misorientation.datasource.calculation.misorientation.Calculation;

@@ -5,9 +5,6 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
-import fava.functionable.FList;
-import fava.functionable.FStringInput;
-
 import scitypes.Coord;
 import skew.core.datasource.Acceptance;
 import skew.core.datasource.impl.BasicDataSource;
@@ -16,6 +13,8 @@ import skew.core.viewer.modes.views.MapView;
 import skew.packages.pixeldeviation.model.PixDev;
 import skew.packages.pixeldeviation.model.PixDevGrid;
 import skew.packages.pixeldeviation.view.PixelDeviationComparisonView;
+import fava.functionable.FList;
+import fava.functionable.FStringInput;
 
 public class PixDevDataSource extends BasicDataSource
 {

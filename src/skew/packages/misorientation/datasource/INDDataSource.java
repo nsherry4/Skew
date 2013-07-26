@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import fava.functionable.FList;
-import fava.signatures.FnMap;
 import plural.executor.map.MapExecutor;
 import plural.executor.map.implementations.PluralMapExecutor;
 import skew.core.datasource.Acceptance;
@@ -25,6 +23,8 @@ import skew.packages.misorientation.view.grain.OrientationView;
 import skew.packages.misorientation.view.misangle.InterGrainView;
 import skew.packages.misorientation.view.misangle.LocalView;
 import skew.packages.misorientation.view.misangle.MagnitudeView;
+import fava.functionable.FList;
+import fava.signatures.FnMap;
 
 public class INDDataSource extends MisorientationDataSource
 {

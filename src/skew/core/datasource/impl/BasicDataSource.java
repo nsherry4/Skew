@@ -3,7 +3,6 @@ package skew.core.datasource.impl;
 import java.io.File;
 import java.util.List;
 
-import commonenvironment.IOOperations;
 import plural.executor.DummyExecutor;
 import plural.executor.ExecutorSet;
 import scitypes.Coord;
@@ -11,6 +10,8 @@ import skew.core.datasource.IDataSource;
 import skew.core.model.ISkewDataset;
 import skew.core.model.ISkewGrid;
 import skew.core.model.impl.SkewDataset;
+
+import commonenvironment.IOOperations;
 
 public abstract class BasicDataSource implements IDataSource
 {

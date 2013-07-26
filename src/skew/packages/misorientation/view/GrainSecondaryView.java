@@ -3,7 +3,6 @@ package skew.packages.misorientation.view;
 import java.util.ArrayList;
 import java.util.List;
 
-import fava.functionable.FList;
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.painters.axis.AxisPainter;
 import skew.core.model.ISkewGrid;
@@ -13,6 +12,7 @@ import skew.models.Misorientation.MisAngleGrid;
 import skew.models.Misorientation.MisAnglePoint;
 import skew.packages.misorientation.drawing.BoundaryMapPainter;
 import skew.packages.misorientation.drawing.SelectedGrainPainter;
+import fava.functionable.FList;
 
 public class GrainSecondaryView extends SecondaryView
 {
@@ -48,6 +48,12 @@ public class GrainSecondaryView extends SecondaryView
 	@Override
 	public List<AxisPainter> getAxisPainters(MapSubView subview, float maxValue) {
 		return new ArrayList<AxisPainter>();
+	}
+
+
+	@Override
+	public boolean canWriteData() {
+		return false;
 	}
 	
 }

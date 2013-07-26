@@ -6,19 +6,18 @@ import java.util.List;
 
 import javax.swing.SpinnerModel;
 
-import fava.functionable.FList;
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.map.painters.RasterSpectrumMapPainter;
 import scidraw.drawing.map.palettes.AbstractPalette;
 import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.Spectrum;
-import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
 import skew.models.Grain.Grain;
 import skew.models.Misorientation.MisAngleGrid;
 import skew.models.Misorientation.MisAnglePoint;
 import skew.packages.misorientation.drawing.GrainPalette;
+import fava.functionable.FList;
 
 
 public class GrainLabelView extends MapView
@@ -46,10 +45,10 @@ public class GrainLabelView extends MapView
 	}
 
 	@Override
-	public String getSummaryText(ISkewPoint skewpoint)
+	public String getSummaryText(int x, int y)
 	{
 		
-		MisAnglePoint point = (MisAnglePoint)skewpoint;
+		MisAnglePoint point = model.get(x, y);
 		
 		String grain = formatGrainValue(point.grain);
 		String result = "Grain: " + grain;

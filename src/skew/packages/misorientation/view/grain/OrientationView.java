@@ -9,18 +9,17 @@ import java.util.List;
 
 import javax.swing.SpinnerModel;
 
-import ca.sciencestudio.process.xrd.util.Orientation;
-import fava.functionable.FList;
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.map.painters.RasterColorMapPainter;
 import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.DirectionVector;
-import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
 import skew.models.Misorientation.MisAngleGrid;
 import skew.models.Misorientation.MisAnglePoint;
 import skew.packages.misorientation.subview.OrientationSubView;
+import ca.sciencestudio.process.xrd.util.Orientation;
+import fava.functionable.FList;
 
 
 public class OrientationView extends MapView
@@ -49,7 +48,7 @@ public class OrientationView extends MapView
 	}
 
 	@Override
-	public String getSummaryText(ISkewPoint skewpoint)
+	public String getSummaryText(int x, int y)
 	{
 		return "";
 	}

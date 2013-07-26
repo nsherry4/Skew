@@ -8,8 +8,6 @@ import java.util.List;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 
-import fava.datatypes.Pair;
-import fava.functionable.FList;
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.map.painters.RasterColorMapPainter;
 import scidraw.drawing.map.painters.axis.SpectrumCoordsAxisPainter;
@@ -18,12 +16,13 @@ import scidraw.drawing.map.palettes.ThermalScalePalette;
 import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.SigDigits;
 import skew.core.model.ISkewGrid;
-import skew.core.model.ISkewPoint;
 import skew.core.model.impl.SkewGrid;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
 import skew.models.XRDStrain.IXRDStrainPoint;
 import skew.packages.xrdstrain.subview.StrainSubView;
+import fava.datatypes.Pair;
+import fava.functionable.FList;
 
 public class StrainView extends MapView
 {
@@ -57,9 +56,9 @@ public class StrainView extends MapView
 	}
 
 	@Override
-	public String getSummaryText(ISkewPoint skewpoint)
+	public String getSummaryText(int x, int y)
 	{
-		IXRDStrainPoint point = (IXRDStrainPoint)skewpoint;
+		IXRDStrainPoint point = model.get(x, y);
 		if (! point.getHasStrainData()) return "";
 		
 		return "" + 

@@ -56,9 +56,9 @@ public class SkewGrid<T extends ISkewPoint> implements ISkewGrid
 	}
 	
 	@Override
-	public boolean setPointSelected(int x, int y, boolean deselectAll)
+	public void setPointSelected(int x, int y, boolean deselectAll)
 	{
-		return false;
+		return;
 	}
 
 

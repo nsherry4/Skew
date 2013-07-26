@@ -14,16 +14,12 @@ package skew.packages.misorientation.datasource.calculation.misorientation;
 import java.io.File;
 import java.util.List;
 
-import commonenvironment.IOOperations;
-import fava.functionable.FList;
-import fava.signatures.FnEach;
 import plural.executor.ExecutorSet;
 import plural.executor.eachindex.EachIndexExecutor;
 import plural.executor.eachindex.implementations.PluralEachIndexExecutor;
 import plural.executor.map.MapExecutor;
 import scitypes.Coord;
 import skew.core.model.ISkewDataset;
-import skew.core.model.ISkewGrid;
 import skew.core.model.impl.SkewDataset;
 import skew.models.Misorientation.MisAngleGrid;
 import skew.models.Misorientation.MisAnglePoint;
@@ -31,6 +27,11 @@ import skew.models.OrientationMatrix.IOrientationMatrix;
 import skew.packages.misorientation.datasource.MisorientationDataSource;
 import skew.packages.misorientation.datasource.calculation.magnitude.Magnitude;
 import skew.packages.misorientation.datasource.calculation.magnitude.OrientationMap;
+
+import commonenvironment.IOOperations;
+
+import fava.functionable.FList;
+import fava.signatures.FnEach;
 
 public class Calculation
 {

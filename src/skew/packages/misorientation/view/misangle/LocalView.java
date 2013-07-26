@@ -7,13 +7,12 @@ import java.util.List;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 
-import fava.functionable.FList;
 import scidraw.drawing.map.painters.MapPainter;
 import scitypes.Spectrum;
-import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.models.Misorientation.MisAngleGrid;
 import skew.models.Misorientation.MisAnglePoint;
+import fava.functionable.FList;
 
 
 public class LocalView extends MisAngleView
@@ -31,10 +30,10 @@ public class LocalView extends MisAngleView
 	}
 
 	@Override
-	public String getSummaryText(ISkewPoint skewpoint)
+	public String getSummaryText(int x, int y)
 	{
 		
-		MisAnglePoint point = (MisAnglePoint)skewpoint;
+		MisAnglePoint point = misModel.get(x, y);
 
 		String avg = formatMisorientationValue(point.average);
 		String east = formatMisorientationValue(point.east);
@@ -85,11 +84,11 @@ public class LocalView extends MisAngleView
 	private void setupPainters(MapSubView subview)
 	{
 		
-		Spectrum misorientationData = new Spectrum(misorientationModel.size());
+		Spectrum misorientationData = new Spectrum(misModel.size());
 
-		for (int i = 0; i < misorientationModel.size(); i++)
+		for (int i = 0; i < misModel.size(); i++)
 		{
-			double v = misorientationModel.get(i).average;
+			double v = misModel.get(i).average;
 			misorientationData.set(i, (float)v);
 		}
 		
@@ -102,7 +101,7 @@ public class LocalView extends MisAngleView
 	
 		writer.write("index, x, y, grain, average, north, east, south, west \n");
 		
-		for (MisAnglePoint point : misorientationModel.getBackingList())
+		for (MisAnglePoint point : misModel.getBackingList())
 		{
 			writer.write(
 					point.getIndex() + ", " + 

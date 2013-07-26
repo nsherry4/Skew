@@ -10,7 +10,7 @@ public interface ISkewGrid
 
 	public abstract ISkewPoint get(int x, int y);
 
-	public abstract boolean setPointSelected(int x, int y, boolean deselectAll);
+	public abstract void setPointSelected(int x, int y, boolean deselectAll);
 
 	public abstract int getWidth();
 

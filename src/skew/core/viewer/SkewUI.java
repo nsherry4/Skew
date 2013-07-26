@@ -14,6 +14,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.List;
+import java.util.Vector;
 
 import javax.swing.Box;
 import javax.swing.JComboBox;
@@ -26,12 +27,7 @@ import javax.swing.SpinnerModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.xml.crypto.Data;
 
-import com.ezware.dialog.task.TaskDialogs;
-
-import commonenvironment.IOOperations;
-import eventful.EventfulListener;
 import scidraw.drawing.DrawingRequest;
 import scidraw.drawing.backends.Surface;
 import scidraw.drawing.map.MapDrawing;
@@ -39,8 +35,6 @@ import scidraw.swing.GraphicsPanel;
 import skew.core.Version;
 import skew.core.controller.SkewController;
 import skew.core.model.ISkewDataset;
-import skew.core.model.impl.DummyGrid;
-import skew.core.model.impl.SkewDataset;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
 import skew.core.viewer.modes.views.impl.DummyView;
@@ -51,6 +45,11 @@ import swidget.icons.StockIcon;
 import swidget.widgets.ToolbarImageButton;
 import swidget.widgets.ZoomSlider;
 
+import com.ezware.dialog.task.TaskDialogs;
+import commonenvironment.IOOperations;
+
+import eventful.EventfulListener;
+
 /**
  * Misorientation viewer GUI displays the results of misorientation calculations as a 2D map.
  * Older XMAS data sets are supported, but misorientation data calculated with this tool
@@ -60,6 +59,7 @@ import swidget.widgets.ZoomSlider;
  *
  */
 
+@SuppressWarnings("serial")
 public class SkewUI extends JPanel {
 
 	SkewTabs parent;
@@ -311,8 +311,7 @@ public class SkewUI extends JPanel {
 		});
 		
 		
-		viewSelector = new JComboBox(controller.data.datasource().getViews().toArray());
-		
+		viewSelector = new JComboBox<MapView>(new Vector<MapView>(controller.data.datasource().getViews()));
 		
 		viewSelector.addActionListener(new ActionListener() {
 			
@@ -392,7 +391,7 @@ public class SkewUI extends JPanel {
 		if (controller.viewMode.hasSublist())
 		{
 			List<MapSubView> subviews = controller.viewMode.getSubList();
-			subViewSelector = new JComboBox(subviews.toArray());
+			subViewSelector = new JComboBox<MapSubView>(new Vector<MapSubView>(subviews));
 			scalePanel.add(subViewSelector, BorderLayout.CENTER);
 			controller.subView = subviews.get(0);
 			
@@ -537,10 +536,10 @@ public class SkewUI extends JPanel {
 					dr.imageWidth = getWidth();
 					dr.imageHeight = getHeight();
 					
-					dr.dataHeight = controller.data.grid().getHeight(); //map.height;
-					dr.dataWidth = controller.data.grid().getWidth(); //map.width;
-					dr.uninterpolatedHeight = controller.data.grid().getHeight(); //map.height;
-					dr.uninterpolatedWidth = controller.data.grid().getWidth(); //map.width;
+					dr.dataHeight = controller.data.height(); //map.height;
+					dr.dataWidth = controller.data.width(); //map.width;
+					dr.uninterpolatedHeight = controller.data.height(); //map.height;
+					dr.uninterpolatedWidth = controller.data.width(); //map.width;
 				} catch (NullPointerException e) {
 					TaskDialogs.showException(e);
 					e.printStackTrace();
@@ -551,7 +550,7 @@ public class SkewUI extends JPanel {
 			protected void drawGraphics(Surface backend, boolean vector) {
 				
 				if (controller.data == null) return;
-				if (controller.data.grid().getWidth() == 0 || controller.data.grid().getHeight() == 0) return;
+				if (controller.data.width() == 0 || controller.data.height() == 0) return;
 				if (controller.viewMode instanceof DummyView) return;
 				
 				

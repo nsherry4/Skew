@@ -5,9 +5,6 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
-import fava.functionable.FList;
-import fava.functionable.FStringInput;
-import fava.signatures.FnMap;
 import scitypes.Coord;
 import skew.core.datasource.Acceptance;
 import skew.core.datasource.impl.BasicDataSource;
@@ -19,6 +16,9 @@ import skew.models.XRDStrain.XRDStrainPoint;
 import skew.packages.misorientation.datasource.calculation.misorientation.IndexFileName;
 import skew.packages.xrdstrain.XRDStrain;
 import skew.packages.xrdstrain.view.StrainView;
+import fava.functionable.FList;
+import fava.functionable.FStringInput;
+import fava.signatures.FnMap;
 
 public class SubtractionDataSource extends BasicDataSource
 {

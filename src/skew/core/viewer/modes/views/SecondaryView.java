@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.swing.SpinnerModel;
 
-import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 
 public abstract class SecondaryView extends MapView
@@ -19,7 +18,7 @@ public abstract class SecondaryView extends MapView
 	}
 
 	@Override
-	public String getSummaryText(ISkewPoint point)
+	public String getSummaryText(int x, int y)
 	{
 		return "";
 	}
@@ -55,10 +54,5 @@ public abstract class SecondaryView extends MapView
 		return "View";
 	}
 
-	@Override
-	public boolean canWriteData()
-	{
-		return false;
-	}
 
 }

@@ -24,6 +24,7 @@ import swidget.widgets.toggle.ComplexToggle;
 import swidget.widgets.toggle.ComplexToggleGroup;
 
 
+@SuppressWarnings("serial")
 public class DataSourceSelection extends JDialog
 {
 	

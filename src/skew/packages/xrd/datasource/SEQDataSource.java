@@ -4,13 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import ca.sciencestudio.process.xrd.util.SequenceEntry;
-
-import com.ezware.dialog.task.TaskDialogs;
-
-import fava.functionable.FList;
-import fava.functionable.FStringInput;
-import fava.signatures.FnMap;
 import plural.executor.map.MapExecutor;
 import plural.executor.map.implementations.PluralMapExecutor;
 import skew.core.datasource.Acceptance;
@@ -32,6 +25,13 @@ import skew.packages.misorientation.view.misangle.MagnitudeView;
 import skew.packages.xrd.model.XRDPoint;
 import skew.packages.xrdstrain.view.StrainView;
 import skew.packages.xrdstrain.view.StressView;
+import ca.sciencestudio.process.xrd.util.SequenceEntry;
+
+import com.ezware.dialog.task.TaskDialogs;
+
+import fava.functionable.FList;
+import fava.functionable.FStringInput;
+import fava.signatures.FnMap;
 
 public class SEQDataSource extends MisorientationDataSource
 {

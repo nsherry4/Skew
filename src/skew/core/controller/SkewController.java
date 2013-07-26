@@ -15,19 +15,14 @@ import javax.swing.JOptionPane;
 
 import plural.executor.ExecutorSet;
 import plural.swing.ExecutorSetView;
-
-import com.ezware.dialog.task.TaskDialogs;
-
-import commonenvironment.AbstractFile;
 import scidraw.swing.SavePicture;
 import scitypes.Coord;
 import skew.core.datasource.Acceptance;
-import skew.core.datasource.IDataSource;
 import skew.core.datasource.DataSourceSelection;
 import skew.core.datasource.DataSources;
+import skew.core.datasource.IDataSource;
 import skew.core.datasource.impl.DummyDataSource;
 import skew.core.model.ISkewDataset;
-import skew.core.model.ISkewPoint;
 import skew.core.model.impl.DummyGrid;
 import skew.core.model.impl.SkewDataset;
 import skew.core.viewer.SettingType;
@@ -39,6 +34,9 @@ import skew.core.viewer.modes.views.impl.DummyView;
 import swidget.dialogues.fileio.SwidgetIO;
 import swidget.icons.IconSize;
 import swidget.icons.StockIcon;
+
+import com.ezware.dialog.task.TaskDialogs;
+import commonenvironment.AbstractFile;
 
 public class SkewController
 {
@@ -206,18 +204,15 @@ public class SkewController
 		Coord<Integer> coord = ui.drawing.getMapCoordinateAtPoint(x, y, false);
 		if (coord == null) return;
 		
-		if (doubleclick) data.grid().setPointSelected(coord.x, coord.y, multiselect);
-		
-		
-		ISkewPoint point = data.grid().get(coord.x, coord.y);
-		if (point == null) return;
-		
-		ui.coords.setText("" +
+		if (doubleclick) data.setPointSelected(coord.x, coord.y, multiselect);
+		String summary = "" +
 				"(X: " + coord.x + 
 				", Y:" + coord.y  + 
-				")    " + 
-				viewMode.getSummaryText(point)
-			);
+				")";
+		
+		summary += "   " + viewMode.getSummaryText(coord.x, coord.y);
+		ui.coords.setText(summary);	
+			
 		
 		ui.settingsChanged(SettingType.SELECTION);
 	}

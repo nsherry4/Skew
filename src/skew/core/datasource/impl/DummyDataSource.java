@@ -2,14 +2,13 @@ package skew.core.datasource.impl;
 
 import java.util.List;
 
-import fava.functionable.FList;
 import plural.executor.ExecutorSet;
 import scitypes.Coord;
 import skew.core.datasource.Acceptance;
 import skew.core.datasource.IDataSource;
 import skew.core.model.ISkewDataset;
 import skew.core.viewer.modes.views.MapView;
-import skew.core.viewer.modes.views.impl.DummyView;
+import fava.functionable.FList;
 
 public class DummyDataSource implements IDataSource
 {

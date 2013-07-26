@@ -21,4 +21,9 @@ public class DummySecondaryView extends SecondaryView
 		return new ArrayList<AxisPainter>();
 	}
 
+	@Override
+	public boolean canWriteData() {
+		return false;
+	}
+
 }

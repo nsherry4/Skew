@@ -8,7 +8,6 @@ package skew.models.Misorientation;
 import java.util.ArrayList;
 import java.util.List;
 
-import skew.core.model.ISkewPoint;
 import skew.core.model.impl.SkewGrid;
 import skew.models.Grain.Grain;
 import skew.packages.misorientation.datasource.calculation.magnitude.GrainIdentify;
@@ -28,10 +27,10 @@ public class MisAngleGrid<T extends MisAnglePoint> extends SkewGrid<T>
 	
 	
 	@Override
-	public boolean setPointSelected(int x, int y, boolean deselectAll)
+	public void setPointSelected(int x, int y, boolean deselectAll)
 	{
-		if (get(x, y) == null) return false;
-		return selectGrainAtPoint(x, y, deselectAll);
+		if (get(x, y) == null) return;
+		selectGrainAtPoint(x, y, deselectAll);
 	}
 	
 	

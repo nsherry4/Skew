@@ -4,10 +4,10 @@ import java.awt.Dimension;
 
 import javax.swing.JFrame;
 
-import skew.core.controller.SkewController;
 import swidget.widgets.tabbedinterface.TabbedInterface;
 
 
+@SuppressWarnings("serial")
 public class SkewTabs extends JFrame
 {
 	

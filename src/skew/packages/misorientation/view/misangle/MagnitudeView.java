@@ -9,15 +9,14 @@ import java.util.List;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 
-import fava.functionable.FList;
 import scidraw.drawing.map.painters.MapPainter;
 import scitypes.Spectrum;
-import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.models.Grain.Grain;
 import skew.models.Misorientation.MisAngleGrid;
 import skew.models.Misorientation.MisAnglePoint;
 import skew.packages.misorientation.subview.GrainMagnitudeSubView;
+import fava.functionable.FList;
 
 
 public class MagnitudeView extends MisAngleView
@@ -39,7 +38,7 @@ public class MagnitudeView extends MisAngleView
 		
 		float grainVal;
 		float maxVal = 0;
-		for (Grain g : misorientationModel.grains)
+		for (Grain g : misModel.grains)
 		{
 			grainVal = (float) gms.select(new double[]{g.magMin, g.magMax, g.magAvg});
 			maxVal = Math.max(grainVal, maxVal);
@@ -51,16 +50,16 @@ public class MagnitudeView extends MisAngleView
 	}
 
 	@Override
-	public String getSummaryText(ISkewPoint skewpoint)
+	public String getSummaryText(int x, int y)
 	{
 	
-		MisAnglePoint point = (MisAnglePoint)skewpoint;
+		MisAnglePoint point = misModel.get(x, y);
 		
 		String grain = formatGrainValue(point.grain);
 		String result = "Grain :" + grain;
 		
 		Grain g;
-		try { g = misorientationModel.grains.get(point.grain); }
+		try { g = misModel.grains.get(point.grain); }
 		catch (ArrayIndexOutOfBoundsException e) { return result; }			
 		
 		if (g == null) return result; 
@@ -111,19 +110,19 @@ public class MagnitudeView extends MisAngleView
 	
 	private void setupPainters(MapSubView subview)
 	{
-		Spectrum misorientationData = new Spectrum(misorientationModel.size());
+		Spectrum misorientationData = new Spectrum(misModel.size());
 
 		GrainMagnitudeSubView mag = (GrainMagnitudeSubView)subview;
 		
-		for (int i = 0; i < misorientationModel.size(); i++)
+		for (int i = 0; i < misModel.size(); i++)
 		{
-			int grain = misorientationModel.get(i).grain;
+			int grain = misModel.get(i).grain;
 			double v;
 			if (grain == -1)
 			{
 				v = -1;
 			} else {
-				Grain g = misorientationModel.grains.get(grain);
+				Grain g = misModel.grains.get(grain);
 				v = mag.select(new double[]{g.magMin, g.magMax, g.magAvg});
 			}
 			misorientationData.set(i, (float)v);
@@ -140,7 +139,7 @@ public class MagnitudeView extends MisAngleView
 	{	
 		writer.write("grain, min, avg, max\n");
 		
-		for (Grain g : misorientationModel.grains)
+		for (Grain g : misModel.grains)
 		{
 			writer.write(g.index + ", " + fmt(g.magMin) + ", " + fmt(g.magAvg) + ", " + fmt(g.magMax) + "\n");
 		}

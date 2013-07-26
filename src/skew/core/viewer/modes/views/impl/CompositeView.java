@@ -6,13 +6,12 @@ import java.util.List;
 
 import javax.swing.SpinnerModel;
 
-import fava.functionable.FList;
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.painters.axis.AxisPainter;
-import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
 import skew.core.viewer.modes.views.SecondaryView;
+import fava.functionable.FList;
 
 public class CompositeView extends MapView 
 {
@@ -57,8 +56,8 @@ public class CompositeView extends MapView
 	}
 
 	@Override
-	public String getSummaryText(ISkewPoint point) {
-		return primary.getSummaryText(point);
+	public String getSummaryText(int x, int y) {
+		return primary.getSummaryText(x, y);
 	}
 
 	@Override

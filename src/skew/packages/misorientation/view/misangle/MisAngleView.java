@@ -2,8 +2,6 @@ package skew.packages.misorientation.view.misangle;
 
 import java.util.List;
 
-import fava.datatypes.Pair;
-import fava.functionable.FList;
 import scidraw.drawing.map.painters.RasterSpectrumMapPainter;
 import scidraw.drawing.map.painters.axis.SpectrumCoordsAxisPainter;
 import scidraw.drawing.map.palettes.AbstractPalette;
@@ -14,6 +12,8 @@ import skew.core.viewer.modes.views.MapView;
 import skew.models.Misorientation.MisAngleGrid;
 import skew.models.Misorientation.MisAnglePoint;
 import skew.packages.misorientation.drawing.EBSDPalette;
+import fava.datatypes.Pair;
+import fava.functionable.FList;
 
 public abstract class MisAngleView extends MapView
 {
@@ -26,13 +26,13 @@ public abstract class MisAngleView extends MapView
 	
 	
 	protected AxisPainter spectrum;
-	MisAngleGrid<? extends MisAnglePoint> misorientationModel;
+	MisAngleGrid<? extends MisAnglePoint> misModel;
 	
 	public MisAngleView(MisAngleGrid<? extends MisAnglePoint> misorientationModel)
 	{
 		super();
 		
-		this.misorientationModel = misorientationModel;
+		this.misModel = misorientationModel;
 		
 		thermal = new EBSDPalette();
 		

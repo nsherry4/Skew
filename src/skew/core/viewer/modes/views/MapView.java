@@ -11,7 +11,6 @@ import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.map.palettes.AbstractPalette;
 import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.SigDigits;
-import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 
 
@@ -67,7 +66,7 @@ public abstract class MapView
 	
 	
 	public abstract SpinnerModel scaleSpinnerModel(MapSubView subView);
-	public abstract String getSummaryText(ISkewPoint point);
+	public abstract String getSummaryText(int x, int y);
 	public abstract boolean hasSublist();
 	public abstract List<MapSubView> getSubList();
 

@@ -9,7 +9,6 @@ import javax.swing.SpinnerModel;
 
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.painters.axis.AxisPainter;
-import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
 
@@ -23,7 +22,7 @@ public class DummyView extends MapView
 	}
 
 	@Override
-	public String getSummaryText(ISkewPoint point)
+	public String getSummaryText(int x, int y)
 	{
 		return "";
 	}

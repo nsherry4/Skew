@@ -6,11 +6,6 @@ import static java.lang.Math.sin;
 import java.io.File;
 import java.util.List;
 
-import com.ezware.dialog.task.TaskDialogs;
-
-import fava.functionable.FList;
-import fava.functionable.FStringInput;
-import fava.signatures.FnMap;
 import plural.executor.map.MapExecutor;
 import plural.executor.map.implementations.PluralMapExecutor;
 import skew.core.datasource.Acceptance;
@@ -26,6 +21,12 @@ import skew.packages.misorientation.view.grain.OrientationView;
 import skew.packages.misorientation.view.misangle.InterGrainView;
 import skew.packages.misorientation.view.misangle.LocalView;
 import skew.packages.misorientation.view.misangle.MagnitudeView;
+
+import com.ezware.dialog.task.TaskDialogs;
+
+import fava.functionable.FList;
+import fava.functionable.FStringInput;
+import fava.signatures.FnMap;
 
 public class EBSDDataSource extends MisorientationDataSource
 {

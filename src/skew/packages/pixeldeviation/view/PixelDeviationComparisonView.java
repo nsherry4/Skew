@@ -7,8 +7,6 @@ import java.util.List;
 
 import javax.swing.SpinnerModel;
 
-import fava.datatypes.Pair;
-import fava.functionable.FList;
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.map.painters.axis.SpectrumCoordsAxisPainter;
 import scidraw.drawing.map.palettes.AbstractPalette;
@@ -19,6 +17,8 @@ import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
 import skew.packages.pixeldeviation.model.PixDev;
 import skew.packages.pixeldeviation.model.PixDevGrid;
+import fava.datatypes.Pair;
+import fava.functionable.FList;
 
 public class PixelDeviationComparisonView extends MapView
 {
@@ -66,7 +66,7 @@ public class PixelDeviationComparisonView extends MapView
 	}
 
 	@Override
-	public String getSummaryText(ISkewPoint point)
+	public String getSummaryText(int x, int y)
 	{
 		return "Comparative Pixel Deviation";
 	}
