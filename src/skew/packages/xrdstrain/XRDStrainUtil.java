@@ -1,6 +1,6 @@
 package skew.packages.xrdstrain;
 
-public class XRDStrain {
+public class XRDStrainUtil {
 
 	public static double vonMises(double[] a)
 	{

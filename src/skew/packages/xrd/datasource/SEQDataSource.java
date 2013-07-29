@@ -4,16 +4,22 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import plural.executor.ExecutorSet;
 import plural.executor.map.MapExecutor;
 import plural.executor.map.implementations.PluralMapExecutor;
+import scitypes.Coord;
 import skew.core.datasource.Acceptance;
+import skew.core.datasource.IDataSource;
+import skew.core.model.ISkewDataset;
+import skew.core.model.impl.BasicSkewPoint;
 import skew.core.model.impl.SkewGrid;
 import skew.core.viewer.modes.views.MapView;
 import skew.core.viewer.modes.views.impl.CompositeView;
 import skew.models.Misorientation.MisAngleGrid;
 import skew.models.Misorientation.MisAnglePoint;
 import skew.models.OrientationMatrix.IOrientationMatrix;
-import skew.models.XRDStrain.IXRDStrainPoint;
+import skew.models.XRDStrain.IXRDStrain;
+import skew.models.XRDStrain.XRDStrain;
 import skew.packages.misorientation.datasource.MisorientationDataSource;
 import skew.packages.misorientation.datasource.calculation.misorientation.Calculation;
 import skew.packages.misorientation.view.GrainSecondaryView;
@@ -22,7 +28,6 @@ import skew.packages.misorientation.view.grain.OrientationView;
 import skew.packages.misorientation.view.misangle.InterGrainView;
 import skew.packages.misorientation.view.misangle.LocalView;
 import skew.packages.misorientation.view.misangle.MagnitudeView;
-import skew.packages.xrd.model.XRDPoint;
 import skew.packages.xrdstrain.view.StrainView;
 import skew.packages.xrdstrain.view.StressView;
 import ca.sciencestudio.process.xrd.util.SequenceEntry;
@@ -33,15 +38,15 @@ import fava.functionable.FList;
 import fava.functionable.FStringInput;
 import fava.signatures.FnMap;
 
-public class SEQDataSource extends MisorientationDataSource
+public class SEQDataSource extends MisorientationDataSource implements IDataSource
 {
 
 	
-	SkewGrid<IXRDStrainPoint> strainModel;
+	SkewGrid<BasicSkewPoint<IXRDStrain>> strainModel;
 	
 	public MisAnglePoint createPoint(int index, int x, int y)
 	{
-		return new XRDPoint(x, y, index);
+		return new MisAnglePoint(x, y, index);
 	}
 	
 	@Override
@@ -70,20 +75,10 @@ public class SEQDataSource extends MisorientationDataSource
 		return accept ? Acceptance.ACCEPT : Acceptance.REJECT;
 	}
 
-	@Override
-	public MapExecutor<String, String> loadPoints(final MisAngleGrid<? extends MisAnglePoint> values, List<String> filenames)
+	public MapExecutor<String, String> loadPoints(final MisAngleGrid<? extends MisAnglePoint> misangleGrid, List<String> filenames)
 	{
 
-		
-		misModel = values;
-		ArrayList<IXRDStrainPoint> strainList = new ArrayList<IXRDStrainPoint>();
-		strainModel = new SkewGrid<IXRDStrainPoint>(misModel.getWidth(), misModel.getHeight(), strainList);
-		for (MisAnglePoint p : values.getBackingList())
-		{
-			XRDPoint point = (XRDPoint)p;
-			strainList.add(point.str);
-		}
-		
+		misModel = misangleGrid;
 		final String filename = filenames.get(0); 
 		
 		try {
@@ -101,11 +96,15 @@ public class SEQDataSource extends MisorientationDataSource
 					SequenceEntry seq = new SequenceEntry(line);
 					int index = seq.imageNumber();
 					
-					XRDPoint point = (XRDPoint)values.get(index);
+					//Grab misorientation model information
+					MisAnglePoint misAnglePoint = misangleGrid.get(index);
+					misAnglePoint.orientation.setHasOMData(loadOrientationMatrix(seq, misAnglePoint.orientation));
 					
-					point.orientation.setHasOMData(loadOrientationMatrix(seq, point.orientation));
-					point.str.setHasStrainData(loadStrain(seq, point));
+					//Grab strain model information
+					BasicSkewPoint<IXRDStrain> strPoint = strainModel.get(index);
+					strPoint.setValid(loadStrain(seq, strPoint.getData()));
 
+					
 					return "";
 				}};
 				
@@ -135,7 +134,7 @@ public class SEQDataSource extends MisorientationDataSource
 		
 	}
 
-	private static boolean loadStrain(SequenceEntry seq, XRDPoint point)
+	private static boolean loadStrain(SequenceEntry seq, IXRDStrain point)
 	{
 		int quality = seq.indexQuality();
 		if (quality <= 0) return false;
@@ -181,6 +180,30 @@ public class SEQDataSource extends MisorientationDataSource
 				new CompositeView(new StressView(strainModel), new GrainSecondaryView(misModel))
 			);
 
+	}
+
+	private void createEmptyModels(Coord<Integer> mapsize)
+	{
+		List<MisAnglePoint> misanglePoints = new ArrayList<MisAnglePoint>();
+		List<BasicSkewPoint<IXRDStrain>> strainPoints = new ArrayList<BasicSkewPoint<IXRDStrain>>();
+		
+		for (int i = 0; i < mapsize.x * mapsize.y; i++)
+		{
+			misanglePoints.add(new MisAnglePoint(i % mapsize.x, i / mapsize.x, i));
+			strainPoints.add(new BasicSkewPoint<IXRDStrain>(i % mapsize.x, i / mapsize.x, i, new XRDStrain()));
+		}
+		
+		misModel = new MisAngleGrid<MisAnglePoint>(mapsize.x, mapsize.y, misanglePoints);
+		strainModel = new SkewGrid<BasicSkewPoint<IXRDStrain>>(mapsize.x, mapsize.y, strainPoints);
+		
+	}
+	
+	@Override
+	public ExecutorSet<ISkewDataset> calculate(List<String> filenames, Coord<Integer> mapsize) {
+		
+		createEmptyModels(mapsize);
+		return Calculation.calculate(filenames, this, mapsize);
+				
 	}
 	
 

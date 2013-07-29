@@ -72,15 +72,4 @@ public class SkewDataset implements ISkewDataset {
 		}
 	}
 
-	@Override
-	public List<ISkewPoint> get(int x, int y) {
-		List<ISkewPoint> points = new ArrayList<ISkewPoint>();
-		ISkewPoint p;
-		for (ISkewGrid g : grids){
-			p = g.get(x, y);
-			if (p != null) points.add(p);
-		}
-		return points;
-	}
-
 }

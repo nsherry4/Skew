@@ -16,10 +16,11 @@ import scidraw.drawing.map.palettes.ThermalScalePalette;
 import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.SigDigits;
 import skew.core.model.ISkewGrid;
+import skew.core.model.impl.BasicSkewPoint;
 import skew.core.model.impl.SkewGrid;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
-import skew.models.XRDStrain.IXRDStrainPoint;
+import skew.models.XRDStrain.IXRDStrain;
 import skew.packages.xrdstrain.subview.StressSubView;
 import fava.datatypes.Pair;
 import fava.functionable.FList;
@@ -30,9 +31,9 @@ public class StressView extends MapView
 	RasterColorMapPainter painter;
 	AbstractPalette palette;
 	
-	SkewGrid<IXRDStrainPoint> model;
+	SkewGrid<BasicSkewPoint<IXRDStrain>> model;
 	
-	public StressView(SkewGrid<IXRDStrainPoint> model)
+	public StressView(SkewGrid<BasicSkewPoint<IXRDStrain>> model)
 	{
 		super();
 		
@@ -58,16 +59,18 @@ public class StressView extends MapView
 	@Override
 	public String getSummaryText(int x, int y)
 	{
-		IXRDStrainPoint point = model.get(x, y);
-		if (! point.getHasStrainData()) return "";
 		
+		BasicSkewPoint<IXRDStrain> point = model.get(x, y);
+		if (! point.isValid()) return "";
+		
+		IXRDStrain data = point.getData();
 		return "" + 
-				"XX: " + fmt(point.stress()[0]) + ", " +
-				"YY: " + fmt(point.stress()[1]) + ", " +
-				"ZZ: " + fmt(point.stress()[2]) + ", " +
-				"XY: " + fmt(point.stress()[3]) + ", " +
-				"XZ: " + fmt(point.stress()[4]) + ", " +
-				"YZ: " + fmt(point.stress()[5]) + ", ";
+				"XX: " + fmt(data.stress()[0]) + ", " +
+				"YY: " + fmt(data.stress()[1]) + ", " +
+				"ZZ: " + fmt(data.stress()[2]) + ", " +
+				"XY: " + fmt(data.stress()[3]) + ", " +
+				"XZ: " + fmt(data.stress()[4]) + ", " +
+				"YZ: " + fmt(data.stress()[5]) + ", ";
 				
 	}
 
@@ -148,19 +151,20 @@ public class StressView extends MapView
 	{	
 		writer.write("index, x, y, xx, yy, zz, xy, xz, yz, von mises\n");
 		
-		for (IXRDStrainPoint point : model.getBackingList())
+		for (BasicSkewPoint<IXRDStrain> point : model.getBackingList())
 		{
+			IXRDStrain data = point.getData();
 			writer.write(
 					point.getIndex() + ", " + 
 					point.getX() + ", " + 
 					point.getY() + ", " +
-					fmt(point.stress()[0]) + ", " +
-					fmt(point.stress()[1]) + ", " + 
-					fmt(point.stress()[2]) + ", " + 
-					fmt(point.stress()[3]) + ", " + 
-					fmt(point.stress()[4]) + ", " + 
-					fmt(point.stress()[5]) + ", " +
-					fmt(point.stress()[6]) + 
+					fmt(data.stress()[0]) + ", " +
+					fmt(data.stress()[1]) + ", " + 
+					fmt(data.stress()[2]) + ", " + 
+					fmt(data.stress()[3]) + ", " + 
+					fmt(data.stress()[4]) + ", " + 
+					fmt(data.stress()[5]) + ", " +
+					fmt(data.stress()[6]) + 
 					"\n"
 				);
 		}
@@ -180,11 +184,13 @@ public class StressView extends MapView
 		for (int i = 0; i < model.getWidth() * model.getHeight(); i++){ pixelColours.add(Color.black); }
 		
 		Color c;
-		for (IXRDStrainPoint point : model.getBackingList())
+		for (BasicSkewPoint<IXRDStrain> point : model.getBackingList())
 		{
-			if (point.getHasStrainData()) 
+			IXRDStrain data = point.getData();
+			
+			if (point.isValid()) 
 			{
-				double v = subview.select(point.stress());
+				double v = subview.select(data.stress());
 				c = palette.getFillColour(v, maximum);
 				pixelColours.set(point.getIndex(), c);
 			} else {

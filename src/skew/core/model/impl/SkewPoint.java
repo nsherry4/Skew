@@ -6,6 +6,7 @@ public class SkewPoint implements ISkewPoint
 {
 
 	protected int x, y, index;
+	private boolean validPoint;
 	
 	public SkewPoint(int x, int y, int index)
 	{
@@ -31,6 +32,16 @@ public class SkewPoint implements ISkewPoint
 	public int getY()
 	{
 		return y;
+	}
+	
+	@Override
+	public boolean isValid() {
+		return validPoint;
+	}
+
+	@Override
+	public void setValid(boolean validPoint) {
+		this.validPoint = validPoint;
 	}
 	
 }

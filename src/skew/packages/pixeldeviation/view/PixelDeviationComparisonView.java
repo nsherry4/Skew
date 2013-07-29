@@ -39,7 +39,7 @@ public class PixelDeviationComparisonView extends MapView
 			protected Color valueToColor(ISkewPoint point)
 			{
 				
-				return getDevColor(((PixDev)point).getValue());
+				return getDevColor(((PixDev)point).getData());
 			}
 		};
 		

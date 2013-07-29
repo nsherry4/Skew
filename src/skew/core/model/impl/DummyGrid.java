@@ -37,6 +37,18 @@ public class DummyGrid implements ISkewGrid
 				// TODO Auto-generated method stub
 				return 0;
 			}
+
+			@Override
+			public boolean isValid() {
+				// TODO Auto-generated method stub
+				return false;
+			}
+
+			@Override
+			public void setValid(boolean validPoint) {
+				// TODO Auto-generated method stub
+				
+			}
 		};
 	}
 
@@ -64,6 +76,18 @@ public class DummyGrid implements ISkewGrid
 			{
 				// TODO Auto-generated method stub
 				return 0;
+			}
+
+			@Override
+			public boolean isValid() {
+				// TODO Auto-generated method stub
+				return false;
+			}
+
+			@Override
+			public void setValid(boolean validPoint) {
+				// TODO Auto-generated method stub
+				
 			}
 		};
 	}

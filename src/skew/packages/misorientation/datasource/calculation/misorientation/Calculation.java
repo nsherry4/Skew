@@ -56,14 +56,10 @@ public class Calculation
 		
 		final MisAngleGrid<MisAnglePoint> anglelist = new MisAngleGrid<MisAnglePoint>(mapSize.x, mapSize.y, values);
 
-
-		// executors		
-		//final MapExecutor<String, String> loadFilesExec = EBSD.loadMatrixListEBSD(matrixlist.values, filenames.get(0));
-		//final MapExecutor<String, String> loadFilesExec = S_IND.loadMatrixList(matrixlist.values, S_IND.startNum, filenames);
-		
+		//Load files into memory, or load data from files 
 		final MapExecutor<String, String> loadFilesExec = ds.loadPoints(anglelist, filenames);
 		
-		
+		//Perform various calculations on loaded data
 		final EachIndexExecutor calculateExec = calculateAngleList(anglelist, mapSize.x, mapSize.y);
 		final EachIndexExecutor calcGrainExec = calculateGrainMagnitude(anglelist);
 
@@ -111,6 +107,8 @@ public class Calculation
 
 	}
 
+	
+	
 
 	public static EachIndexExecutor calculateAngleList(final MisAngleGrid<? extends MisAnglePoint> anglelist,
 			final int width, final int height)
