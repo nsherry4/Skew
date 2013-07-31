@@ -5,6 +5,7 @@ import javax.swing.SpinnerNumberModel;
 
 import skew.core.model.ISkewGrid;
 import skew.core.viewer.modes.subviews.MapSubView;
+import skew.models.Misorientation.MisAngle;
 
 
 public class IntraGrainSubView implements MapSubView
@@ -35,7 +36,7 @@ public class IntraGrainSubView implements MapSubView
 		return options[index];
 	}
 	
-	public SpinnerModel getSpinnerModel(ISkewGrid data)
+	public SpinnerModel getSpinnerModel(ISkewGrid<MisAngle> data)
 	{
 		if (index == 0) return null;
 		if (index == 1) return new SpinnerNumberModel(2.0, 0.1, 180.0, 0.1);

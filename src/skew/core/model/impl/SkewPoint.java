@@ -2,17 +2,20 @@ package skew.core.model.impl;
 
 import skew.core.model.ISkewPoint;
 
-public class SkewPoint implements ISkewPoint
+public final class SkewPoint<T> implements ISkewPoint<T>
 {
 
 	protected int x, y, index;
 	private boolean validPoint;
+	private T data;
 	
-	public SkewPoint(int x, int y, int index)
+
+	public SkewPoint(int x, int y, int index, T data)
 	{
 		this.x = x;
 		this.y = y;
 		this.index = index;
+		this.data = data;
 	}
 
 	
@@ -43,5 +46,17 @@ public class SkewPoint implements ISkewPoint
 	public void setValid(boolean validPoint) {
 		this.validPoint = validPoint;
 	}
+	
+	@Override
+	public T getData() {
+		return data;
+	}
+
+	@Override
+	public void setData(T data) {
+		this.data = data;
+	}
+
+	
 	
 }

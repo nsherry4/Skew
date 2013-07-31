@@ -2,23 +2,23 @@ package skew.packages.misorientation.datasource.calculation.magnitude;
 
 import java.util.List;
 
+import skew.models.Misorientation.MisAngle;
 import skew.models.Misorientation.MisAngleGrid;
-import skew.models.Misorientation.MisAnglePoint;
 import fava.functionable.FList;
 
 
 public class GrainIdentify
 {
 	
-	private MisAngleGrid<? extends MisAnglePoint> data;
+	private MisAngleGrid data;
 	
-	public static void calculate(MisAngleGrid<? extends MisAnglePoint> data)
+	public static void calculate(MisAngleGrid data)
 	{
 		new GrainIdentify(data).calculateGrains();
 		
 	}
 	
-	private GrainIdentify(MisAngleGrid<? extends MisAnglePoint> data)
+	private GrainIdentify(MisAngleGrid data)
 	{
 		this.data = data;
 	}
@@ -28,13 +28,13 @@ public class GrainIdentify
 		
 		for (int i = 0; i < data.size(); i++)
 		{
-			data.get(i).grain = i;
+			data.get(i).getData().grain = i;
 		}
 		
 		for (int y = 0; y < data.getHeight(); y++) {
 			for (int x = 0; x < data.getWidth(); x++){
 			
-				MisAnglePoint point = data.get(x, y);
+				MisAngle point = data.get(x, y).getData();
 				
 				//skip unindexed points, and points out of bounds
 				if (point == null) continue;
@@ -77,7 +77,7 @@ public class GrainIdentify
 		for (int i = 0; i < data.size(); i++)
 		{
 			
-			MisAnglePoint p = data.get(i);
+			MisAngle p = data.get(i).getData();
 			if (p == null) continue;
 			if (p.average < 0 || isSinglePixelGrain(i)) {
 				p.grain = -1;
@@ -102,8 +102,8 @@ public class GrainIdentify
 	private boolean sameGrainNorth(int x, int y)
 	{
 		if (y == 0) return false;
-		MisAnglePoint point = data.get(x, y);
-		MisAnglePoint pointNorth = data.get(x, y-1);
+		MisAngle point = data.get(x, y).getData();
+		MisAngle pointNorth = data.get(x, y-1).getData();
 		
 		if (pointNorth.average < 0) return false;
 		return point.north < 5 && point.north >= 0;
@@ -113,8 +113,8 @@ public class GrainIdentify
 	private boolean sameGrainWest(int x, int y)
 	{
 		if (x == 0) return false;
-		MisAnglePoint point = data.get(x, y);
-		MisAnglePoint pointWest = data.get(x-1, y);
+		MisAngle point = data.get(x, y).getData();
+		MisAngle pointWest = data.get(x-1, y).getData();
 		
 		if (pointWest.average < 0) return false;
 		return point.west < 5 && point.west >= 0;
@@ -123,7 +123,7 @@ public class GrainIdentify
 	
 	private boolean isSinglePixelGrain(int i)
 	{
-		MisAnglePoint p = data.get(i);
+		MisAngle p = data.get(i).getData();
 		if (p == null) return true;
 		
 		boolean west = p.west > 5 || p.west < 0;
@@ -147,15 +147,15 @@ public class GrainIdentify
 		if (x < 0) return -1;
 		
 		int y = x;
-		while (data.get(y).grain != y)
+		while (data.get(y).getData().grain != y)
 		{
-			y = data.get(y).grain;
+			y = data.get(y).getData().grain;
 		}
 		
-		while (data.get(x).grain != x)
+		while (data.get(x).getData().grain != x)
 		{
-			int z = data.get(x).grain;
-			data.get(x).grain = y;
+			int z = data.get(x).getData().grain;
+			data.get(x).getData().grain = y;
 			x = z;
 		}
 		
@@ -165,7 +165,7 @@ public class GrainIdentify
 	
 	private void union(int x, int y)
 	{
-		data.get(find(x)).grain = find(y);
+		data.get(find(x)).getData().grain = find(y);
 		
 	}
 

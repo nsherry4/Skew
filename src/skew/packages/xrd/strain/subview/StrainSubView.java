@@ -1,12 +1,12 @@
-package skew.packages.xrdstrain.subview;
+package skew.packages.xrd.strain.subview;
 
 import skew.core.viewer.modes.subviews.MapSubView;
 
-public class StressSubView implements MapSubView
+public class StrainSubView implements MapSubView
 {
 	int index;
 	
-	public StressSubView(int index)
+	public StrainSubView(int index)
 	{
 		this.index = index;
 	}

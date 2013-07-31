@@ -8,7 +8,7 @@ import scidraw.drawing.map.painters.RasterColorMapPainter;
 import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 
-public abstract class RasterColorMapWrapper extends RasterColorMapPainter
+public abstract class RasterColorMapWrapper<T> extends RasterColorMapPainter
 {
 
 	
@@ -17,7 +17,7 @@ public abstract class RasterColorMapWrapper extends RasterColorMapPainter
 		super();
 	}
 	
-	public void setData(ISkewGrid data)
+	public void setData(ISkewGrid<T> data)
 	{
 		List<Color> colors = new ArrayList<Color>();
 		for (int y = 0; y < data.getHeight(); y++) {
@@ -29,7 +29,7 @@ public abstract class RasterColorMapWrapper extends RasterColorMapPainter
 	}
 
 	
-	protected abstract Color valueToColor(ISkewPoint point);
+	protected abstract Color valueToColor(ISkewPoint<T> point);
 	
 	
 }

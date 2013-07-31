@@ -11,8 +11,8 @@ import plural.executor.map.implementations.PluralMapExecutor;
 import skew.core.datasource.Acceptance;
 import skew.core.viewer.modes.views.MapView;
 import skew.core.viewer.modes.views.impl.CompositeView;
+import skew.models.Misorientation.MisAngle;
 import skew.models.Misorientation.MisAngleGrid;
-import skew.models.Misorientation.MisAnglePoint;
 import skew.models.OrientationMatrix.IOrientationMatrix;
 import skew.packages.misorientation.datasource.calculation.misorientation.Calculation;
 import skew.packages.misorientation.view.GrainSecondaryView;
@@ -21,6 +21,7 @@ import skew.packages.misorientation.view.grain.OrientationView;
 import skew.packages.misorientation.view.misangle.InterGrainView;
 import skew.packages.misorientation.view.misangle.LocalView;
 import skew.packages.misorientation.view.misangle.MagnitudeView;
+import autodialog.model.Parameter;
 
 import com.ezware.dialog.task.TaskDialogs;
 
@@ -57,7 +58,7 @@ public class EBSDDataSource extends MisorientationDataSource
 	}
 
 	@Override
-	public MapExecutor<String, String> loadPoints(final MisAngleGrid<? extends MisAnglePoint> values, List<String> filenames)
+	public MapExecutor<String, String> loadPoints(final MisAngleGrid values, List<String> filenames)
 	{
 		
 		misModel = values;
@@ -78,7 +79,7 @@ public class EBSDDataSource extends MisorientationDataSource
 	
 					List<String> words = FStringInput.words(line).toSink();
 					int index = Integer.parseInt(words.get(0)) - 1;
-					MisAnglePoint p = values.get(index);
+					MisAngle p = values.get(index).getData();
 					IOrientationMatrix om = p.orientation;
 					om.setMatrixIndex(index);
 					p.orientation.setHasOMData(loadOrientationMatrix(words, om));
@@ -135,6 +136,16 @@ public class EBSDDataSource extends MisorientationDataSource
 				new CompositeView(new GrainLabelView(misModel), new GrainSecondaryView(misModel))
 			);
 
+	}
+
+	@Override
+	public List<Parameter> userQueries() {
+		return new FList<>();
+	}
+
+	@Override
+	public String userQueryInformation() {
+		return null;
 	}
 	
 

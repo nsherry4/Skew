@@ -6,15 +6,16 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import skew.core.model.ISkewGrid;
+import skew.core.model.ISkewPoint;
 import skew.models.Grain.Grain;
+import skew.models.Misorientation.MisAngle;
 import skew.models.Misorientation.MisAngleGrid;
-import skew.models.Misorientation.MisAnglePoint;
 import skew.packages.misorientation.datasource.calculation.misorientation.Calculation;
 import fava.functionable.FList;
 
 public class Magnitude
 {
-	public static int setupGrains(MisAngleGrid<? extends MisAnglePoint> data)
+	public static int setupGrains(MisAngleGrid data)
 	{
 		
 		//Construct a list of Grains from the data
@@ -22,16 +23,17 @@ public class Magnitude
 		for (int y = 0; y < data.getHeight(); y++){
 			for (int x = 0; x < data.getWidth(); x++){
 
-				MisAnglePoint p = data.get(x, y);
-				if (p == null) continue;
-				if (p.grain == -1) continue;
+				ISkewPoint<MisAngle> p = data.get(x, y);
 				
-				if (data.grains.size() <= p.grain || data.grains.get(p.grain) == null)
+				if (p == null) continue;
+				if (p.getData().grain == -1) continue;
+				
+				if (data.grains.size() <= p.getData().grain || data.grains.get(p.getData().grain) == null)
 				{
-					data.grains.set(p.grain, new Grain(p.grain));
+					data.grains.set(p.getData().grain, new Grain(p.getData().grain));
 				}
 				
-				Grain g = data.grains.get(p.grain);
+				Grain g = data.grains.get(p.getData().grain);
 				g.points.add(p);
 			}
 		}
@@ -40,7 +42,7 @@ public class Magnitude
 		int maxNeighbours = 0;
 		for (Grain grain : data.grains)
 		{
-			for (MisAnglePoint p : grain.points)
+			for (ISkewPoint<MisAngle> p : grain.points)
 			{
 				addNeighbour(grain, data, data.goNorth(p));
 				addNeighbour(grain, data, data.goEast(p));
@@ -80,7 +82,7 @@ public class Magnitude
 		
 	}
 	
-	private static void addNeighbour(Grain g, MisAngleGrid<? extends MisAnglePoint> data, MisAnglePoint p)
+	private static void addNeighbour(Grain g, MisAngleGrid data, ISkewPoint<MisAngle> p)
 	{
 		if (p == null) return;
 		Grain other = data.getGrainAtPoint(p);
@@ -96,28 +98,29 @@ public class Magnitude
 		
 	}
 	
-	public static void calcMagnitude(ISkewGrid data, Grain g)
+	public static void calcMagnitude(ISkewGrid<MisAngle> grid, Grain g)
 	{
 		double magAvg = 0;
 		double magMax = 0;
 		double magMin = Double.MAX_VALUE;
-		MisAnglePoint minPoint = null;
+		ISkewPoint<MisAngle> minPoint = null;
 		
 		
-		for (MisAnglePoint point : g.points)
+		for (ISkewPoint<MisAngle> point : g.points)
 		{
-			point.grainMagnitude = calcPointMagnitude(data, g, point);
+			MisAngle data = point.getData();
+			data.grainMagnitude = calcPointMagnitude(grid, g, point);
 			
-			magAvg += point.grainMagnitude;
+			magAvg += data.grainMagnitude;
 			
-			if (point.grainMagnitude > magMax)
+			if (data.grainMagnitude > magMax)
 			{
-				magMax = point.grainMagnitude;
+				magMax = data.grainMagnitude;
 			}
 			
-			if (point.grainMagnitude < magMin)
+			if (data.grainMagnitude < magMin)
 			{
-				magMin = point.grainMagnitude;
+				magMin = data.grainMagnitude;
 				minPoint = point;
 			}
 			
@@ -135,10 +138,10 @@ public class Magnitude
 		//List<Double> intraGrainValues = new ArrayList<Double>(g.points.size()); 
 		double[] igv = new double[g.points.size()];
 		int count = 0;
-		for (MisAnglePoint point : g.points)
+		for (ISkewPoint<MisAngle> point : g.points)
 		{
-			point.intraGrainMisorientation = Calculation.calculateAngle(point.orientation, minPoint.orientation);
-			igv[count++] = point.intraGrainMisorientation;
+			point.getData().intraGrainMisorientation = Calculation.calculateAngle(point.getData().orientation, minPoint.getData().orientation);
+			igv[count++] = point.getData().intraGrainMisorientation;
 			//intraGrainValues.add(point.intraGrainMisorientation);
 			//g.intraGrainMax = Math.max(g.intraGrainMax, point.intraGrainMisorientation);
 		}
@@ -149,13 +152,13 @@ public class Magnitude
 		
 	}
 	
-	private static double calcPointMagnitude(ISkewGrid data, Grain g, MisAnglePoint p)
+	private static double calcPointMagnitude(ISkewGrid<MisAngle> data, Grain g, ISkewPoint<MisAngle> p)
 	{
 		double sum = 0;
-		for (MisAnglePoint point : g.points)
+		for (ISkewPoint<MisAngle> point : g.points)
 		{
 			if (point == p) continue;
-			sum += Calculation.calculateAngle(p.orientation, point.orientation);
+			sum += Calculation.calculateAngle(p.getData().orientation, point.getData().orientation);
 		}
 		return sum / g.points.size();
 	}

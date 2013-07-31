@@ -6,14 +6,13 @@ import java.util.List;
 import plural.executor.DummyExecutor;
 import plural.executor.ExecutorSet;
 import scitypes.Coord;
-import skew.core.datasource.IDataSource;
 import skew.core.model.ISkewDataset;
 import skew.core.model.ISkewGrid;
 import skew.core.model.impl.SkewDataset;
 
 import commonenvironment.IOOperations;
 
-public abstract class BasicDataSource implements IDataSource
+public abstract class BasicDataSource extends DataSource
 {
 
 	private String ext, desc, title;
@@ -55,13 +54,13 @@ public abstract class BasicDataSource implements IDataSource
 			protected ISkewDataset execute()
 			{
 				exec.advanceState();
-				ISkewGrid grid = load(filenames, mapsize);
+				List<ISkewGrid<?>> grids = load(filenames, mapsize);
 				exec.advanceState();
 				
 				return new SkewDataset(
 						new File(IOOperations.getCommonFileName(filenames)).getName(), 
 						new File(filenames.get(0)).getParent(), 
-						grid,
+						grids,
 						BasicDataSource.this
 					);
 			}};
@@ -71,7 +70,7 @@ public abstract class BasicDataSource implements IDataSource
 		return execset;
 	}
 	
-	public abstract ISkewGrid load(List<String> filenames, Coord<Integer> mapsize);
+	public abstract List<ISkewGrid<?>> load(List<String> filenames, Coord<Integer> mapsize);
 
 
 }

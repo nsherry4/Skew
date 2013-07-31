@@ -4,13 +4,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import skew.core.model.ISkewPoint;
-import skew.models.Misorientation.MisAnglePoint;
+import skew.models.Misorientation.MisAngle;
 import fava.functionable.FList;
 
 public class Grain
 {
 	
-	public FList<MisAnglePoint> points = new FList<MisAnglePoint>();
+	public FList<ISkewPoint<MisAngle>> points = new FList<ISkewPoint<MisAngle>>();
 	
 	public double magMin = 0;
 	public double magMax = 0;
@@ -22,7 +22,7 @@ public class Grain
 	public boolean selected = false;
 	public int index;
 	
-	public ISkewPoint intraGrainCenter;
+	public ISkewPoint<MisAngle> intraGrainCenter;
 	public double intraGrainMax = 0.0001;
 	
 	public Grain(int index)

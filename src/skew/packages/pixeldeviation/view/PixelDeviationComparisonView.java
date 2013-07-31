@@ -11,35 +11,34 @@ import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.map.painters.axis.SpectrumCoordsAxisPainter;
 import scidraw.drawing.map.palettes.AbstractPalette;
 import scidraw.drawing.painters.axis.AxisPainter;
+import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.painter.RasterColorMapWrapper;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
-import skew.packages.pixeldeviation.model.PixDev;
-import skew.packages.pixeldeviation.model.PixDevGrid;
 import fava.datatypes.Pair;
 import fava.functionable.FList;
 
 public class PixelDeviationComparisonView extends MapView
 {
 
-	RasterColorMapWrapper painter;
+	RasterColorMapWrapper<Float> painter;
 	AbstractPalette palette;
-	PixDevGrid model;
+	ISkewGrid<Float> model;
 	
-	public PixelDeviationComparisonView(PixDevGrid model)
+	public PixelDeviationComparisonView(ISkewGrid<Float> model)
 	{
 		super();
 		
 		this.model = model;
 		
-		painter = new RasterColorMapWrapper() {
+		painter = new RasterColorMapWrapper<Float>() {
 			
 			@Override
-			protected Color valueToColor(ISkewPoint point)
+			protected Color valueToColor(ISkewPoint<Float> point)
 			{
 				
-				return getDevColor(((PixDev)point).getData());
+				return getDevColor(point.getData());
 			}
 		};
 		

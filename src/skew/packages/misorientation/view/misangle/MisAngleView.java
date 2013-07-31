@@ -10,7 +10,6 @@ import scitypes.SigDigits;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
 import skew.models.Misorientation.MisAngleGrid;
-import skew.models.Misorientation.MisAnglePoint;
 import skew.packages.misorientation.drawing.EBSDPalette;
 import fava.datatypes.Pair;
 import fava.functionable.FList;
@@ -26,9 +25,9 @@ public abstract class MisAngleView extends MapView
 	
 	
 	protected AxisPainter spectrum;
-	MisAngleGrid<? extends MisAnglePoint> misModel;
+	MisAngleGrid misModel;
 	
-	public MisAngleView(MisAngleGrid<? extends MisAnglePoint> misorientationModel)
+	public MisAngleView(MisAngleGrid misorientationModel)
 	{
 		super();
 		

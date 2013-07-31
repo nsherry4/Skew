@@ -11,11 +11,12 @@ import scidraw.drawing.map.painters.RasterSpectrumMapPainter;
 import scidraw.drawing.map.palettes.AbstractPalette;
 import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.Spectrum;
+import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
 import skew.models.Grain.Grain;
+import skew.models.Misorientation.MisAngle;
 import skew.models.Misorientation.MisAngleGrid;
-import skew.models.Misorientation.MisAnglePoint;
 import skew.packages.misorientation.drawing.GrainPalette;
 import fava.functionable.FList;
 
@@ -26,10 +27,10 @@ public class GrainLabelView extends MapView
 	RasterSpectrumMapPainter grainPainter;
 	
 	AbstractPalette grainpalette = new GrainPalette();
-	private MisAngleGrid<? extends MisAnglePoint> model;
+	private MisAngleGrid model;
 	
 	
-	public GrainLabelView(MisAngleGrid<? extends MisAnglePoint> model)
+	public GrainLabelView(MisAngleGrid model)
 	{
 		this.model = model;
 		List<AbstractPalette> grainPalettes = new FList<AbstractPalette>(super.greyEmpty, grainpalette);
@@ -48,7 +49,7 @@ public class GrainLabelView extends MapView
 	public String getSummaryText(int x, int y)
 	{
 		
-		MisAnglePoint point = model.get(x, y);
+		MisAngle point = model.get(x, y).getData();
 		
 		String grain = formatGrainValue(point.grain);
 		String result = "Grain: " + grain;
@@ -107,7 +108,7 @@ public class GrainLabelView extends MapView
 		
 		for (int i = 0; i < model.size(); i++)
 		{
-			int grainIndex = model.get(i).grain;
+			int grainIndex = model.get(i).getData().grain;
 			if (grainIndex < 0) { misorientationData.set(i, -1f); continue; }
 			Grain g = model.grains.get(grainIndex);
 			if (g == null) { misorientationData.set(i, -1f); continue; }
@@ -122,7 +123,7 @@ public class GrainLabelView extends MapView
 	{	
 		writer.write("index, x, y, grain, size (px)\n");
 		
-		for (MisAnglePoint point : model.getBackingList())
+		for (ISkewPoint<MisAngle> point : model.getBackingList())
 		{
 			Grain g = model.getGrainAtPoint(point);
 			String grainsize = fmt(-1f);
@@ -131,7 +132,7 @@ public class GrainLabelView extends MapView
 					point.getIndex() + ", " + 
 					point.getX() + ", " + 
 					point.getY() + ", " +
-					point.grain + ", " + 
+					point.getData().grain + ", " + 
 					grainsize + 
 				"\n");
 		}

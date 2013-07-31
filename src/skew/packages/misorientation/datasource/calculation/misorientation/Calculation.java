@@ -20,9 +20,10 @@ import plural.executor.eachindex.implementations.PluralEachIndexExecutor;
 import plural.executor.map.MapExecutor;
 import scitypes.Coord;
 import skew.core.model.ISkewDataset;
+import skew.core.model.ISkewPoint;
 import skew.core.model.impl.SkewDataset;
+import skew.models.Misorientation.MisAngle;
 import skew.models.Misorientation.MisAngleGrid;
-import skew.models.Misorientation.MisAnglePoint;
 import skew.models.OrientationMatrix.IOrientationMatrix;
 import skew.packages.misorientation.datasource.MisorientationDataSource;
 import skew.packages.misorientation.datasource.calculation.magnitude.Magnitude;
@@ -43,7 +44,7 @@ public class Calculation
 	public static ExecutorSet<ISkewDataset> calculate(final List<String> filenames, final MisorientationDataSource ds, final Coord<Integer> mapSize)
 	{
 
-		FList<MisAnglePoint> values = new FList<MisAnglePoint>(mapSize.x * mapSize.y);
+		FList<ISkewPoint<MisAngle>> values = new FList<ISkewPoint<MisAngle>>(mapSize.x * mapSize.y);
 		for (int i = 0; i < mapSize.x * mapSize.y; i++)
 		{
 			values.add(ds.createPoint(i, i % mapSize.x, i / mapSize.x));
@@ -54,7 +55,7 @@ public class Calculation
 		final String name = new File(datasetName).getName();
 		final String path = new File(filenames.get(0)).getParent();
 		
-		final MisAngleGrid<MisAnglePoint> anglelist = new MisAngleGrid<MisAnglePoint>(mapSize.x, mapSize.y, values);
+		final MisAngleGrid anglelist = new MisAngleGrid(mapSize.x, mapSize.y, values);
 
 		//Load files into memory, or load data from files 
 		final MapExecutor<String, String> loadFilesExec = ds.loadPoints(anglelist, filenames);
@@ -110,8 +111,7 @@ public class Calculation
 	
 	
 
-	public static EachIndexExecutor calculateAngleList(final MisAngleGrid<? extends MisAnglePoint> anglelist,
-			final int width, final int height)
+	public static EachIndexExecutor calculateAngleList(final MisAngleGrid anglelist, final int width, final int height)
 	{
 
 		FnEach<Integer> eachIndex = new FnEach<Integer>() {
@@ -129,7 +129,7 @@ public class Calculation
 
 	}
 
-	public static EachIndexExecutor calculateGrainMagnitude(final MisAngleGrid<? extends MisAnglePoint> data)
+	public static EachIndexExecutor calculateGrainMagnitude(final MisAngleGrid data)
 	{
 		FnEach<Integer> eachIndex = new FnEach<Integer>() {
 
@@ -145,9 +145,10 @@ public class Calculation
 		return exec;
 	}
 
-	private static void setMisAnglePoints(int i, MisAngleGrid<? extends MisAnglePoint> values, int width, int height)
+	private static void setMisAnglePoints(int i, MisAngleGrid values, int width, int height)
 	{
-		if (!values.get(i).orientation.matrixOK()) return;
+		MisAngle point = values.get(i).getData();
+		if (!point.orientation.matrixOK()) return;
 
 		int n, w, e, s, nw, sw, se, ne, row, col, points = 0;
 		double angle_total = 0., angle;
@@ -198,17 +199,19 @@ public class Calculation
 			se = -1;
 		}
 
-		MisAnglePoint point = values.get(i);
-		point.orientation = values.get(i).orientation;
-
+		
+		//point.orientation = values.get(i).orientation;
+		
+		MisAngle otherPoint;
 		if (n >= 0)
 		{ // has north neighbor
+			otherPoint = values.get(n).getData();
 			angle = 0.;
 
-			if (values.get(n).orientation.matrixOK())
+			if (otherPoint.orientation.matrixOK())
 			{
 
-				angle = calculateAngle(values.get(i).orientation, values.get(n).orientation);
+				angle = calculateAngle(point.orientation, otherPoint.orientation);
 
 				if (angle < 5.)
 				{
@@ -221,12 +224,13 @@ public class Calculation
 		}
 		if (s >= 0)
 		{ // has south neighbor
+			otherPoint = values.get(s).getData();
 			angle = 0.;
-			if (values.get(s).orientation.matrixOK())
+			if (otherPoint.orientation.matrixOK())
 			{
 
 
-				angle = calculateAngle(values.get(i).orientation, values.get(s).orientation);
+				angle = calculateAngle(point.orientation, otherPoint.orientation);
 
 				if (angle < 5.)
 				{
@@ -239,12 +243,13 @@ public class Calculation
 		}
 		if (w >= 0)
 		{ // has west neighbor
+			otherPoint = values.get(w).getData();
 			angle = 0.;
-			if (values.get(w).orientation.matrixOK())
+			if (otherPoint.orientation.matrixOK())
 			{
 
 
-				angle = calculateAngle(values.get(i).orientation, values.get(w).orientation);
+				angle = calculateAngle(point.orientation, otherPoint.orientation);
 
 				if (angle < 5.)
 				{
@@ -256,14 +261,15 @@ public class Calculation
 		}
 		if (e >= 0)
 		{ // has east neighbor
+			otherPoint = values.get(e).getData();
 			angle = 0.;
-			if (values.get(e).orientation.matrixOK())
+			if (otherPoint.orientation.matrixOK())
 			{
 				// angle =
 				// calculatAngle(matrixlist.getMatrix(i),matrixlist.getMatrix(e));
 
 
-				angle = calculateAngle(values.get(i).orientation, values.get(e).orientation);
+				angle = calculateAngle(point.orientation, otherPoint.orientation);
 
 				if (angle < 5.)
 				{
@@ -276,10 +282,11 @@ public class Calculation
 		}
 		if (nw >= 0)
 		{ // has north-west neighbor
+			otherPoint = values.get(nw).getData();
 			angle = 0.;
-			if (values.get(nw).orientation.matrixOK())
+			if (otherPoint.orientation.matrixOK())
 			{
-				angle = calculateAngle(values.get(i).orientation, values.get(nw).orientation);
+				angle = calculateAngle(point.orientation, otherPoint.orientation);
 
 				if (angle < 5.)
 				{
@@ -290,10 +297,11 @@ public class Calculation
 		}
 		if (ne >= 0)
 		{// has north-east neighbor
+			otherPoint = values.get(ne).getData();
 			angle = 0.;
-			if (values.get(ne).orientation.matrixOK())
+			if (otherPoint.orientation.matrixOK())
 			{
-				angle = calculateAngle(values.get(i).orientation, values.get(ne).orientation);
+				angle = calculateAngle(point.orientation, otherPoint.orientation);
 				if (angle < 5.)
 				{
 					angle_total += angle;
@@ -303,10 +311,11 @@ public class Calculation
 		}
 		if (sw >= 0)
 		{// has south-west neighbor
+			otherPoint = values.get(sw).getData();
 			angle = 0.;
-			if (values.get(sw).orientation.matrixOK())
+			if (otherPoint.orientation.matrixOK())
 			{
-				angle = calculateAngle(values.get(i).orientation, values.get(sw).orientation);
+				angle = calculateAngle(point.orientation, otherPoint.orientation);
 
 				if (angle < 5.)
 				{
@@ -317,10 +326,11 @@ public class Calculation
 		}
 		if (se >= 0)
 		{// has south-east neighbor
+			otherPoint = values.get(se).getData();
 			angle = 0.;
-			if (values.get(se).orientation.matrixOK())
+			if (otherPoint.orientation.matrixOK())
 			{
-				angle = calculateAngle(values.get(i).orientation, values.get(se).orientation);
+				angle = calculateAngle(point.orientation, otherPoint.orientation);
 
 				if (angle < 5)
 				{
@@ -332,11 +342,11 @@ public class Calculation
 
 		if (points != 0)
 		{
-			values.get(i).average = angle_total / points;
+			point.average = angle_total / points;
 		}
 		else
 		{
-			values.get(i).average = 0.0;
+			point.average = 0.0;
 		}
 		// printf("%10d %10d %15.8f %15.8f %15.8f \n",row,
 		// col,pointList[i].average,pointList[i].east,pointList[i].south);

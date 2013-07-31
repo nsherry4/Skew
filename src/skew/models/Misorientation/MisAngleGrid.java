@@ -8,18 +8,19 @@ package skew.models.Misorientation;
 import java.util.ArrayList;
 import java.util.List;
 
+import skew.core.model.ISkewPoint;
 import skew.core.model.impl.SkewGrid;
 import skew.models.Grain.Grain;
 import skew.packages.misorientation.datasource.calculation.magnitude.GrainIdentify;
 
 
-public class MisAngleGrid<T extends MisAnglePoint> extends SkewGrid<T>
+public class MisAngleGrid extends SkewGrid<MisAngle>
 {
 	
 	public List<Grain>               grains;
 	public int grainCount = 0;
 
-	public MisAngleGrid(int width, int height, List<T> points)
+	public MisAngleGrid(int width, int height, List<ISkewPoint<MisAngle>> points)
 	{
 		super(width, height, points);
 		this.grains = new ArrayList<Grain>();
@@ -36,7 +37,7 @@ public class MisAngleGrid<T extends MisAnglePoint> extends SkewGrid<T>
 	
 	
 	
-	public List<T> getBackingList()
+	public List<ISkewPoint<MisAngle>> getBackingList()
 	{
 		return values;
 	}
@@ -47,53 +48,54 @@ public class MisAngleGrid<T extends MisAnglePoint> extends SkewGrid<T>
 		GrainIdentify.calculate(this);
 	}
 	
-	public T goNorth(MisAnglePoint p)
+	public ISkewPoint<MisAngle> goNorth(ISkewPoint<MisAngle> p)
 	{
 		return get(p.getX()-1, p.getY());
 	}
 	
-	public T goNorthEast(MisAnglePoint p)
+	public ISkewPoint<MisAngle> goNorthEast(ISkewPoint<MisAngle> p)
 	{
 		return get(p.getX()-1, p.getY()+1);
 	}
 	
-	public T goNorthWest(MisAnglePoint p)
+	public ISkewPoint<MisAngle> goNorthWest(ISkewPoint<MisAngle> p)
 	{
 		return get(p.getX()-1, p.getY()-1);
 	}
 	
-	public T goEast(MisAnglePoint p)
+	public ISkewPoint<MisAngle> goEast(ISkewPoint<MisAngle> p)
 	{
 		return get(p.getX(), p.getY()+1);
 	}
 	
-	public T goSouth(MisAnglePoint p)
+	public ISkewPoint<MisAngle> goSouth(ISkewPoint<MisAngle> p)
 	{
 		return get(p.getX()+1, p.getY());
 	}
 	
-	public T goSouthEast(MisAnglePoint p)
+	public ISkewPoint<MisAngle> goSouthEast(ISkewPoint<MisAngle> p)
 	{
 		return get(p.getX()+1, p.getY()+1);
 	}
 	
-	public T goSouthWest(MisAnglePoint p)
+	public ISkewPoint<MisAngle> goSouthWest(ISkewPoint<MisAngle> p)
 	{
 		return get(p.getX()+1, p.getY()-1);
 	}
 	
-	public T goWest(MisAnglePoint p)
+	public ISkewPoint<MisAngle> goWest(ISkewPoint<MisAngle> p)
 	{
 		return get(p.getX(), p.getY()-1);
 	}
 	
-	public Grain getGrainAtPoint(MisAnglePoint p)
+	public Grain getGrainAtPoint(ISkewPoint<MisAngle> p)
 	{
-		if (p == null) return null;
-		if (p.grain < 0) return null;
-		if (p.grain >= grains.size()) return null;
+		MisAngle data = p.getData();
+		if (data == null) return null;
+		if (data.grain < 0) return null;
+		if (data.grain >= grains.size()) return null;
 		
-		return grains.get(p.grain);
+		return grains.get(data.grain);
 	}
 	
 	public Grain getGrainAtPoint(int x, int y)

@@ -12,8 +12,8 @@ import plural.executor.map.implementations.PluralMapExecutor;
 import skew.core.datasource.Acceptance;
 import skew.core.viewer.modes.views.MapView;
 import skew.core.viewer.modes.views.impl.CompositeView;
+import skew.models.Misorientation.MisAngle;
 import skew.models.Misorientation.MisAngleGrid;
-import skew.models.Misorientation.MisAnglePoint;
 import skew.models.OrientationMatrix.IOrientationMatrix;
 import skew.packages.misorientation.datasource.calculation.misorientation.Calculation;
 import skew.packages.misorientation.datasource.calculation.misorientation.IndexFileName;
@@ -23,6 +23,7 @@ import skew.packages.misorientation.view.grain.OrientationView;
 import skew.packages.misorientation.view.misangle.InterGrainView;
 import skew.packages.misorientation.view.misangle.LocalView;
 import skew.packages.misorientation.view.misangle.MagnitudeView;
+import autodialog.model.Parameter;
 import fava.functionable.FList;
 import fava.signatures.FnMap;
 
@@ -63,7 +64,7 @@ public class INDDataSource extends MisorientationDataSource
 
 	
 	@Override
-	public MapExecutor<String, String> loadPoints(final MisAngleGrid<? extends MisAnglePoint> data, List<String> filenames)
+	public MapExecutor<String, String> loadPoints(final MisAngleGrid data, List<String> filenames)
 	{
 		misModel = data;
 		FnMap<String, String> eachFilename = new FnMap<String, String>(){
@@ -72,7 +73,7 @@ public class INDDataSource extends MisorientationDataSource
 			public String f(String filename) {
 				int index = IndexFileName.getFileNumber(filename)-startNum;
 				if (index >= data.size()) return "";
-				MisAnglePoint p = data.get(index);
+				MisAngle p = data.get(index).getData();
 				p.orientation.setHasOMData(loadOM(filename, p.orientation));
 				return "";
 			}};
@@ -186,6 +187,15 @@ public class INDDataSource extends MisorientationDataSource
 
 	}
 
+	@Override
+	public List<Parameter> userQueries() {
+		return new FList<>();
+	}
+	
+	@Override
+	public String userQueryInformation() {
+		return null;
+	}
 
 
 }

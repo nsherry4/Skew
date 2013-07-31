@@ -8,6 +8,7 @@ import skew.core.datasource.Acceptance;
 import skew.core.datasource.IDataSource;
 import skew.core.model.ISkewDataset;
 import skew.core.viewer.modes.views.MapView;
+import autodialog.model.Parameter;
 import fava.functionable.FList;
 
 public class DummyDataSource implements IDataSource
@@ -42,12 +43,22 @@ public class DummyDataSource implements IDataSource
 	public List<MapView> getViews()
 	{
 		//return new FList<MapView>(new DummyView());
-		return new FList<MapView>();
+		return new FList<>();
 	}
 
 	@Override
 	public ExecutorSet<ISkewDataset> calculate(List<String> filenames, Coord<Integer> mapsize)
 	{
+		return null;
+	}
+
+	@Override
+	public List<Parameter> userQueries() {
+		return new FList<>();
+	}
+
+	@Override
+	public String userQueryInformation() {
 		return null;
 	}
 

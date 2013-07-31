@@ -1,4 +1,4 @@
-package skew.packages.xrd.datasource;
+package skew.packages.xrd.sequence.datasource;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -11,12 +11,13 @@ import scitypes.Coord;
 import skew.core.datasource.Acceptance;
 import skew.core.datasource.IDataSource;
 import skew.core.model.ISkewDataset;
-import skew.core.model.impl.BasicSkewPoint;
+import skew.core.model.ISkewPoint;
 import skew.core.model.impl.SkewGrid;
+import skew.core.model.impl.SkewPoint;
 import skew.core.viewer.modes.views.MapView;
 import skew.core.viewer.modes.views.impl.CompositeView;
+import skew.models.Misorientation.MisAngle;
 import skew.models.Misorientation.MisAngleGrid;
-import skew.models.Misorientation.MisAnglePoint;
 import skew.models.OrientationMatrix.IOrientationMatrix;
 import skew.models.XRDStrain.IXRDStrain;
 import skew.models.XRDStrain.XRDStrain;
@@ -28,8 +29,9 @@ import skew.packages.misorientation.view.grain.OrientationView;
 import skew.packages.misorientation.view.misangle.InterGrainView;
 import skew.packages.misorientation.view.misangle.LocalView;
 import skew.packages.misorientation.view.misangle.MagnitudeView;
-import skew.packages.xrdstrain.view.StrainView;
-import skew.packages.xrdstrain.view.StressView;
+import skew.packages.xrd.strain.view.StrainView;
+import skew.packages.xrd.strain.view.StressView;
+import autodialog.model.Parameter;
 import ca.sciencestudio.process.xrd.util.SequenceEntry;
 
 import com.ezware.dialog.task.TaskDialogs;
@@ -42,11 +44,11 @@ public class SEQDataSource extends MisorientationDataSource implements IDataSour
 {
 
 	
-	SkewGrid<BasicSkewPoint<IXRDStrain>> strainModel;
+	SkewGrid<IXRDStrain> strainModel;
 	
-	public MisAnglePoint createPoint(int index, int x, int y)
+	public ISkewPoint<MisAngle> createPoint(int index, int x, int y)
 	{
-		return new MisAnglePoint(x, y, index);
+		return new SkewPoint<MisAngle>(x, y, index, new MisAngle());
 	}
 	
 	@Override
@@ -75,7 +77,7 @@ public class SEQDataSource extends MisorientationDataSource implements IDataSour
 		return accept ? Acceptance.ACCEPT : Acceptance.REJECT;
 	}
 
-	public MapExecutor<String, String> loadPoints(final MisAngleGrid<? extends MisAnglePoint> misangleGrid, List<String> filenames)
+	public MapExecutor<String, String> loadPoints(final MisAngleGrid misangleGrid, List<String> filenames)
 	{
 
 		misModel = misangleGrid;
@@ -97,11 +99,11 @@ public class SEQDataSource extends MisorientationDataSource implements IDataSour
 					int index = seq.imageNumber();
 					
 					//Grab misorientation model information
-					MisAnglePoint misAnglePoint = misangleGrid.get(index);
+					MisAngle misAnglePoint = misangleGrid.get(index).getData();
 					misAnglePoint.orientation.setHasOMData(loadOrientationMatrix(seq, misAnglePoint.orientation));
 					
 					//Grab strain model information
-					BasicSkewPoint<IXRDStrain> strPoint = strainModel.get(index);
+					ISkewPoint<IXRDStrain> strPoint = strainModel.get(index);
 					strPoint.setValid(loadStrain(seq, strPoint.getData()));
 
 					
@@ -184,17 +186,17 @@ public class SEQDataSource extends MisorientationDataSource implements IDataSour
 
 	private void createEmptyModels(Coord<Integer> mapsize)
 	{
-		List<MisAnglePoint> misanglePoints = new ArrayList<MisAnglePoint>();
-		List<BasicSkewPoint<IXRDStrain>> strainPoints = new ArrayList<BasicSkewPoint<IXRDStrain>>();
+		List<ISkewPoint<MisAngle>> misanglePoints = new ArrayList<ISkewPoint<MisAngle>>();
+		List<ISkewPoint<IXRDStrain>> strainPoints = new ArrayList<ISkewPoint<IXRDStrain>>();
 		
 		for (int i = 0; i < mapsize.x * mapsize.y; i++)
 		{
-			misanglePoints.add(new MisAnglePoint(i % mapsize.x, i / mapsize.x, i));
-			strainPoints.add(new BasicSkewPoint<IXRDStrain>(i % mapsize.x, i / mapsize.x, i, new XRDStrain()));
+			misanglePoints.add(new SkewPoint<MisAngle>(i % mapsize.x, i / mapsize.x, i, new MisAngle()));
+			strainPoints.add(new SkewPoint<IXRDStrain>(i % mapsize.x, i / mapsize.x, i, new XRDStrain()));
 		}
 		
-		misModel = new MisAngleGrid<MisAnglePoint>(mapsize.x, mapsize.y, misanglePoints);
-		strainModel = new SkewGrid<BasicSkewPoint<IXRDStrain>>(mapsize.x, mapsize.y, strainPoints);
+		misModel = new MisAngleGrid(mapsize.x, mapsize.y, misanglePoints);
+		strainModel = new SkewGrid<IXRDStrain>(mapsize.x, mapsize.y, strainPoints);
 		
 	}
 	
@@ -206,6 +208,15 @@ public class SEQDataSource extends MisorientationDataSource implements IDataSour
 				
 	}
 	
+	@Override
+	public List<Parameter> userQueries() {
+		return new FList<>();
+	}
+	
+	@Override
+	public String userQueryInformation() {
+		return null;
+	}
 
 
 }

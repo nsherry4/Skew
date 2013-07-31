@@ -1,4 +1,4 @@
-package skew.packages.xrdstrain;
+package skew.packages.xrd.strain;
 
 public class XRDStrainUtil {
 

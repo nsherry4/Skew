@@ -1,28 +1,26 @@
 package skew.core.model.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import skew.core.datasource.IDataSource;
 import skew.core.model.ISkewDataset;
 import skew.core.model.ISkewGrid;
-import skew.core.model.ISkewPoint;
 import fava.functionable.FList;
 
 public class SkewDataset implements ISkewDataset {
 
 	private String name;
 	private String path;
-	private List<ISkewGrid> grids;
+	private List<ISkewGrid<?>> grids;
 	private IDataSource ds;
 	
 	
 	
-	public SkewDataset(String name, String path, ISkewGrid grid, IDataSource ds) {
-		this(name, path, new FList<ISkewGrid>(grid), ds);
+	public SkewDataset(String name, String path, ISkewGrid<?> grid, IDataSource ds) {
+		this(name, path, new FList<ISkewGrid<?>>(grid), ds);
 	}
 	
-	public SkewDataset(String name, String path, List<ISkewGrid> grids, IDataSource ds) {
+	public SkewDataset(String name, String path, List<ISkewGrid<?>> grids, IDataSource ds) {
 		this.name = name;
 		this.path = path;
 		this.grids = grids;
@@ -50,7 +48,7 @@ public class SkewDataset implements ISkewDataset {
 	@Override
 	public int height() {
 		int max = 0;
-		for (ISkewGrid g : grids) {
+		for (ISkewGrid<?> g : grids) {
 			max = Math.max(max, g.getHeight());
 		}
 		return max;
@@ -59,7 +57,7 @@ public class SkewDataset implements ISkewDataset {
 	@Override
 	public int width() {
 		int max = 0;
-		for (ISkewGrid g : grids) {
+		for (ISkewGrid<?> g : grids) {
 			max = Math.max(max, g.getWidth());
 		}
 		return max;
@@ -67,7 +65,7 @@ public class SkewDataset implements ISkewDataset {
 
 	@Override
 	public void setPointSelected(int x, int y, boolean deselectAll) {
-		for (ISkewGrid g : grids){
+		for (ISkewGrid<?> g : grids){
 			g.setPointSelected(x, y, deselectAll);
 		}
 	}

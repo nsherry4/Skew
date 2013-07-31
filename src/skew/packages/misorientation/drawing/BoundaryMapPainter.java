@@ -5,7 +5,7 @@ import java.awt.Color;
 
 import scidraw.drawing.backends.Surface.EndCap;
 import scidraw.drawing.painters.PainterData;
-import skew.models.Misorientation.MisAnglePoint;
+import skew.models.Misorientation.MisAngle;
 
 /**
  * 
@@ -49,7 +49,7 @@ public class BoundaryMapPainter extends AbstractMisAnglePainter
 		for (int y = 0; y < data.getHeight(); y++) {
 			for (int x = 0; x < data.getWidth(); x++) {
 
-				MisAnglePoint point = data.get(x, y);
+				MisAngle point = data.get(x, y).getData();
 				
 				float fx = (float)x;
 				float fy = (float)y;

@@ -1,19 +1,20 @@
 package skew.core.model.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 
-public class SkewGrid<T extends ISkewPoint> implements ISkewGrid
+public class SkewGrid<T> implements ISkewGrid<T>
 {
 
-	protected List<T>               values;
+	protected List<ISkewPoint<T>>   values;
 	
 	protected int                   width;
 	protected int                   height;
 		
-	public SkewGrid(int width, int height, List<T> points)
+	public SkewGrid(int width, int height, List<ISkewPoint<T>> points)
 	{
 		this.width = width;
 		this.height = height;
@@ -29,7 +30,7 @@ public class SkewGrid<T extends ISkewPoint> implements ISkewGrid
 	}
 
 	@Override
-	public T get(int position)
+	public ISkewPoint<T> get(int position)
 	{
 		if (position < 0) return null;
 		if (position >= values.size()) return null;
@@ -37,7 +38,7 @@ public class SkewGrid<T extends ISkewPoint> implements ISkewGrid
 	}
 
 	@Override
-	public T get(int x, int y)
+	public ISkewPoint<T> get(int x, int y)
 	{
 		return get(width * y + x);
 	}
@@ -61,10 +62,10 @@ public class SkewGrid<T extends ISkewPoint> implements ISkewGrid
 		return;
 	}
 
-
-	public List<T> getBackingList()
+	
+	public List<ISkewPoint<T>> getPoints()
 	{
-		return values;
+		return new ArrayList<ISkewPoint<T>>(values);
 	}
 
 

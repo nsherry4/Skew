@@ -2,14 +2,17 @@ package skew.core.model;
 
 
 
-public interface ISkewPoint
+public interface ISkewPoint<T>
 {
 
 	public abstract int getIndex();
 	public abstract int getX();
 	public abstract int getY();
 
-	boolean isValid();
-	void setValid(boolean validPoint);
+	public boolean isValid();
+	public void setValid(boolean validPoint);
+	
+	public T getData();
+	public void setData(T data);
 
 }

@@ -34,9 +34,15 @@ import skew.core.viewer.modes.views.impl.DummyView;
 import swidget.dialogues.fileio.SwidgetIO;
 import swidget.icons.IconSize;
 import swidget.icons.StockIcon;
+import autodialog.controller.SimpleAutoDialogController;
+import autodialog.model.Parameter;
+import autodialog.model.Parameter.ValueType;
+import autodialog.view.AutoDialog;
 
 import com.ezware.dialog.task.TaskDialogs;
 import commonenvironment.AbstractFile;
+
+import fava.functionable.FList;
 
 public class SkewController
 {
@@ -66,15 +72,38 @@ public class SkewController
 		this.ui = ui;
 	}
 	
-
 	
-	public void setData(ISkewDataset newdata)
+	
+	
+	private void event(SettingType type)
+	{
+		if (type != SettingType.SELECTION) viewMode.setUpdateRequired();
+		ui.settingsChanged(type);
+	}
+	
+	public void actionScaleChanged()
+	{
+		event(SettingType.SCALE);
+	}
+	
+	public void actionSetDataset(ISkewDataset newdata)
 	{
 		if (newdata == null) return;
 		data = newdata;
-		ui.settingsChanged(SettingType.DATA);
-		window.setTabTitle(ui, data.name());
+		viewMode = data.datasource().getViews().get(0);
+		
+		event(SettingType.DATA);
+		event(SettingType.VIEW);
+		
+		if (viewMode.hasSublist()){
+			subView = viewMode.getSubList().get(0);
+			event(SettingType.SUBVIEW);
+		} else {
+			subView = null;
+		}
+
 	}
+	
 	
 	public void actionSaveText()
 	{
@@ -100,7 +129,67 @@ public class SkewController
 		}
 	}
 	
-	public static ISkewDataset actionOpenData(SkewTabs window, String path)
+	
+	public void actionSelection(int x, int y, boolean multiselect, boolean doubleclick)
+	{
+		Coord<Integer> coord = ui.drawing.getMapCoordinateAtPoint(x, y, false);
+		if (coord == null) return;
+		
+		if (doubleclick) data.setPointSelected(coord.x, coord.y, multiselect);
+		String summary = "" +
+				"(X: " + coord.x + 
+				", Y:" + coord.y  + 
+				")";
+		
+		summary += "   " + viewMode.getSummaryText(coord.x, coord.y);
+		ui.coords.setText(summary);	
+			
+		
+		event(SettingType.SELECTION);
+	}
+
+
+
+	public void actionSavePicture()
+	{
+		if (data != null) {
+			new SavePicture(
+					window, ui.graphics, dir.getAbsolutePath()
+				);
+		}
+	}
+
+
+
+	public void actionSubviewChange(MapSubView newsubview)
+	{
+		subView = newsubview;
+		event(SettingType.SUBVIEW);
+	}
+	
+	public void actionViewChange(MapView newview)
+	{
+		if (newview == null)
+		{
+			ui.viewSelector.setSelectedItem(viewMode);
+			ui.savetext.setVisible(false);
+			return;
+		}
+		viewMode = newview;
+		
+		event(SettingType.VIEW);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+	public static ISkewDataset loadDataset(SkewTabs window, String path)
 	{
 		//list of all data formats
 		List<IDataSource> formats = DataSources.getSources();
@@ -165,16 +254,33 @@ public class SkewController
 		}
 		
 	}
+
 	
 	private static ISkewDataset loadFiles(SkewTabs window, List<String> filenames, IDataSource ds)
 	{
 		
 		try {
 			
-			Integer width = Integer.parseInt(JOptionPane.showInputDialog(window, "Map Width", 1));
-			Integer height = Integer.parseInt(JOptionPane.showInputDialog(window, "Map Height", 1));
-		
-			Coord<Integer> mapSize = new Coord<Integer>(width, height);
+			Parameter paramWidth = new Parameter("Width", ValueType.INTEGER, 1);
+			Parameter paramHeight = new Parameter("Height", ValueType.INTEGER, 1);
+			
+			List<Parameter> params = new FList<>(paramWidth, paramHeight);
+			params.addAll(ds.userQueries());
+			
+			SimpleAutoDialogController dialogController = new SimpleAutoDialogController(params);
+			
+			AutoDialog dialog = new AutoDialog(dialogController, window);
+			dialog.setHelpTitle("Additional Dataset Information");
+			dialog.setHelpMessage(ds.userQueryInformation());
+			dialog.setModal(true);
+			dialog.setTitle("Dataset Parameters");
+			dialog.initialize();
+			
+			//User Cancel
+			if (!dialogController.getDialogAccepted()) return null;
+			
+			Coord<Integer> mapSize = new Coord<>(paramWidth.intValue(), paramHeight.intValue());
+			
 			
 			ExecutorSet<ISkewDataset> execset = ds.calculate(filenames, mapSize);
 			new ExecutorSetView(window, execset);
@@ -190,59 +296,13 @@ public class SkewController
 		
 	}
 	
+	
+	
 	private File tempfile() throws IOException
 	{
 		final File tempfile = File.createTempFile("Image File - ", " export");
 		tempfile.deleteOnExit();
 		return tempfile;
-	}
-
-
-
-	public void handleClick(int x, int y, boolean multiselect, boolean doubleclick)
-	{
-		Coord<Integer> coord = ui.drawing.getMapCoordinateAtPoint(x, y, false);
-		if (coord == null) return;
-		
-		if (doubleclick) data.setPointSelected(coord.x, coord.y, multiselect);
-		String summary = "" +
-				"(X: " + coord.x + 
-				", Y:" + coord.y  + 
-				")";
-		
-		summary += "   " + viewMode.getSummaryText(coord.x, coord.y);
-		ui.coords.setText(summary);	
-			
-		
-		ui.settingsChanged(SettingType.SELECTION);
-	}
-
-
-
-	public void actionSavePicture()
-	{
-		if (data != null) {
-			new SavePicture(
-					window, ui.graphics, dir.getAbsolutePath()
-				);
-		}
-	}
-
-
-
-	public void actionViewChange()
-	{
-		MapView newview = (MapView)ui.viewSelector.getSelectedItem();
-		if (newview == null)
-		{
-			ui.viewSelector.setSelectedItem(viewMode);
-			ui.savetext.setVisible(false);
-			return;
-		}
-		ui.savetext.setVisible(newview.canWriteData());
-		viewMode = newview;
-		ui.setSubViewUI();
-		ui.settingsChanged(SettingType.VIEW);
 	}
 	
 	

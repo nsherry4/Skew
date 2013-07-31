@@ -8,8 +8,8 @@ import scidraw.drawing.painters.axis.AxisPainter;
 import skew.core.model.ISkewGrid;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.SecondaryView;
+import skew.models.Misorientation.MisAngle;
 import skew.models.Misorientation.MisAngleGrid;
-import skew.models.Misorientation.MisAnglePoint;
 import skew.packages.misorientation.drawing.BoundaryMapPainter;
 import skew.packages.misorientation.drawing.SelectedGrainPainter;
 import fava.functionable.FList;
@@ -20,9 +20,9 @@ public class GrainSecondaryView extends SecondaryView
 	protected BoundaryMapPainter boundaryPainter;
 	protected SelectedGrainPainter selectedGrainPainter;
 
-	protected MisAngleGrid<? extends MisAnglePoint> model;
+	protected MisAngleGrid model;
 	
-	public GrainSecondaryView(MisAngleGrid<? extends MisAnglePoint> model)
+	public GrainSecondaryView(MisAngleGrid model)
 	{
 		super();
 		this.model = model;
@@ -31,7 +31,7 @@ public class GrainSecondaryView extends SecondaryView
 	}
 	
 	
-	protected void setData(ISkewGrid data)
+	protected void setData(ISkewGrid<MisAngle> data)
 	{
 		boundaryPainter.setData(data);
 		selectedGrainPainter.setData(data);

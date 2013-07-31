@@ -11,10 +11,11 @@ import javax.swing.SpinnerModel;
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.Spectrum;
+import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.models.Grain.Grain;
+import skew.models.Misorientation.MisAngle;
 import skew.models.Misorientation.MisAngleGrid;
-import skew.models.Misorientation.MisAnglePoint;
 import skew.packages.misorientation.subview.IntraGrainSubView;
 import fava.functionable.FList;
 
@@ -23,7 +24,7 @@ public class InterGrainView extends MisAngleView
 {
 
 
-	public InterGrainView(MisAngleGrid<? extends MisAnglePoint> misorientationModel) {
+	public InterGrainView(MisAngleGrid misorientationModel) {
 		super(misorientationModel);
 	}
 
@@ -40,7 +41,7 @@ public class InterGrainView extends MisAngleView
 	public String getSummaryText(int x, int y)
 	{
 		
-		MisAnglePoint point = misModel.get(x, y);
+		MisAngle point = misModel.get(x, y).getData();
 	
 		String grain = formatGrainValue(point.grain);
 		String result = "Grain :" + grain;
@@ -104,7 +105,7 @@ public class InterGrainView extends MisAngleView
 	}
 	
 	
-	private void setupPainters(MisAngleGrid<? extends MisAnglePoint> data, MapSubView subview)
+	private void setupPainters(MisAngleGrid data, MapSubView subview)
 	{
 		Spectrum misorientationData = new Spectrum(data.size());
 		IntraGrainSubView igsv = (IntraGrainSubView)subview;
@@ -113,10 +114,10 @@ public class InterGrainView extends MisAngleView
 		
 		for (int i = 0; i < data.size(); i++)
 		{
-			MisAnglePoint p = data.get(i);
+			MisAngle p = data.get(i).getData();
 			if (p == null)	{ misorientationData.set(i, -1.0f); continue; }
 
-			Grain g = data.getGrainAtPoint(p);
+			Grain g = data.getGrainAtPoint(data.get(i));
 			if (g == null)	{ misorientationData.set(i, -1.0f); continue; }
 			
 			float v = (float) p.intraGrainMisorientation;
@@ -134,13 +135,13 @@ public class InterGrainView extends MisAngleView
 		
 		writer.write("index, x, y, grain, value, percent\n");
 		
-		for (MisAnglePoint point : misModel.getBackingList())
+		for (ISkewPoint<MisAngle> point : misModel.getBackingList())
 		{
 			
 			Grain g = misModel.getGrainAtPoint(point);
 			String relative = "";
 			if (g != null) {
-				relative = fmt(point.intraGrainMisorientation / g.intraGrainMax);
+				relative = fmt(point.getData().intraGrainMisorientation / g.intraGrainMax);
 			} else {
 				relative = fmt(-1f);
 			}
@@ -148,8 +149,8 @@ public class InterGrainView extends MisAngleView
 					point.getIndex() + ", " + 
 					point.getX() + ", " + 
 					point.getY() + ", " +
-					point.grain + ", " + 
-					fmt(point.intraGrainMisorientation) + ", " + 
+					point.getData().grain + ", " + 
+					fmt(point.getData().intraGrainMisorientation) + ", " + 
 					relative +  
 					"\n"
 				);

@@ -13,15 +13,15 @@ import scidraw.drawing.map.painters.MapPainter;
 import scitypes.Spectrum;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.models.Grain.Grain;
+import skew.models.Misorientation.MisAngle;
 import skew.models.Misorientation.MisAngleGrid;
-import skew.models.Misorientation.MisAnglePoint;
 import skew.packages.misorientation.subview.GrainMagnitudeSubView;
 import fava.functionable.FList;
 
 
 public class MagnitudeView extends MisAngleView
 {
-	public MagnitudeView(MisAngleGrid<? extends MisAnglePoint> misorientationModel) {
+	public MagnitudeView(MisAngleGrid misorientationModel) {
 		super(misorientationModel);
 	}
 
@@ -53,7 +53,7 @@ public class MagnitudeView extends MisAngleView
 	public String getSummaryText(int x, int y)
 	{
 	
-		MisAnglePoint point = misModel.get(x, y);
+		MisAngle point = misModel.get(x, y).getData();
 		
 		String grain = formatGrainValue(point.grain);
 		String result = "Grain :" + grain;
@@ -116,7 +116,7 @@ public class MagnitudeView extends MisAngleView
 		
 		for (int i = 0; i < misModel.size(); i++)
 		{
-			int grain = misModel.get(i).grain;
+			int grain = misModel.get(i).getData().grain;
 			double v;
 			if (grain == -1)
 			{

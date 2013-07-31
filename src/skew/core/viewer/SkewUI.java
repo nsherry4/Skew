@@ -86,6 +86,7 @@ public class SkewUI extends JPanel {
 	float zoom = 1;
 	
 	public ToolbarImageButton savetext;
+	private ToolbarImageButton save;
 	
 	public JLabel coords;
 	
@@ -165,7 +166,7 @@ public class SkewUI extends JPanel {
 				boolean multiselect = e.getModifiersEx() == InputEvent.CTRL_DOWN_MASK;
 				boolean doubleclick = e.getClickCount() > 1;
 				
-				controller.handleClick(x, y, multiselect, doubleclick);
+				controller.actionSelection(x, y, multiselect, doubleclick);
 				
 			}
 		});
@@ -272,13 +273,13 @@ public class SkewUI extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				
 				
-				ISkewDataset dataset = SkewController.actionOpenData(parent, controller.data.path());
+				ISkewDataset dataset = SkewController.loadDataset(parent, controller.data.path());
 				if (dataset != null) {
 					//create new UI
 					SkewUI ui = new SkewUI(parent);
 					ui.dummy = false;
 					parent.addTab(ui);
-					ui.controller.setData(dataset);
+					ui.controller.actionSetDataset(dataset);
 					parent.tabs.setActiveTab(ui);
 					
 					//remove this one, if a placeholder
@@ -299,7 +300,7 @@ public class SkewUI extends JPanel {
 			}
 		});
 		
-		ToolbarImageButton save = new ToolbarImageButton(StockIcon.DEVICE_CAMERA, "Save Picture");
+		save = new ToolbarImageButton(StockIcon.DEVICE_CAMERA, "Save Picture");
 		save.addActionListener(new ActionListener() {
 			
 			@Override
@@ -309,6 +310,7 @@ public class SkewUI extends JPanel {
 
 			}
 		});
+		save.setVisible(false);
 		
 		
 		viewSelector = new JComboBox<MapView>(new Vector<MapView>(controller.data.datasource().getViews()));
@@ -318,7 +320,7 @@ public class SkewUI extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
-				controller.actionViewChange();
+				controller.actionViewChange((MapView)viewSelector.getSelectedItem());
 			}
 		});
 		
@@ -400,9 +402,7 @@ public class SkewUI extends JPanel {
 				@Override
 				public void actionPerformed(ActionEvent arg0)
 				{
-					controller.subView = (MapSubView) subViewSelector.getSelectedItem();
-					setScaleSpinner();
-					settingsChanged(SettingType.SUBVIEW);
+					controller.actionSubviewChange((MapSubView) subViewSelector.getSelectedItem());
 				}
 			});
 			
@@ -440,7 +440,7 @@ public class SkewUI extends JPanel {
 			
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				settingsChanged(SettingType.SCALE);
+				controller.actionScaleChanged();
 			}
 		});
 		
@@ -462,12 +462,24 @@ public class SkewUI extends JPanel {
 	
 	public void settingsChanged(SettingType type)
 	{
-		if (type != SettingType.SELECTION) controller.viewMode.setUpdateRequired();
-		
-		if (type == SettingType.DATA)
-		{
-			viewsUpdated();
-			controller.viewMode = controller.data.datasource().getViews().get(0);
+				
+		switch (type) {
+			
+			case DATA:
+				parent.setTabTitle(this, controller.data.name());
+				break;
+				
+			case VIEW:
+				viewsUpdated();
+				savetext.setVisible(controller.viewMode.canWriteData());
+				save.setVisible(true);
+				break;
+	
+			case SUBVIEW:
+				setScaleSpinner();
+				
+			default:
+				break;
 		}
 		
 		setZoom(zoom);
@@ -488,11 +500,13 @@ public class SkewUI extends JPanel {
 			viewSelector.setVisible(false);
 			zoomslider.setVisible(true);
 			graphics.setBackground(Color.white);
+			setSubViewUI();
 		} else {
 		
 			viewSelector.setVisible(true);
 			zoomslider.setVisible(true);
 			graphics.setBackground(Color.white);
+			setSubViewUI();
 			for (MapView view : controller.data.datasource().getViews())
 			{
 				viewSelector.addItem(view);

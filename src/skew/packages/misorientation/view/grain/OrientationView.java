@@ -13,10 +13,11 @@ import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.map.painters.RasterColorMapPainter;
 import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.DirectionVector;
+import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
+import skew.models.Misorientation.MisAngle;
 import skew.models.Misorientation.MisAngleGrid;
-import skew.models.Misorientation.MisAnglePoint;
 import skew.packages.misorientation.subview.OrientationSubView;
 import ca.sciencestudio.process.xrd.util.Orientation;
 import fava.functionable.FList;
@@ -26,9 +27,9 @@ public class OrientationView extends MapView
 {
 
 	protected RasterColorMapPainter orientationPainter;
-	private MisAngleGrid<? extends MisAnglePoint> model;
+	private MisAngleGrid model;
 	
-	public OrientationView(MisAngleGrid<? extends MisAnglePoint> model)
+	public OrientationView(MisAngleGrid model)
 	{
 		super();
 		this.model = model;
@@ -99,15 +100,15 @@ public class OrientationView extends MapView
 		for (int i = 0; i < model.getWidth() * model.getHeight(); i++){ pixelColours.add(backgroundGray); }
 		
 		Color c;
-		for (MisAnglePoint point : model.getBackingList())
+		for (ISkewPoint<MisAngle> point : model.getBackingList())
 		{
-			if (!point.orientation.getHasOMData())
+			if (!point.getData().orientation.getHasOMData())
 			{
 				c = backgroundGray;
 			}
 			else
 			{
-				DirectionVector dv = point.orientationVectors.get(subview.getIndex());
+				DirectionVector dv = point.getData().orientationVectors.get(subview.getIndex());
 				c = Orientation.directionToColor(dv, 1f);
 			}
 			pixelColours.set(point.getIndex(), c);
@@ -121,23 +122,24 @@ public class OrientationView extends MapView
 	{		
 		writer.write("index, x, y, distance [001], direction [001], distance [110], direction [110], distance [111], direction [111]\n");
 		
-		for (MisAnglePoint point : model.getBackingList())
+		for (ISkewPoint<MisAngle> point : model.getBackingList())
 		{
-			if (point.orientationVectors == null)
+			MisAngle data = point.getData();
+			if (data.orientationVectors == null)
 			{
 				writer.write(point.getIndex() + ", " + point.getX() + ", " + point.getY() + ", " + "-, -, -, -, -, -\n");
 			}
 			else
 			{
-				DirectionVector dv1 = point.orientationVectors.get(0);
-				DirectionVector dv2 = point.orientationVectors.get(1);
-				DirectionVector dv3 = point.orientationVectors.get(2);
+				DirectionVector dv1 = data.orientationVectors.get(0);
+				DirectionVector dv2 = data.orientationVectors.get(1);
+				DirectionVector dv3 = data.orientationVectors.get(2);
 				
 				writer.write(
 						point.getIndex() + ", " + 
 						point.getX() + ", " + 
 						point.getY() + ", " +
-						point.grain + ", " + 
+						data.grain + ", " + 
 						
 						fmt(dv1.getDistance()) + ", " + 
 						fmt(dv1.getDirection()) + ", " +
