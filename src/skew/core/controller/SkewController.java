@@ -36,12 +36,12 @@ import swidget.icons.IconSize;
 import swidget.icons.StockIcon;
 import autodialog.controller.SimpleAutoDialogController;
 import autodialog.model.Parameter;
-import autodialog.model.Parameter.ValueType;
 import autodialog.view.AutoDialog;
+import autodialog.view.editors.IntegerEditor;
 
 import com.ezware.dialog.task.TaskDialogs;
-import commonenvironment.AbstractFile;
 
+import commonenvironment.AbstractFile;
 import fava.functionable.FList;
 
 public class SkewController
@@ -261,8 +261,8 @@ public class SkewController
 		
 		try {
 			
-			Parameter paramWidth = new Parameter("Width", ValueType.INTEGER, 1);
-			Parameter paramHeight = new Parameter("Height", ValueType.INTEGER, 1);
+			Parameter paramWidth = new Parameter("Width", new IntegerEditor(), 1);
+			Parameter paramHeight = new Parameter("Height", new IntegerEditor(), 1);
 			
 			List<Parameter> params = new FList<>(paramWidth, paramHeight);
 			params.addAll(ds.userQueries());

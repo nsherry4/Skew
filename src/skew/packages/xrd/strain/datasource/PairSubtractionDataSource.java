@@ -19,7 +19,7 @@ import skew.packages.misorientation.datasource.calculation.misorientation.IndexF
 import skew.packages.xrd.strain.XRDStrainUtil;
 import skew.packages.xrd.strain.view.StrainView;
 import autodialog.model.Parameter;
-import autodialog.model.Parameter.ValueType;
+import autodialog.view.editors.IntegerEditor;
 import fava.functionable.FList;
 import fava.functionable.FStringInput;
 import fava.signatures.FnEach;
@@ -28,8 +28,8 @@ import fava.signatures.FnGet;
 public class PairSubtractionDataSource extends BasicDataSource
 {
 
-	private Parameter hShift = new Parameter("Horizontal Shift", ValueType.INTEGER, 0);
-	private Parameter vShift = new Parameter("Vertical Shift", ValueType.INTEGER, 0);
+	private Parameter hShift = new Parameter("Horizontal Shift", new IntegerEditor(), 0);
+	private Parameter vShift = new Parameter("Vertical Shift", new IntegerEditor(), 0);
 	
 	private static String ext = "pair";
 	private int startNum = 1;

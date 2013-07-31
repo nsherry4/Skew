@@ -625,16 +625,5 @@ public class SkewUI extends JPanel {
 		return -1;
 	}
 	
-	
-	public static void main(String[] args) {
-		
-		Swidget.initialize();
-		IconFactory.customPath = "/skew/core/icons/";
-		
-		new SkewTabs();
-		
-	}
-
-	
 }
 
