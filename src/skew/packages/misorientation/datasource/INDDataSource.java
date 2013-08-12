@@ -188,7 +188,7 @@ public class INDDataSource extends MisorientationDataSource
 	}
 
 	@Override
-	public List<Parameter> userQueries() {
+	public List<Parameter<?>> userQueries() {
 		return new FList<>();
 	}
 	

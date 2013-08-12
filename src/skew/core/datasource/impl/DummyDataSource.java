@@ -53,7 +53,7 @@ public class DummyDataSource implements IDataSource
 	}
 
 	@Override
-	public List<Parameter> userQueries() {
+	public List<Parameter<?>> userQueries() {
 		return new FList<>();
 	}
 

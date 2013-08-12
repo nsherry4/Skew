@@ -5,11 +5,11 @@ import java.util.List;
 
 import plural.executor.DummyExecutor;
 import plural.executor.ExecutorSet;
+import plural.executor.PluralExecutor;
 import scitypes.Coord;
 import skew.core.model.ISkewDataset;
 import skew.core.model.ISkewGrid;
 import skew.core.model.impl.SkewDataset;
-
 import commonenvironment.IOOperations;
 
 public abstract class BasicDataSource extends DataSource
@@ -54,7 +54,7 @@ public abstract class BasicDataSource extends DataSource
 			protected ISkewDataset execute()
 			{
 				exec.advanceState();
-				List<ISkewGrid<?>> grids = load(filenames, mapsize);
+				List<ISkewGrid<?>> grids = load(filenames, mapsize, exec);
 				exec.advanceState();
 				
 				return new SkewDataset(
@@ -70,7 +70,7 @@ public abstract class BasicDataSource extends DataSource
 		return execset;
 	}
 	
-	public abstract List<ISkewGrid<?>> load(List<String> filenames, Coord<Integer> mapsize);
+	public abstract List<ISkewGrid<?>> load(List<String> filenames, Coord<Integer> mapsize, PluralExecutor executor);
 
 
 }

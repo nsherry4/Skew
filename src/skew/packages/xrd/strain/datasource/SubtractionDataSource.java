@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
+import plural.executor.PluralExecutor;
 import scitypes.Coord;
 import skew.core.datasource.Acceptance;
 import skew.core.datasource.impl.BasicDataSource;
@@ -54,8 +55,11 @@ public class SubtractionDataSource extends BasicDataSource
 	}
 
 	@Override
-	public List<ISkewGrid<?>> load(final List<String> filenames, final Coord<Integer> mapsize) {
+	public List<ISkewGrid<?>> load(final List<String> filenames, final Coord<Integer> mapsize, final PluralExecutor executor) {
 
+		executor.setStalling(false);
+		executor.setWorkUnits(filenames.size());
+		
 		final List<ISkewPoint<IXRDStrain>> points = DataSource.getEmptyPoints(mapsize, new FnGet<IXRDStrain>() {
 
 			@Override
@@ -63,7 +67,8 @@ public class SubtractionDataSource extends BasicDataSource
 				return new XRDStrain();
 			}
 		});
-						
+		
+		
 		FList.wrap(filenames).each(new FnEach<String>() {
 
 			@Override
@@ -90,6 +95,8 @@ public class SubtractionDataSource extends BasicDataSource
 					e.printStackTrace();
 				}
 				
+				executor.workUnitCompleted();
+				
 			}
 		});
 		
@@ -104,7 +111,7 @@ public class SubtractionDataSource extends BasicDataSource
 	}
 	
 	@Override
-	public List<Parameter> userQueries() {
+	public List<Parameter<?>> userQueries() {
 		return new FList<>();
 	}
 	

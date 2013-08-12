@@ -37,6 +37,7 @@ import swidget.icons.StockIcon;
 import autodialog.controller.SimpleAutoDialogController;
 import autodialog.model.Parameter;
 import autodialog.view.AutoDialog;
+import autodialog.view.AutoDialog.AutoDialogButtons;
 import autodialog.view.editors.IntegerEditor;
 
 import com.ezware.dialog.task.TaskDialogs;
@@ -261,15 +262,17 @@ public class SkewController
 		
 		try {
 			
-			Parameter paramWidth = new Parameter("Width", new IntegerEditor(), 1);
-			Parameter paramHeight = new Parameter("Height", new IntegerEditor(), 1);
+			Parameter<Integer> paramWidth = new Parameter<>("Width", new IntegerEditor(), 1);
+			Parameter<Integer> paramHeight = new Parameter<>("Height", new IntegerEditor(), 1);
 			
-			List<Parameter> params = new FList<>(paramWidth, paramHeight);
+			List<Parameter<?>> params = new FList<>();
+			params.add(paramWidth);
+			params.add(paramHeight);
 			params.addAll(ds.userQueries());
 			
 			SimpleAutoDialogController dialogController = new SimpleAutoDialogController(params);
 			
-			AutoDialog dialog = new AutoDialog(dialogController, window);
+			AutoDialog dialog = new AutoDialog(dialogController, AutoDialogButtons.OK_CANCEL, window);
 			dialog.setHelpTitle("Additional Dataset Information");
 			dialog.setHelpMessage(ds.userQueryInformation());
 			dialog.setModal(true);
@@ -279,7 +282,7 @@ public class SkewController
 			//User Cancel
 			if (!dialogController.getDialogAccepted()) return null;
 			
-			Coord<Integer> mapSize = new Coord<>(paramWidth.intValue(), paramHeight.intValue());
+			Coord<Integer> mapSize = new Coord<>((Integer)paramWidth.getValue(), (Integer)paramHeight.getValue());
 			
 			
 			ExecutorSet<ISkewDataset> execset = ds.calculate(filenames, mapSize);

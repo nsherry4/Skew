@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
+import plural.executor.PluralExecutor;
 import scitypes.Coord;
 import skew.core.datasource.Acceptance;
 import skew.core.datasource.impl.BasicDataSource;
@@ -28,8 +29,8 @@ import fava.signatures.FnGet;
 public class PairSubtractionDataSource extends BasicDataSource
 {
 
-	private Parameter hShift = new Parameter("Horizontal Shift", new IntegerEditor(), 0);
-	private Parameter vShift = new Parameter("Vertical Shift", new IntegerEditor(), 0);
+	private Parameter<Integer> hShift = new Parameter<>("Horizontal Shift", new IntegerEditor(), 0);
+	private Parameter<Integer> vShift = new Parameter<>("Vertical Shift", new IntegerEditor(), 0);
 	
 	private static String ext = "pair";
 	private int startNum = 1;
@@ -59,8 +60,12 @@ public class PairSubtractionDataSource extends BasicDataSource
 	}
 
 	@Override
-	public List<ISkewGrid<?>> load(final List<String> filenames, final Coord<Integer> mapsize) {
+	public List<ISkewGrid<?>> load(final List<String> filenames, final Coord<Integer> mapsize, final PluralExecutor executor) {
 
+		executor.setStalling(false);
+		executor.setWorkUnits(filenames.size());
+		
+		
 		final List<ISkewPoint<IXRDStrain>> beforeList = DataSource.getEmptyPoints(mapsize, new FnGet<IXRDStrain>() {
 
 			@Override
@@ -120,6 +125,8 @@ public class PairSubtractionDataSource extends BasicDataSource
 					FList<String> fileParts = FStringInput.tokens(new File(filename), "\n\n").toSink();					
 					readFilePart(beforeList.get(index), fileParts.get(0).trim());
 					readFilePart(afterList.get(index), fileParts.get(1).trim());
+					
+					executor.workUnitCompleted();
 
 				} catch (FileNotFoundException e) {
 					// TODO Auto-generated catch block
@@ -134,8 +141,8 @@ public class PairSubtractionDataSource extends BasicDataSource
 		ISkewGrid<IXRDStrain> afterModel = new SkewGrid<IXRDStrain>(mapsize.y, mapsize.x, afterList);
 		ISkewGrid<IXRDStrain> subtractModel = new SkewGrid<IXRDStrain>(mapsize.y, mapsize.x, subtractList);
 
-		int tx = hShift.intValue();
-		int ty = vShift.intValue();
+		int tx = (Integer)hShift.getValue();
+		int ty = (Integer)vShift.getValue();
 		
 		//After = After - Before
 		for (int x = 0; x < mapsize.x; x++)	{
@@ -172,14 +179,17 @@ public class PairSubtractionDataSource extends BasicDataSource
 	
 	private void subtractStrain(IXRDStrain difference, IXRDStrain before, IXRDStrain after)
 	{
-		for (int i = 0; i < 6; i++){
+		for (int i = 0; i < 7; i++){
 			difference.strain()[i] = after.strain()[i] - before.strain()[i];
 		}
 	}
 	
 	@Override
-	public List<Parameter> userQueries() {
-		return new FList<>(hShift, vShift);
+	public List<Parameter<?>> userQueries() {
+		List<Parameter<?>> params = new FList<>();
+		params.add(hShift);
+		params.add(vShift);
+		return params;
 	}
 	
 	@Override

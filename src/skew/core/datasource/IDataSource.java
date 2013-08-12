@@ -19,7 +19,7 @@ public interface IDataSource
 	
 	public Acceptance accepts(List<String> filenames);
 	
-	public List<Parameter> userQueries();
+	public List<Parameter<?>> userQueries();
 	public String userQueryInformation();
 	
 	public List<MapView> getViews();	

@@ -209,7 +209,7 @@ public class SEQDataSource extends MisorientationDataSource implements IDataSour
 	}
 	
 	@Override
-	public List<Parameter> userQueries() {
+	public List<Parameter<?>> userQueries() {
 		return new FList<>();
 	}
 	

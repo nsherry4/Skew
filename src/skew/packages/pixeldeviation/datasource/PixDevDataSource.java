@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
+import plural.executor.PluralExecutor;
 import scitypes.Coord;
 import skew.core.datasource.Acceptance;
 import skew.core.datasource.impl.BasicDataSource;
@@ -45,7 +46,7 @@ public class PixDevDataSource extends BasicDataSource
 	}
 
 	@Override
-	public List<ISkewGrid<?>> load(List<String> filenames, Coord<Integer> mapsize)
+	public List<ISkewGrid<?>> load(List<String> filenames, Coord<Integer> mapsize, final PluralExecutor executor)
 	{
 		//tokenize the file
 		String filename = filenames.get(0);
@@ -60,10 +61,16 @@ public class PixDevDataSource extends BasicDataSource
 			return null;
 		}
 		
+		executor.setStalling(false);
+		executor.setWorkUnits(mapsize.x * mapsize.y);
+		
 		//convert to list of floats
 		final List<ISkewPoint<Float>> values = new ArrayList<ISkewPoint<Float>>();
 		for (int y = 0; y < mapsize.y; y++) {
 			for (int x = 0; x < mapsize.x; x++) {
+				
+				executor.workUnitCompleted();
+				
 				int index = x + y*mapsize.x;
 				if (index >= tokens.size()) 
 				{
@@ -72,6 +79,7 @@ public class PixDevDataSource extends BasicDataSource
 				}
 				float val = Float.parseFloat(tokens.get(index));
 				values.add(new SkewPoint<Float>(x, y, index, val));
+				
 			}
 		}
 		
@@ -82,7 +90,7 @@ public class PixDevDataSource extends BasicDataSource
 	}
 	
 	@Override
-	public List<Parameter> userQueries() {
+	public List<Parameter<?>> userQueries() {
 		return new FList<>();
 	}
 	

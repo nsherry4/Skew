@@ -139,7 +139,7 @@ public class EBSDDataSource extends MisorientationDataSource
 	}
 
 	@Override
-	public List<Parameter> userQueries() {
+	public List<Parameter<?>> userQueries() {
 		return new FList<>();
 	}
 
