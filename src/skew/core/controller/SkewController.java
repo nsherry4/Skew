@@ -262,8 +262,9 @@ public class SkewController
 		
 		try {
 			
-			Parameter<Integer> paramWidth = new Parameter<>("Width", new IntegerEditor(), 1);
-			Parameter<Integer> paramHeight = new Parameter<>("Height", new IntegerEditor(), 1);
+			String g = "Map Dimensions";
+			Parameter<Integer> paramWidth = new Parameter<>("Width", new IntegerEditor(), 1, g);
+			Parameter<Integer> paramHeight = new Parameter<>("Height", new IntegerEditor(), 1, g);
 			
 			List<Parameter<?>> params = new FList<>();
 			params.add(paramWidth);

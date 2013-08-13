@@ -69,7 +69,8 @@ public class StrainView extends MapView
 				"ZZ: " + fmt(data.strain()[2]) + ", " +
 				"XY: " + fmt(data.strain()[3]) + ", " +
 				"XZ: " + fmt(data.strain()[4]) + ", " +
-				"YZ: " + fmt(data.strain()[5]) + ", ";
+				"YZ: " + fmt(data.strain()[5]) + ", " +
+				"VM: " + fmt(data.strain()[6]);
 				
 	}
 
@@ -116,20 +117,34 @@ public class StrainView extends MapView
 	{
 		List<Pair<Float, String>> axisMarkings = new FList<Pair<Float,String>>();
 		
-		axisMarkings.add(  new Pair<Float, String>(0f, "" + SigDigits.roundFloatTo((float)(-maxValue), 3))  );
-		axisMarkings.add(  new Pair<Float, String>(0.25f, "" + SigDigits.roundFloatTo((float)(-maxValue * 0.5), 3))  );
-		axisMarkings.add(  new Pair<Float, String>(0.5f, "" + 0)  );
-		axisMarkings.add(  new Pair<Float, String>(0.75f, "" + SigDigits.roundFloatTo((float)(maxValue * 0.5), 3))  );
-		axisMarkings.add(  new Pair<Float, String>(1f, "" + SigDigits.roundFloatTo((float)maxValue, 3))  );
+		String p1, p2, p3, p4, p5;
+		
+		if (subview.getIndex() < 6)
+		{
+			p1 = SigDigits.roundFloatTo((float)(-maxValue), 3, true);
+			p2 = SigDigits.roundFloatTo((float)(-maxValue * 0.5), 3, true);
+			p3 = "0";
+			p4 = SigDigits.roundFloatTo((float)(maxValue * 0.5), 3, true);
+			p5 = SigDigits.roundFloatTo((float)maxValue, 3, true);
+		} else {
+			//von mises
+			p1 = "0";
+			p2 = SigDigits.roundFloatTo((float)(maxValue * 0.25), 3, true);
+			p3 = SigDigits.roundFloatTo((float)(maxValue * 0.5), 3, true);
+			p4 = SigDigits.roundFloatTo((float)(maxValue * 0.75), 3, true);
+			p5 = SigDigits.roundFloatTo((float)maxValue, 3, true);
+		}
+		
+		
+		axisMarkings.add(new Pair<Float, String>(0f, p1));
+		axisMarkings.add(new Pair<Float, String>(0.25f, p2));
+		axisMarkings.add(new Pair<Float, String>(0.5f, p3));
+		axisMarkings.add(new Pair<Float, String>(0.75f, p4));
+		axisMarkings.add(new Pair<Float, String>(1f, p5));
 		
 		
 		AxisPainter spectrum = new SpectrumCoordsAxisPainter(
-				false, 
-				null, 
-				null, 
-				null, 
-				null, 
-				null, 
+				false, null, null, null, null, null,  //coordinate settings
 				true, 
 				20, 
 				256, 

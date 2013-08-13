@@ -69,7 +69,8 @@ public class StressView extends MapView
 				"ZZ: " + fmt(data.stress()[2]) + ", " +
 				"XY: " + fmt(data.stress()[3]) + ", " +
 				"XZ: " + fmt(data.stress()[4]) + ", " +
-				"YZ: " + fmt(data.stress()[5]) + ", ";
+				"YZ: " + fmt(data.stress()[5]) + ", " +
+				"VM: " + fmt(data.strain()[6]);
 				
 	}
 
@@ -116,11 +117,30 @@ public class StressView extends MapView
 	{
 		List<Pair<Float, String>> axisMarkings = new FList<Pair<Float,String>>();
 		
-		axisMarkings.add(  new Pair<Float, String>(0f, "" + SigDigits.roundFloatTo((float)(-maxValue), 3))  );
-		axisMarkings.add(  new Pair<Float, String>(0.25f, "" + SigDigits.roundFloatTo((float)(-maxValue * 0.5), 3))  );
-		axisMarkings.add(  new Pair<Float, String>(0.5f, "" + 0)  );
-		axisMarkings.add(  new Pair<Float, String>(0.75f, "" + SigDigits.roundFloatTo((float)(maxValue * 0.5), 3))  );
-		axisMarkings.add(  new Pair<Float, String>(1f, "" + SigDigits.roundFloatTo((float)maxValue, 3))  );
+		String p1, p2, p3, p4, p5;
+		
+		if (subview.getIndex() < 6)
+		{
+			p1 = SigDigits.roundFloatTo((float)(-maxValue), 3);
+			p2 = SigDigits.roundFloatTo((float)(-maxValue * 0.5), 3);
+			p3 = "0";
+			p4 = SigDigits.roundFloatTo((float)(maxValue * 0.5), 3);
+			p5 = SigDigits.roundFloatTo((float)maxValue, 3);
+		} else {
+			//von mises
+			p1 = "0";
+			p2 = SigDigits.roundFloatTo((float)(maxValue * 0.25), 3);
+			p3 = SigDigits.roundFloatTo((float)(maxValue * 0.5), 3);
+			p4 = SigDigits.roundFloatTo((float)(maxValue * 0.75), 3);
+			p5 = SigDigits.roundFloatTo((float)maxValue, 3);
+		}
+		
+		
+		axisMarkings.add(new Pair<Float, String>(0f, p1));
+		axisMarkings.add(new Pair<Float, String>(0.25f, p2));
+		axisMarkings.add(new Pair<Float, String>(0.5f, p3));
+		axisMarkings.add(new Pair<Float, String>(0.75f, p4));
+		axisMarkings.add(new Pair<Float, String>(1f, p5));
 		
 		
 		AxisPainter spectrum = new SpectrumCoordsAxisPainter(

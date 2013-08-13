@@ -58,7 +58,7 @@ public abstract class BasicDataSource extends DataSource
 				exec.advanceState();
 				
 				return new SkewDataset(
-						new File(IOOperations.getCommonFileName(filenames)).getName(), 
+						new File(getDatasetTitle(filenames)).getName(), 
 						new File(filenames.get(0)).getParent(), 
 						grids,
 						BasicDataSource.this
@@ -68,6 +68,11 @@ public abstract class BasicDataSource extends DataSource
 		execset.addExecutor(exec, "Loading Data...");
 		
 		return execset;
+	}
+	
+	protected String getDatasetTitle(List<String> filenames)
+	{
+		return IOOperations.getCommonFileName(filenames);
 	}
 	
 	public abstract List<ISkewGrid<?>> load(List<String> filenames, Coord<Integer> mapsize, PluralExecutor executor);

@@ -28,9 +28,9 @@ import fava.signatures.FnGet;
 
 public class PairSubtractionDataSource extends BasicDataSource
 {
-
-	private Parameter<Integer> hShift = new Parameter<>("Horizontal Shift", new IntegerEditor(), 0);
-	private Parameter<Integer> vShift = new Parameter<>("Vertical Shift", new IntegerEditor(), 0);
+	String g = "Overlay";
+	private Parameter<Integer> hShift = new Parameter<>("Horizontal Shift", new IntegerEditor(), 0, g);
+	private Parameter<Integer> vShift = new Parameter<>("Vertical Shift", new IntegerEditor(), 0, g);
 	
 	private static String ext = "pair";
 	private int startNum = 1;
@@ -111,7 +111,7 @@ public class PairSubtractionDataSource extends BasicDataSource
 				data.strain()[3] = Double.parseDouble(contents.get(4));	//YY
 				data.strain()[4] = Double.parseDouble(contents.get(5));	//YZ
 				data.strain()[5] = Double.parseDouble(contents.get(8));	//ZZ
-				data.strain()[6] = XRDStrainUtil.vonMises(data.strain());
+				//don't do von-mises here, we have to do it after the subtraction
 				
 				point.setValid(true);
 			}
@@ -141,6 +141,7 @@ public class PairSubtractionDataSource extends BasicDataSource
 		ISkewGrid<IXRDStrain> afterModel = new SkewGrid<IXRDStrain>(mapsize.y, mapsize.x, afterList);
 		ISkewGrid<IXRDStrain> subtractModel = new SkewGrid<IXRDStrain>(mapsize.y, mapsize.x, subtractList);
 
+		
 		int tx = (Integer)hShift.getValue();
 		int ty = (Integer)vShift.getValue();
 		
@@ -165,6 +166,7 @@ public class PairSubtractionDataSource extends BasicDataSource
 				
 				//perform the subtraction, storing the result in differencePoint, and set that point valid
 				subtractStrain(differencePoint.getData(), beforePoint.getData(), afterPoint.getData());
+				differencePoint.getData().strain()[6] = XRDStrainUtil.vonMises(differencePoint.getData().strain());
 				differencePoint.setValid(true);
 				
 			}
@@ -182,6 +184,12 @@ public class PairSubtractionDataSource extends BasicDataSource
 		for (int i = 0; i < 7; i++){
 			difference.strain()[i] = after.strain()[i] - before.strain()[i];
 		}
+	}
+	
+	@Override //Manual
+	protected String getDatasetTitle(List<String> filenames)
+	{
+		return super.getDatasetTitle(filenames) + " (" + hShift.getValue().toString() + ", " + vShift.getValue().toString() + ")";  
 	}
 	
 	@Override
