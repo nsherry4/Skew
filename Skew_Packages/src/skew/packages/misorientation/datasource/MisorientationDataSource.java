@@ -19,7 +19,7 @@ public abstract class MisorientationDataSource extends DataSource
 	protected MisAngleGrid misModel;
 	public abstract MapExecutor<String, String> loadPoints(final MisAngleGrid data, List<String> filenames);
 	
-	public ExecutorSet<ISkewDataset> calculate(List<String> filenames, Coord<Integer> mapsize)
+	public ExecutorSet<ISkewDataset> loadDataset(List<String> filenames, Coord<Integer> mapsize)
 	{
 		return Calculation.calculate(filenames, this, mapsize);
 	}

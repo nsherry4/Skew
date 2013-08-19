@@ -86,6 +86,7 @@ public class SkewUI extends JPanel {
 	float zoom = 1;
 	
 	public ToolbarImageButton savetext;
+	public ToolbarImageButton parameters;
 	private ToolbarImageButton save;
 	
 	public JLabel coords;
@@ -334,6 +335,17 @@ public class SkewUI extends JPanel {
 			}
 		});
 		savetext.setVisible(false);
+
+		parameters = new ToolbarImageButton(StockIcon.MISC_PROPERTIES, "Dataset Options");
+		parameters.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0)
+			{
+				controller.actionDatasetOptions();
+			}
+		});
+		parameters.setVisible(false);
 		
 		
 		ToolbarImageButton about = new ToolbarImageButton(StockIcon.MISC_ABOUT, "About");
@@ -371,6 +383,7 @@ public class SkewUI extends JPanel {
 
 		toolbar.add(viewSelector);	
 		toolbar.add(savetext);
+		toolbar.add(parameters);
 		
 		toolbar.add(Box.createHorizontalGlue());
 		
@@ -466,6 +479,7 @@ public class SkewUI extends JPanel {
 			
 			case DATA:
 				parent.setTabTitle(this, controller.data.name());
+				parameters.setVisible(controller.data.datasource().getRuntimeParameters().size() > 0);
 				break;
 				
 			case VIEW:

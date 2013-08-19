@@ -33,11 +33,12 @@ import skew.core.viewer.modes.views.MapView;
 import swidget.dialogues.fileio.SwidgetIO;
 import swidget.icons.IconSize;
 import swidget.icons.StockIcon;
-import autodialog.controller.SimpleAutoDialogController;
+import autodialog.controller.SimpleADController;
 import autodialog.model.Parameter;
 import autodialog.view.AutoDialog;
 import autodialog.view.AutoDialog.AutoDialogButtons;
 import autodialog.view.editors.IntegerEditor;
+import autodialog.view.layouts.FramesADLayout;
 
 import com.ezware.dialog.task.TaskDialogs;
 
@@ -70,6 +71,24 @@ public class SkewController
 	
 	
 	
+	
+	public void actionDatasetOptions()
+	{
+		AutoDialog options = new AutoDialog(new SimpleADController(data.datasource().getRuntimeParameters()){
+			
+			@Override
+			public void parameterUpdated(Parameter<?> param) {
+				data.datasource().recalculate();
+				event(SettingType.PARAMETER);
+			}
+			
+		}, AutoDialogButtons.CLOSE, window);
+
+		
+		options.setTitle("Dataset Options");
+		options.initialize();
+		
+	}
 
 	public void actionScaleChanged()
 	{
@@ -274,24 +293,24 @@ public class SkewController
 			List<Parameter<?>> params = new FList<>();
 			params.add(paramWidth);
 			params.add(paramHeight);
-			params.addAll(ds.userQueries());
+			params.addAll(ds.getLoadParameters());
 			
-			SimpleAutoDialogController dialogController = new SimpleAutoDialogController(params);
+			SimpleADController dialogController = new SimpleADController(params);
 			
 			AutoDialog dialog = new AutoDialog(dialogController, AutoDialogButtons.OK_CANCEL, window);
 			dialog.setHelpTitle("Additional Dataset Information");
-			dialog.setHelpMessage(ds.userQueryInformation());
+			dialog.setHelpMessage(ds.getLoadParametersInformation());
 			dialog.setModal(true);
 			dialog.setTitle("Dataset Parameters");
-			dialog.initialize();
-			
-			//User Cancel
-			if (!dialogController.getDialogAccepted()) return null;
+			dialog.initialize(new FramesADLayout());
+
+			//User Cancel/Close
+			if (!dialog.okSelected()) return null;
 			
 			Coord<Integer> mapSize = new Coord<>((Integer)paramWidth.getValue(), (Integer)paramHeight.getValue());
 			
 			
-			ExecutorSet<ISkewDataset> execset = ds.calculate(filenames, mapSize);
+			ExecutorSet<ISkewDataset> execset = ds.loadDataset(filenames, mapSize);
 			new ExecutorSetView(window, execset);
 			return execset.getResult();					
 			

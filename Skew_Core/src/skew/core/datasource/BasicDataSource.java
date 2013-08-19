@@ -44,7 +44,7 @@ public abstract class BasicDataSource extends DataSource
 
 
 	@Override
-	public final ExecutorSet<ISkewDataset> calculate(final List<String> filenames, final Coord<Integer> mapsize)
+	public final ExecutorSet<ISkewDataset> loadDataset(final List<String> filenames, final Coord<Integer> mapsize)
 	{
 		final DummyExecutor exec = new DummyExecutor(true);
 		

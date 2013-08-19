@@ -201,7 +201,7 @@ public class SEQDataSource extends MisorientationDataSource implements IDataSour
 	}
 	
 	@Override
-	public ExecutorSet<ISkewDataset> calculate(List<String> filenames, Coord<Integer> mapsize) {
+	public ExecutorSet<ISkewDataset> loadDataset(List<String> filenames, Coord<Integer> mapsize) {
 		
 		createEmptyModels(mapsize);
 		return Calculation.calculate(filenames, this, mapsize);
@@ -209,14 +209,22 @@ public class SEQDataSource extends MisorientationDataSource implements IDataSour
 	}
 	
 	@Override
-	public List<Parameter<?>> userQueries() {
+	public List<Parameter<?>> getLoadParameters() {
 		return new FList<>();
 	}
 	
 	@Override
-	public String userQueryInformation() {
+	public String getLoadParametersInformation() {
 		return null;
 	}
+
+	@Override
+	public List<Parameter<?>> getRuntimeParameters() {
+		return new FList<>();
+	}
+
+	@Override
+	public void recalculate() {}
 
 
 }

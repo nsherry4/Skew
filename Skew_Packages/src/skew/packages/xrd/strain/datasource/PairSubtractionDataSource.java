@@ -36,6 +36,12 @@ public class PairSubtractionDataSource extends BasicDataSource
 	private int startNum = 1;
 	private List<MapView> views;
 	
+	private ISkewGrid<IXRDStrain> beforeModel;
+	private ISkewGrid<IXRDStrain> afterModel;
+	private ISkewGrid<IXRDStrain> subtractModel;
+	
+	private Coord<Integer> dimensions;
+	
 	public PairSubtractionDataSource() {
 		super(ext, "Strain Difference", "Strain Difference");
 		views = new ArrayList<MapView>();
@@ -62,11 +68,13 @@ public class PairSubtractionDataSource extends BasicDataSource
 	@Override
 	public List<ISkewGrid<?>> load(final List<String> filenames, final Coord<Integer> mapsize, final PluralExecutor executor) {
 
+		dimensions = mapsize;
+		
 		executor.setStalling(false);
 		executor.setWorkUnits(filenames.size());
 		
 		
-		final List<ISkewPoint<IXRDStrain>> beforeList = DataSource.getEmptyPoints(mapsize, new FnGet<IXRDStrain>() {
+		final List<ISkewPoint<IXRDStrain>> beforeList = DataSource.getEmptyPoints(dimensions, new FnGet<IXRDStrain>() {
 
 			@Override
 			public IXRDStrain f() {
@@ -74,7 +82,7 @@ public class PairSubtractionDataSource extends BasicDataSource
 			}
 		});
 		
-		final List<ISkewPoint<IXRDStrain>> afterList = DataSource.getEmptyPoints(mapsize, new FnGet<IXRDStrain>() {
+		final List<ISkewPoint<IXRDStrain>> afterList = DataSource.getEmptyPoints(dimensions, new FnGet<IXRDStrain>() {
 
 			@Override
 			public IXRDStrain f() {
@@ -82,7 +90,7 @@ public class PairSubtractionDataSource extends BasicDataSource
 			}
 		});
 		
-		final List<ISkewPoint<IXRDStrain>> subtractList = DataSource.getEmptyPoints(mapsize, new FnGet<IXRDStrain>() {
+		final List<ISkewPoint<IXRDStrain>> subtractList = DataSource.getEmptyPoints(dimensions, new FnGet<IXRDStrain>() {
 
 			@Override
 			public IXRDStrain f() {
@@ -137,40 +145,11 @@ public class PairSubtractionDataSource extends BasicDataSource
 		});
 		
 		//Create a new Grid/Model from this list of points
-		ISkewGrid<IXRDStrain> beforeModel = new SkewGrid<IXRDStrain>(mapsize.y, mapsize.x, beforeList);
-		ISkewGrid<IXRDStrain> afterModel = new SkewGrid<IXRDStrain>(mapsize.y, mapsize.x, afterList);
-		ISkewGrid<IXRDStrain> subtractModel = new SkewGrid<IXRDStrain>(mapsize.y, mapsize.x, subtractList);
+		beforeModel = new SkewGrid<IXRDStrain>(dimensions.y, dimensions.x, beforeList);
+		afterModel = new SkewGrid<IXRDStrain>(dimensions.y, dimensions.x, afterList);
+		subtractModel = new SkewGrid<IXRDStrain>(dimensions.y, dimensions.x, subtractList);
 
-		
-		int tx = (Integer)hShift.getValue();
-		int ty = (Integer)vShift.getValue();
-		
-		//After = After - Before
-		for (int x = 0; x < mapsize.x; x++)	{
-			for (int y = 0; y < mapsize.y; y++) {
-				
-				//offset x/y for before
-				int dx = x - tx;
-				int dy = y - ty;
-				
-				//range check
-				if (dx < 0 || dx >= mapsize.x || dy < 0 || dy >= mapsize.y) continue;
-				
-				//look up the points in the three models
-				ISkewPoint<IXRDStrain> differencePoint = subtractModel.get(x, y);
-				ISkewPoint<IXRDStrain> afterPoint = afterModel.get(x, y);
-				ISkewPoint<IXRDStrain> beforePoint = beforeModel.get(dx, dy);
-				
-				//make sure both before and after points are valid
-				if (!afterPoint.isValid() || !beforePoint.isValid()) continue;
-				
-				//perform the subtraction, storing the result in differencePoint, and set that point valid
-				subtractStrain(differencePoint.getData(), beforePoint.getData(), afterPoint.getData());
-				differencePoint.getData().strain()[6] = XRDStrainUtil.vonMises(differencePoint.getData().strain());
-				differencePoint.setValid(true);
-				
-			}
-		}
+		recalculate();
 		
 		//Create a new View from this model
 		views.add(new StrainView(subtractModel));
@@ -193,7 +172,7 @@ public class PairSubtractionDataSource extends BasicDataSource
 	}
 	
 	@Override
-	public List<Parameter<?>> userQueries() {
+	public List<Parameter<?>> getLoadParameters() {
 		List<Parameter<?>> params = new FList<>();
 		params.add(hShift);
 		params.add(vShift);
@@ -201,8 +180,53 @@ public class PairSubtractionDataSource extends BasicDataSource
 	}
 	
 	@Override
-	public String userQueryInformation() {
+	public String getLoadParametersInformation() {
 		return "This type of data requires a subtraction of 'before' and 'after' scans. The additional 'Shift' parameters will shift the 'before' dataset prior to performing the subtraction.";
+	}
+
+	@Override
+	public List<Parameter<?>> getRuntimeParameters() {
+		List<Parameter<?>> params = new FList<>();
+		params.add(hShift);
+		params.add(vShift);
+		return params;
+	}
+
+	@Override
+	public void recalculate() {
+		
+		int tx = (Integer)hShift.getValue();
+		int ty = (Integer)vShift.getValue();
+		
+		//After = After - Before
+		for (int x = 0; x < dimensions.x; x++)	{
+			for (int y = 0; y < dimensions.y; y++) {
+				
+				//offset x/y for before
+				int dx = x - tx;
+				int dy = y - ty;
+				
+				
+				//look up the points in the three models
+				ISkewPoint<IXRDStrain> differencePoint = subtractModel.get(x, y);
+				//set point to invalid initially
+				differencePoint.setValid(false);
+				//range check
+				if (dx < 0 || dx >= dimensions.x || dy < 0 || dy >= dimensions.y) continue;
+				ISkewPoint<IXRDStrain> afterPoint = afterModel.get(x, y);
+				ISkewPoint<IXRDStrain> beforePoint = beforeModel.get(dx, dy);
+				
+				//make sure both before and after points are valid
+				if (!afterPoint.isValid() || !beforePoint.isValid()) continue;
+				
+				//perform the subtraction, storing the result in differencePoint, and set that point valid
+				subtractStrain(differencePoint.getData(), beforePoint.getData(), afterPoint.getData());
+				differencePoint.getData().strain()[6] = XRDStrainUtil.vonMises(differencePoint.getData().strain());
+				differencePoint.setValid(true);
+				
+			}
+		}
+		
 	}
 	
 

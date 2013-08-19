@@ -19,11 +19,22 @@ public interface IDataSource
 	
 	public Acceptance accepts(List<String> filenames);
 	
-	public List<Parameter<?>> userQueries();
-	public String userQueryInformation();
+	public List<Parameter<?>> getLoadParameters();
+	public String getLoadParametersInformation();
+	public List<Parameter<?>> getRuntimeParameters();
+	
 	
 	public List<MapView> getViews();	
 	
-	public ExecutorSet<ISkewDataset> calculate(List<String> filenames, Coord<Integer> mapsize);
+	/**
+	 * Loads a dataset from the given filename(s) on disk 
+	 */
+	public ExecutorSet<ISkewDataset> loadDataset(List<String> filenames, Coord<Integer> mapsize);
+	
+	/**
+	 * If a dataset has any runtime parameters, this method is called to recalculate the dataset values
+	 * with altered parameter values
+	 */
+	public void recalculate();
 
 }
