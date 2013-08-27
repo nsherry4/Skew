@@ -10,9 +10,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JOptionPane;
+import javax.swing.border.TitledBorder;
 
 import plural.executor.ExecutorSet;
 import plural.swing.ExecutorSetView;
@@ -33,6 +36,7 @@ import skew.core.viewer.modes.views.MapView;
 import swidget.dialogues.fileio.SwidgetIO;
 import swidget.icons.IconSize;
 import swidget.icons.StockIcon;
+import swidget.widgets.properties.PropertyViewPanel;
 import autodialog.controller.SimpleADController;
 import autodialog.model.Parameter;
 import autodialog.view.AutoDialog;
@@ -41,8 +45,8 @@ import autodialog.view.editors.IntegerEditor;
 import autodialog.view.layouts.FramesADLayout;
 
 import com.ezware.dialog.task.TaskDialogs;
-
 import commonenvironment.AbstractFile;
+
 import fava.functionable.FList;
 
 public class SkewController
@@ -71,25 +75,6 @@ public class SkewController
 	
 	
 	
-	
-	public void actionDatasetOptions()
-	{
-		AutoDialog options = new AutoDialog(new SimpleADController(data.datasource().getRuntimeParameters()){
-			
-			@Override
-			public void parameterUpdated(Parameter<?> param) {
-				data.datasource().recalculate();
-				event(SettingType.PARAMETER);
-			}
-			
-		}, AutoDialogButtons.CLOSE, window);
-
-		
-		options.setTitle("Dataset Options");
-		options.initialize();
-		
-	}
-
 	public void actionScaleChanged()
 	{
 		event(SettingType.SCALE);
@@ -105,11 +90,26 @@ public class SkewController
 		event(SettingType.DATA);
 		event(SettingType.VIEW);
 		
+		//set up subviews
 		if (viewMode.hasSublist()){
 			subView = viewMode.getSubList().get(0);
 			event(SettingType.SUBVIEW);
 		} else {
 			subView = null;
+		}
+		
+		//set up runtime parameter controller/listeners
+		List<Parameter<?>> params = data.datasource().getRuntimeParameters();
+		if (params.size() > 0) {
+			new SimpleADController(data.datasource().getRuntimeParameters()){
+				
+				@Override
+				public void parameterUpdated(Parameter<?> param) {
+					data.datasource().recalculate();
+					event(SettingType.PARAMETER);
+				}
+				
+			};
 		}
 
 	}
@@ -118,6 +118,7 @@ public class SkewController
 
 	public void actionSaveText()
 	{
+		
 		try
 		{
 		
@@ -125,7 +126,38 @@ public class SkewController
 			
 			OutputStream os = new FileOutputStream(tempfile);
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
-			viewMode.writeData(subView, writer);
+
+			
+			List<String> keys = viewMode.getSummaryHeaders();
+			
+			writer.write("X,  Y");
+			for (String key : keys) writer.write(",  " + key);
+			writer.write("\n");
+			
+			Map<String, String> summary;
+			for (int y = 0; y < data.height(); y++) {
+				for (int x = 0; x < data.width(); x++) {
+					
+					summary = getCoordInfoMap(x, y);
+					writer.write(summary.get("X") + ", ");
+					writer.write(summary.get("Y"));
+					
+					summary = viewMode.getSummaryData(x, y);
+					for (String key : keys) {
+						writer.write(", ");
+						if (summary.containsKey(key)) {
+							writer.write(summary.get(key));
+						} else {
+							writer.write("-");
+						}
+					}
+					
+					writer.write("\n");
+					
+				}
+			}
+			
+			
 			writer.close();
 			
 			InputStream is = new FileInputStream(tempfile);
@@ -134,33 +166,53 @@ public class SkewController
 			
 			tempfile.delete();
 		} 
+		
 		catch (Exception e)
 		{
 			TaskDialogs.showException(e);
 		}
+		
 	}
 	
 
-	public void actionSelection(int x, int y, boolean multiselect, boolean doubleclick)
+	//x and y are pixel positions on the drawing surface, not indicies for a 2d-array model
+	public void actionSelection(int px, int py, boolean multiselect, boolean doubleclick)
 	{
-		Coord<Integer> coord = ui.drawing.getMapCoordinateAtPoint(x, y, false);
+		Coord<Integer> coord = ui.drawing.getMapCoordinateAtPoint(px, py, false);
+		
 		if (coord == null) return;
-		
 		if (doubleclick) data.setPointSelected(coord.x, coord.y, multiselect);
-		String summary = "" +
-				"(X: " + coord.x + 
-				", Y:" + coord.y  + 
-				")";
 		
-		summary += "   " + viewMode.getSummaryText(coord.x, coord.y);
-		ui.coords.setText(summary);	
-			
+		PropertyViewPanel panel;
+		
+		ui.sidebarInfoPanel.removeAll();
+		
+		panel = new PropertyViewPanel(getCoordInfoMap(coord.x, coord.y), null, 0, false, false);
+		panel.setBorder(new TitledBorder("Coordinates"));
+		ui.sidebarInfoPanel.add(panel);
+		
+		panel = new PropertyViewPanel(viewMode.getSummaryData(coord.x, coord.y), null, 0, false, false);
+		panel.setBorder(new TitledBorder(viewMode.toString()));
+		ui.sidebarInfoPanel.add(panel);
+		
+		
+		ui.sidebarScroller.revalidate();
 		
 		event(SettingType.SELECTION);
 	}
 
-
-
+	
+	
+	//x and y are 2d-array-index values
+	private Map<String, String> getCoordInfoMap(int x, int y)
+	{
+		Map<String, String> coordInfo = new LinkedHashMap<>();
+		
+		coordInfo.put("X", ""+x);
+		coordInfo.put("Y", ""+y);
+		return coordInfo;
+	}
+	
 
 	public void actionSavePicture()
 	{
@@ -186,7 +238,7 @@ public class SkewController
 		if (newview == null)
 		{
 			ui.viewSelector.setSelectedItem(viewMode);
-			ui.savetext.setVisible(false);
+			ui.savetextButton.setVisible(false);
 			return;
 		}
 		viewMode = newview;

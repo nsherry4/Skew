@@ -22,7 +22,7 @@ public abstract class RasterColorMapWrapper<T> extends RasterColorMapPainter
 		List<Color> colors = new ArrayList<Color>();
 		for (int y = 0; y < data.getHeight(); y++) {
 			for (int x = 0; x < data.getWidth(); x++) {
-				colors.add(valueToColor(data.get(x, y)));
+				colors.add(valueToColor(data.getPoint(x, y)));
 			}
 		}
 		setPixels(colors);

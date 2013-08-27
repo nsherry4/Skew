@@ -1,18 +1,25 @@
 package skew.core.viewer.modes.views;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.SpinnerModel;
 
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.painters.axis.AxisPainter;
 import skew.core.viewer.modes.subviews.MapSubView;
+import fava.functionable.FList;
 
 public class DummyView extends MapView
 {
+
+	public DummyView() {
+		super("");
+		// TODO Auto-generated constructor stub
+	}
+
 
 	@Override
 	public SpinnerModel scaleSpinnerModel(MapSubView subView)
@@ -20,11 +27,6 @@ public class DummyView extends MapView
 		return null;
 	}
 
-	@Override
-	public String getSummaryText(int x, int y)
-	{
-		return "";
-	}
 
 	@Override
 	public boolean hasSublist()
@@ -56,11 +58,6 @@ public class DummyView extends MapView
 		return new ArrayList<AxisPainter>();
 	}
 
-	@Override
-	public void writeData(MapSubView subview, BufferedWriter writer) throws IOException
-	{
-		
-	}
 	
 	@Override
 	public String toString()
@@ -68,10 +65,16 @@ public class DummyView extends MapView
 		return "View";
 	}
 
+
 	@Override
-	public boolean canWriteData()
-	{
-		return false;
+	public Map<String, String> getSummaryData(int x, int y) {
+		return new LinkedHashMap<>();
+	}
+
+
+	@Override
+	public List<String> getSummaryHeaders() {
+		return new FList<>();
 	}
 
 }

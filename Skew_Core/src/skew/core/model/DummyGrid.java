@@ -1,5 +1,6 @@
 package skew.core.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DummyGrid implements ISkewGrid<Object>
@@ -12,7 +13,7 @@ public class DummyGrid implements ISkewGrid<Object>
 	}
 
 	@Override
-	public ISkewPoint<Object> get(int position)
+	public ISkewPoint<Object> getPoint(int position)
 	{
 		return new ISkewPoint<Object>() {
 			
@@ -64,7 +65,7 @@ public class DummyGrid implements ISkewGrid<Object>
 	}
 
 	@Override
-	public ISkewPoint<Object> get(int x, int y)
+	public ISkewPoint<Object> getPoint(int x, int y)
 	{
 		return new ISkewPoint<Object>() {
 			
@@ -135,7 +136,16 @@ public class DummyGrid implements ISkewGrid<Object>
 
 	@Override
 	public List<ISkewPoint<Object>> getPoints() {
-		// TODO Auto-generated method stub
+		return new ArrayList<>();
+	}
+
+	@Override
+	public Object getData(int position) {
+		return null;
+	}
+
+	@Override
+	public Object getData(int x, int y) {
 		return null;
 	}
 

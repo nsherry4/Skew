@@ -3,11 +3,11 @@ package skew;
 import java.util.List;
 
 import skew.core.datasource.IDataSource;
-import skew.packages.misorientation.datasource.EBSDDataSource;
-import skew.packages.misorientation.datasource.INDDataSource;
-import skew.packages.pixeldeviation.datasource.PixDevDataSource;
-import skew.packages.xrd.sequence.datasource.SEQDataSource;
-import skew.packages.xrd.strain.datasource.PairSubtractionDataSource;
+import skew.datasources.misorientation.datasource.EBSDDataSource;
+import skew.datasources.misorientation.datasource.INDDataSource;
+import skew.datasources.pixeldeviation.PixDevDataSource;
+import skew.datasources.xrd.sequence.SEQDataSource;
+import skew.datasources.xrd.subtraction.PairSubtractionDataSource;
 import fava.functionable.FList;
 
 public class DataSources

@@ -1,8 +1,8 @@
 package skew.core.viewer.modes.views;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.SpinnerModel;
 
@@ -15,24 +15,23 @@ public class CompositeView extends MapView
 {
 
 	private MapView primary;
-	private List<SecondaryView> secondary;
+	private List<MapView> secondary;
 	
-	public CompositeView(MapView primary, SecondaryView secondary) {
-		this(primary, new FList<SecondaryView>(secondary));
+	public CompositeView(MapView primary, MapView secondary) {
+		this(primary, new FList<MapView>(secondary));
 	}
 	
-	public CompositeView(MapView primary, List<SecondaryView> secondary) {
-		super();
+	public CompositeView(MapView primary, MapView... secondary) {
+		this(primary, Arrays.asList(secondary));
+	}
+	
+	public CompositeView(MapView primary, List<MapView> secondary) {
+		super(primary.getTitle());
 		this.primary = primary;
 		this.secondary = secondary;
 	}
 	
 	
-
-	@Override
-	public boolean canWriteData() {
-		return primary.canWriteData();
-	}
 
 	@Override
 	public void setUpdateRequired() {
@@ -53,10 +52,6 @@ public class CompositeView extends MapView
 		return primary.scaleSpinnerModel(subView);
 	}
 
-	@Override
-	public String getSummaryText(int x, int y) {
-		return primary.getSummaryText(x, y);
-	}
 
 	@Override
 	public boolean hasSublist() {
@@ -89,13 +84,28 @@ public class CompositeView extends MapView
 
 
 	@Override
-	public void writeData(MapSubView subview, BufferedWriter writer) throws IOException {
-		primary.writeData(subview, writer);
+	public String toString() {
+		return primary.toString();
 	}
 
 	@Override
-	public String toString() {
-		return primary.toString();
+	public Map<String, String> getSummaryData(int x, int y) {
+		return primary.getSummaryData(x, y);
+	}
+
+	@Override
+	public List<String> getSummaryHeaders() {
+		return primary.getSummaryHeaders();
+	}
+
+	@Override
+	public void setTitle(String title) {
+		primary.setTitle(title);
+	}
+
+	@Override
+	public String getTitle() {
+		return primary.getTitle();
 	}
 	
 	

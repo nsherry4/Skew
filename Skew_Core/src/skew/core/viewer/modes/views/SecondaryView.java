@@ -1,7 +1,5 @@
 package skew.core.viewer.modes.views;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
 import java.util.List;
 
 import javax.swing.SpinnerModel;
@@ -11,16 +9,14 @@ import skew.core.viewer.modes.subviews.MapSubView;
 public abstract class SecondaryView extends MapView
 {
 
+	public SecondaryView(String title) {
+		super(title);
+	}
+
 	@Override
 	public SpinnerModel scaleSpinnerModel(MapSubView subView)
 	{
 		return null;
-	}
-
-	@Override
-	public String getSummaryText(int x, int y)
-	{
-		return "";
 	}
 
 	@Override
@@ -41,12 +37,6 @@ public abstract class SecondaryView extends MapView
 		return 0;
 	}
 
-
-	@Override
-	public void writeData(MapSubView subview, BufferedWriter writer) throws IOException
-	{
-		
-	}
 	
 	@Override
 	public String toString()

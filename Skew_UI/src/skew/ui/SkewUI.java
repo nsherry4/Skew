@@ -4,6 +4,8 @@ package skew.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,21 +20,26 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
+import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 import javax.swing.SpinnerModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.apache.batik.ext.swing.GridBagConstants;
+
 import scidraw.drawing.DrawingRequest;
 import scidraw.drawing.backends.Surface;
 import scidraw.drawing.map.MapDrawing;
 import scidraw.swing.GraphicsPanel;
+import scitypes.Coord;
 import skew.Version;
 import skew.core.model.ISkewDataset;
 import skew.core.viewer.ScrollableGraphicsPanel;
@@ -42,8 +49,12 @@ import skew.core.viewer.modes.views.DummyView;
 import skew.core.viewer.modes.views.MapView;
 import swidget.dialogues.AboutDialogue;
 import swidget.icons.StockIcon;
+import swidget.widgets.DraggingScrollPaneListener;
 import swidget.widgets.ToolbarImageButton;
 import swidget.widgets.ZoomSlider;
+import autodialog.model.Parameter;
+import autodialog.view.AutoPanel;
+import autodialog.view.layouts.FramesADLayout;
 
 import com.ezware.dialog.task.TaskDialogs;
 
@@ -81,16 +92,19 @@ public class SkewUI extends JPanel {
 	JComboBox<MapSubView> subViewSelector;
 	
 
-	JScrollPane pane;
+	JScrollPane graphicsScroller;
 	ZoomSlider zoomslider;
 	float zoom = 1;
 	
-	public ToolbarImageButton savetext;
-	public ToolbarImageButton parameters;
-	private ToolbarImageButton save;
+	JPanel sidebarParameterPanel;
+	JPanel sidebarInfoPanel;
+	JScrollPane sidebarScroller;
 	
-	public JLabel coords;
-		
+	JSplitPane mainPanel;
+	
+	public ToolbarImageButton savetextButton;
+	private ToolbarImageButton savepictureButton;
+			
 	
 	public SkewUI(SkewTabs parent)
 	{
@@ -130,12 +144,54 @@ public class SkewUI extends JPanel {
 		createGraphicsPanel();
 		graphics.setPreferredSize(new Dimension(1000, 473));
 		
-		pane = new JScrollPane(graphics);
-		pane.setBorder(new EmptyBorder(0, 0, 0, 0));
-		pane.setBackground(Color.white);
-		pane.getViewport().setBackground(Color.white);
+		graphicsScroller = new JScrollPane(graphics);
+		graphicsScroller.setBorder(new EmptyBorder(0, 0, 0, 0));
+		graphicsScroller.setBackground(Color.white);
+		graphicsScroller.getViewport().setBackground(Color.white);
+		new DraggingScrollPaneListener(graphicsScroller.getViewport(), graphics);
 		
-		add(pane, BorderLayout.CENTER);
+		
+		JPanel sidebar = new JPanel();
+		sidebar.setLayout(new GridBagLayout());
+		
+		
+		
+		sidebarParameterPanel = new JPanel();
+		sidebarParameterPanel.setLayout(new BoxLayout(sidebarParameterPanel, BoxLayout.Y_AXIS));
+				
+		sidebarInfoPanel = new JPanel();
+		sidebarInfoPanel.setLayout(new BoxLayout(sidebarInfoPanel, BoxLayout.Y_AXIS));
+		
+				
+		GridBagConstraints c = new GridBagConstraints();
+		c.weighty = 0;
+		c.weightx = 1f;
+		c.anchor = GridBagConstants.NORTH;
+		c.fill = GridBagConstants.BOTH;
+		c.gridx = 0;
+		
+		
+		c.gridy = 0;
+		sidebar.add(sidebarParameterPanel, c);
+		
+		c.gridy = 1;
+		sidebar.add(sidebarInfoPanel, c);
+		
+		c.gridy = 2;
+		c.weighty = 1f;
+		sidebar.add(new JPanel(), c);
+		
+		
+		sidebarScroller = new JScrollPane(sidebar);
+		sidebarScroller.setBorder(new EmptyBorder(0, 0, 0, 0));
+		sidebarScroller.setPreferredSize(new Dimension(200, 1));
+		
+		mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, sidebarScroller, graphicsScroller);
+		mainPanel.setResizeWeight(0f);
+		mainPanel.setDividerSize(8);
+		mainPanel.setOneTouchExpandable(true);
+		
+		add(mainPanel, BorderLayout.CENTER);
 		
 
 		
@@ -143,7 +199,8 @@ public class SkewUI extends JPanel {
 		JPanel statusbar = createBottomControls();
 		add(statusbar, BorderLayout.SOUTH);
 		
-		viewsUpdated();
+		availableViewsChanged();
+		selectedViewChanged();
 		
 		graphics.addMouseListener(new MouseListener() {
 			
@@ -209,11 +266,7 @@ public class SkewUI extends JPanel {
 				setZoom(zoomslider.getValue() / 100f);
 			}
 		});
-		
-		coords = new JLabel(" ");
-		coords.setHorizontalAlignment(JLabel.CENTER);
-		statusbar.add(coords, BorderLayout.NORTH);
-		
+				
 		scalePanel = createScaleControl();
 		statusbar.add(scalePanel, BorderLayout.WEST);
 		setSubViewUI();
@@ -225,22 +278,22 @@ public class SkewUI extends JPanel {
 	private void setZoom(float newzoom)
 	{
 		zoom = newzoom;
-		Rectangle r = pane.getVisibleRect();
+		Rectangle r = graphicsScroller.getVisibleRect();
 		if (graphics == null) return;
 		
 		
-		Dimension panesize = pane.getSize();
+		Dimension panesize = graphicsScroller.getSize();
 		
 		Dimension currentSize = graphics.getSize();
 		graphics.setSize(panesize);
 
-		graphics.setPreferredSize(new Dimension((int)(graphics.getUsedWidth() * zoom), (int)(graphics.getUsedHeight() * zoom)));
+		graphics.setPreferredSize(new Dimension((int)(graphics.getUsedWidth(zoom)), (int)(graphics.getUsedHeight(zoom))));
 
 		graphics.setSize(currentSize);
 		
 		
 		
-		pane.scrollRectToVisible(r);
+		graphicsScroller.scrollRectToVisible(r);
 		
 		graphics.revalidate();
 	}
@@ -300,8 +353,8 @@ public class SkewUI extends JPanel {
 			}
 		});
 		
-		save = new ToolbarImageButton(StockIcon.DEVICE_CAMERA, "Save Picture");
-		save.addActionListener(new ActionListener() {
+		savepictureButton = new ToolbarImageButton(StockIcon.DEVICE_CAMERA, "Save Picture");
+		savepictureButton.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -310,7 +363,7 @@ public class SkewUI extends JPanel {
 
 			}
 		});
-		save.setVisible(false);
+		savepictureButton.setVisible(false);
 		
 		
 		viewSelector = new JComboBox<MapView>(new Vector<MapView>(controller.data.datasource().getViews()));
@@ -325,8 +378,8 @@ public class SkewUI extends JPanel {
 		});
 		
 		
-		savetext = new ToolbarImageButton(StockIcon.DOCUMENT_EXPORT, "Export Map Data");
-		savetext.addActionListener(new ActionListener() {
+		savetextButton = new ToolbarImageButton(StockIcon.DOCUMENT_EXPORT, "Export Map Data");
+		savetextButton.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0)
@@ -334,18 +387,7 @@ public class SkewUI extends JPanel {
 				controller.actionSaveText();
 			}
 		});
-		savetext.setVisible(false);
-
-		parameters = new ToolbarImageButton(StockIcon.MISC_PROPERTIES, "Dataset Options");
-		parameters.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent arg0)
-			{
-				controller.actionDatasetOptions();
-			}
-		});
-		parameters.setVisible(false);
+		savetextButton.setVisible(false);
 		
 		
 		ToolbarImageButton about = new ToolbarImageButton(StockIcon.MISC_ABOUT, "About");
@@ -376,14 +418,13 @@ public class SkewUI extends JPanel {
 		
 		toolbar.add(open);
 		//toolbar.add(tab);
-		toolbar.add(save);
+		toolbar.add(savepictureButton);
 		
 		
 		toolbar.add(Box.createHorizontalGlue());
 
 		toolbar.add(viewSelector);	
-		toolbar.add(savetext);
-		toolbar.add(parameters);
+		toolbar.add(savetextButton);
 		
 		toolbar.add(Box.createHorizontalGlue());
 		
@@ -474,18 +515,19 @@ public class SkewUI extends JPanel {
 	
 	public void settingsChanged(SettingType type)
 	{
-				
+					
 		switch (type) {
 			
 			case DATA:
 				parent.setTabTitle(this, controller.data.name());
-				parameters.setVisible(controller.data.datasource().getRuntimeParameters().size() > 0);
+				runtimeParametersChanged();
+				availableViewsChanged();
 				break;
 				
 			case VIEW:
-				viewsUpdated();
-				savetext.setVisible(controller.viewMode.canWriteData());
-				save.setVisible(true);
+				selectedViewChanged();
+				savetextButton.setVisible(true);
+				savepictureButton.setVisible(true);
 				break;
 	
 			case SUBVIEW:
@@ -500,32 +542,55 @@ public class SkewUI extends JPanel {
 	}
 	
 	
-	private void viewsUpdated()
+	private void availableViewsChanged()
 	{
 		List<MapView> views = controller.data.datasource().getViews();
-		
 		viewSelector.removeAllItems();
+		
+		for (MapView view : views)
+		{
+			viewSelector.addItem(view);
+		}
+		
+		
+		graphics.setBackground(Color.white);
+		zoomslider.setVisible(true);
 		if (views.size() == 0) {
 			viewSelector.setVisible(false);
 			zoomslider.setVisible(false);
 			graphics.setBackground(this.getBackground());
 		} else if (views.size() == 1) {
 			viewSelector.setVisible(false);
-			zoomslider.setVisible(true);
-			graphics.setBackground(Color.white);
-			setSubViewUI();
 		} else {
-		
 			viewSelector.setVisible(true);
-			zoomslider.setVisible(true);
-			graphics.setBackground(Color.white);
-			setSubViewUI();
-			for (MapView view : controller.data.datasource().getViews())
-			{
-				viewSelector.addItem(view);
-			}
 		}
+
+
 		
+	}
+	
+	private void runtimeParametersChanged()
+	{
+		sidebarParameterPanel.removeAll();
+		
+		List<Parameter<?>> params = controller.data.datasource().getRuntimeParameters();
+		AutoPanel panel = new AutoPanel(params, new FramesADLayout(), false);
+		sidebarParameterPanel.add(panel);
+		sidebarParameterPanel.setVisible(params.size() > 0);
+		
+		sidebarScroller.setPreferredSize(new Dimension(
+				Math.max(200, sidebarParameterPanel.getPreferredSize().width + 30), 
+				0
+			));
+		mainPanel.resetToPreferredSizes();
+		
+				
+	}
+	
+	private void selectedViewChanged()
+	{
+		setSubViewUI();
+		sidebarInfoPanel.removeAll();
 	}
 	
 	
@@ -541,18 +606,28 @@ public class SkewUI extends JPanel {
 			
 			@Override
 			public float getUsedWidth() {
-				
-				setDR();
-				
-				return drawing.calcTotalSize().x;
+				return getUsedWidth(1);				
 			}
 			
 			@Override
 			public float getUsedHeight() {
-				
+				return getUsedHeight(1);				
+			}
+			
+			@Override
+			public float getUsedHeight(float zoom) {
 				setDR();
-								
-				return drawing.calcTotalSize().y;
+				Coord<Float> borders = drawing.calcBorderSize();
+				Coord<Float> map = drawing.calcMapSize();
+				return map.y * zoom + borders.y;
+			}
+
+			@Override
+			public float getUsedWidth(float zoom) {
+				setDR();
+				Coord<Float> borders = drawing.calcBorderSize();
+				Coord<Float> map = drawing.calcMapSize();
+				return map.x * zoom + borders.x;
 			}
 			
 			private void setDR()
@@ -622,6 +697,7 @@ public class SkewUI extends JPanel {
 			public int getScrollableUnitIncrement(Rectangle arg0, int arg1,	int arg2) {
 				return (int)(5f*zoom);
 			}
+
 				
 		};
 		

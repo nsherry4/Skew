@@ -27,7 +27,7 @@ public class SkewGrid<T> implements ISkewGrid<T>
 	}
 
 	@Override
-	public ISkewPoint<T> get(int position)
+	public ISkewPoint<T> getPoint(int position)
 	{
 		if (position < 0) return null;
 		if (position >= values.size()) return null;
@@ -35,9 +35,9 @@ public class SkewGrid<T> implements ISkewGrid<T>
 	}
 
 	@Override
-	public ISkewPoint<T> get(int x, int y)
+	public ISkewPoint<T> getPoint(int x, int y)
 	{
-		return get(width * y + x);
+		return getPoint(width * y + x);
 	}
 	
 	
@@ -66,6 +66,73 @@ public class SkewGrid<T> implements ISkewGrid<T>
 	}
 
 
+	@Override
+	public T getData(int position) {
+		return getPoint(position).getData();
+	}
 
+
+	@Override
+	public T getData(int x, int y) {
+		return getPoint(x, y).getData();
+	}
+
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+	public static <T> ISkewPoint<T> goNorth(ISkewGrid<T> grid, ISkewPoint<T> p)
+	{
+		return grid.getPoint(p.getX()-1, p.getY());
+	}
+	
+	public static <T> ISkewPoint<T> goNorthEast(ISkewGrid<T> grid, ISkewPoint<T> p)
+	{
+		return grid.getPoint(p.getX()-1, p.getY()+1);
+	}
+	
+	public static <T> ISkewPoint<T> goNorthWest(ISkewGrid<T> grid, ISkewPoint<T> p)
+	{
+		return grid.getPoint(p.getX()-1, p.getY()-1);
+	}
+	
+	public static <T> ISkewPoint<T> goEast(ISkewGrid<T> grid, ISkewPoint<T> p)
+	{
+		return grid.getPoint(p.getX(), p.getY()+1);
+	}
+	
+	public static <T> ISkewPoint<T> goSouth(ISkewGrid<T> grid, ISkewPoint<T> p)
+	{
+		return grid.getPoint(p.getX()+1, p.getY());
+	}
+	
+	public static <T> ISkewPoint<T> goSouthEast(ISkewGrid<T> grid, ISkewPoint<T> p)
+	{
+		return grid.getPoint(p.getX()+1, p.getY()+1);
+	}
+	
+	public static <T> ISkewPoint<T> goSouthWest(ISkewGrid<T> grid, ISkewPoint<T> p)
+	{
+		return grid.getPoint(p.getX()+1, p.getY()-1);
+	}
+	
+	public static <T> ISkewPoint<T> goWest(ISkewGrid<T> grid, ISkewPoint<T> p)
+	{
+		return grid.getPoint(p.getX(), p.getY()-1);
+	}
+	
 
 }
