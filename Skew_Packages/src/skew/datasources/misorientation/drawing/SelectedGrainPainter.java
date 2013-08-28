@@ -2,6 +2,8 @@ package skew.datasources.misorientation.drawing;
 
 import java.awt.Color;
 import java.awt.geom.Ellipse2D;
+import java.util.ArrayList;
+import java.util.List;
 
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.map.palettes.ThermalScalePalette;
@@ -15,6 +17,7 @@ public class SelectedGrainPainter extends MapPainter
 {
 
 	private GrainModel grid;
+	private List<Grain> selectedGrains = new ArrayList<>();
 	
 	public SelectedGrainPainter(GrainModel data) {
 		super(new ThermalScalePalette());
@@ -38,7 +41,7 @@ public class SelectedGrainPainter extends MapPainter
 		{
 		
 			if (g == null) continue;
-			if (!g.selected) continue;
+			if (!isGrainSelected(g)) continue;
 				
 			for (ISkewPoint<MisAngle> point : g.points)
 			{
@@ -59,7 +62,7 @@ public class SelectedGrainPainter extends MapPainter
 		{
 		
 			if (g == null) continue;
-			if (!g.selected) continue;
+			if (!isGrainSelected(g)) continue;
 				
 			for (ISkewPoint<MisAngle> point : g.points)
 			{
@@ -83,5 +86,43 @@ public class SelectedGrainPainter extends MapPainter
 		return false;
 	}
 
-
+	public void setPointSelected(ISkewPoint<MisAngle> misData, boolean multiselect) 
+	{
+		Grain g = grid.getGrain(misData);
+		if (g == null) return;
+		
+		// if grain was already selected
+		boolean alreadySelected = isGrainSelected(g);
+		if (!multiselect) deselectAllGrains();
+		if (!alreadySelected) selectGrain(g);
+		
+	}
+	
+	private boolean isGrainSelected(Grain g) { return selectedGrains.contains(g); }
+	private void deselectGrain(Grain g) { selectedGrains.remove(g); }
+	private void deselectAllGrains() { selectedGrains.clear(); }
+	private void selectGrain(Grain g) { selectedGrains.add(g); }
+	
+/*
+	public boolean selectGrain(MisAngle point, boolean multiselect)
+	{
+		Grain g = getGrain(point);
+		if (g == null) return false;
+		
+		boolean alreadySelected = g.selected;
+		if (!multiselect) for (Grain grain : grains) { grain.selected = false; }
+		g.selected = !alreadySelected;
+		
+		return g.selected;
+		
+	}
+	
+	public List<Grain> getSelectedGrains()
+	{
+		List<Grain> selected = new ArrayList<Grain>();
+		for (Grain g : grains) { if (g.selected) selected.add(g); }
+		return selected;
+	}
+*/
+	
 }

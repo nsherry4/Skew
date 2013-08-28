@@ -2,7 +2,6 @@ package skew.core.viewer.modes.views;
 
 import java.awt.Color;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.SpinnerModel;
 
@@ -21,7 +20,7 @@ public abstract class MapView
 	public static final Color backgroundGray = new Color(0.1f, 0.1f, 0.1f);
 	protected AbstractPalette negativeValueEmptyPalette, nanEmptyPalette;
 	private boolean updateRequired = true;
-	private String title = "";
+	protected String title = "";
 	
 	public MapView(String title)
 	{
@@ -84,12 +83,14 @@ public abstract class MapView
 	public abstract boolean hasSublist();
 	public abstract List<MapSubView> getSubList();
 
-	public abstract Map<String, String> getSummaryData(int x, int y);
-	public abstract List<String> getSummaryHeaders();
+	public abstract List<Summary> getSummary(int x, int y);
+
 	
 	public abstract float getMaximumIntensity(MapSubView subview);
 	public abstract List<MapPainter> getPainters(MapSubView subview, float maximum);
 	public abstract List<AxisPainter> getAxisPainters(MapSubView subview, float maxValue);
+	
+	public abstract void setPointSelected(int x, int y, boolean deselectAll);
 	
 	public void setTitle(String title) {
 		this.title = title;
@@ -124,5 +125,6 @@ public abstract class MapView
 	}
 	
 
+	
 	
 }

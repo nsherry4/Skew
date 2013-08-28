@@ -7,9 +7,7 @@ public interface ISkewDataset {
 	public abstract String name();
 	public abstract String path();
 	public abstract IDataSource datasource();
-		
-	public abstract int height();
-	public abstract int width();
-	
-	public abstract void setPointSelected(int x, int y, boolean deselectAll);	
+	public abstract int getWidth();
+	public abstract int getHeight();
+
 }

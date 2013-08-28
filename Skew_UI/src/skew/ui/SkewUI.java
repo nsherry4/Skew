@@ -57,8 +57,8 @@ import autodialog.view.AutoPanel;
 import autodialog.view.layouts.FramesADLayout;
 
 import com.ezware.dialog.task.TaskDialogs;
-
 import commonenvironment.IOOperations;
+
 import eventful.EventfulListener;
 
 /**
@@ -218,11 +218,12 @@ public class SkewUI extends JPanel {
 			
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				
 				int x = e.getX();
 				int y = e.getY();
 				boolean multiselect = e.getModifiersEx() == InputEvent.CTRL_DOWN_MASK;
 				boolean doubleclick = e.getClickCount() > 1;
-				
+								
 				controller.actionSelection(x, y, multiselect, doubleclick);
 				
 			}
@@ -638,10 +639,10 @@ public class SkewUI extends JPanel {
 					dr.imageWidth = getWidth();
 					dr.imageHeight = getHeight();
 					
-					dr.dataHeight = controller.data.height(); //map.height;
-					dr.dataWidth = controller.data.width(); //map.width;
-					dr.uninterpolatedHeight = controller.data.height(); //map.height;
-					dr.uninterpolatedWidth = controller.data.width(); //map.width;
+					dr.dataHeight = controller.data.getHeight(); //map.height;
+					dr.dataWidth = controller.data.getWidth(); //map.width;
+					dr.uninterpolatedHeight = controller.data.getHeight(); //map.height;
+					dr.uninterpolatedWidth = controller.data.getWidth(); //map.width;
 				} catch (NullPointerException e) {
 					TaskDialogs.showException(e);
 					e.printStackTrace();
@@ -652,7 +653,7 @@ public class SkewUI extends JPanel {
 			protected void drawGraphics(Surface backend, boolean vector) {
 				
 				if (controller.data == null) return;
-				if (controller.data.width() == 0 || controller.data.height() == 0) return;
+				if (controller.data.getWidth() == 0 || controller.data.getHeight() == 0) return;
 				if (controller.viewMode instanceof DummyView) return;
 				
 				

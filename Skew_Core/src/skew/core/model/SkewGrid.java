@@ -10,7 +10,8 @@ public class SkewGrid<T> implements ISkewGrid<T>
 	
 	protected int                   width;
 	protected int                   height;
-		
+	
+	
 	public SkewGrid(int width, int height, List<ISkewPoint<T>> points)
 	{
 		this.width = width;
@@ -51,12 +52,6 @@ public class SkewGrid<T> implements ISkewGrid<T>
 	public int getHeight()
 	{
 		return height;
-	}
-	
-	@Override
-	public void setPointSelected(int x, int y, boolean deselectAll)
-	{
-		return;
 	}
 
 	

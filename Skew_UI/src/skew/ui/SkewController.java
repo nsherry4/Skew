@@ -10,9 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.JOptionPane;
 import javax.swing.border.TitledBorder;
@@ -33,6 +31,7 @@ import skew.core.viewer.SettingType;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.DummyView;
 import skew.core.viewer.modes.views.MapView;
+import skew.core.viewer.modes.views.Summary;
 import swidget.dialogues.fileio.SwidgetIO;
 import swidget.icons.IconSize;
 import swidget.icons.StockIcon;
@@ -127,30 +126,25 @@ public class SkewController
 			OutputStream os = new FileOutputStream(tempfile);
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
 
+			List<Summary> summaries = viewMode.getSummary(0, 0);
 			
-			List<String> keys = viewMode.getSummaryHeaders();
 			
 			writer.write("X,  Y");
-			for (String key : keys) writer.write(",  " + key);
+			for (Summary s : summaries) {
+				for (String key : s.getHeaders()) writer.write(",  " + s.getTitle() + ": " + key);
+			}
 			writer.write("\n");
 			
-			Map<String, String> summary;
-			for (int y = 0; y < data.height(); y++) {
-				for (int x = 0; x < data.width(); x++) {
+			Summary summary;
+			for (int y = 0; y < data.getHeight(); y++) {
+				for (int x = 0; x < data.getWidth(); x++) {
 					
 					summary = getCoordInfoMap(x, y);
-					writer.write(summary.get("X") + ", ");
-					writer.write(summary.get("Y"));
+					writer.write(summary.getValues().get("X") + ", ");
+					writer.write(summary.getValues().get("Y"));
 					
-					summary = viewMode.getSummaryData(x, y);
-					for (String key : keys) {
-						writer.write(", ");
-						if (summary.containsKey(key)) {
-							writer.write(summary.get(key));
-						} else {
-							writer.write("-");
-						}
-					}
+					summaries = viewMode.getSummary(x, y);
+					for (Summary s : summaries) writeSummary(writer, s);
 					
 					writer.write("\n");
 					
@@ -174,6 +168,18 @@ public class SkewController
 		
 	}
 	
+	private void writeSummary(BufferedWriter w, Summary s) throws IOException
+	{
+		for (String key : s.getHeaders()) {
+			w.write(", ");
+			if (s.getValues().containsKey(key)) {
+				w.write(s.getValues().get(key));
+			} else {
+				w.write("-");
+			}
+		}
+	}
+	
 
 	//x and y are pixel positions on the drawing surface, not indicies for a 2d-array model
 	public void actionSelection(int px, int py, boolean multiselect, boolean doubleclick)
@@ -181,19 +187,23 @@ public class SkewController
 		Coord<Integer> coord = ui.drawing.getMapCoordinateAtPoint(px, py, false);
 		
 		if (coord == null) return;
-		if (doubleclick) data.setPointSelected(coord.x, coord.y, multiselect);
+		if (doubleclick) viewMode.setPointSelected(coord.x, coord.y, multiselect);
 		
 		PropertyViewPanel panel;
 		
 		ui.sidebarInfoPanel.removeAll();
 		
-		panel = new PropertyViewPanel(getCoordInfoMap(coord.x, coord.y), null, 0, false, false);
+		panel = new PropertyViewPanel(getCoordInfoMap(coord.x, coord.y).getValues(), null, 0, false, false);
 		panel.setBorder(new TitledBorder("Coordinates"));
 		ui.sidebarInfoPanel.add(panel);
 		
-		panel = new PropertyViewPanel(viewMode.getSummaryData(coord.x, coord.y), null, 0, false, false);
-		panel.setBorder(new TitledBorder(viewMode.toString()));
-		ui.sidebarInfoPanel.add(panel);
+		List<Summary> summaries = viewMode.getSummary(coord.x, coord.y);
+		for (Summary s : summaries) {
+			if (s.getValues().size() == 0) continue;
+			panel = new PropertyViewPanel(s.getValues(), null, 0, false, false);
+			panel.setBorder(new TitledBorder(s.getTitle()));
+			ui.sidebarInfoPanel.add(panel);
+		}
 		
 		
 		ui.sidebarScroller.revalidate();
@@ -204,12 +214,12 @@ public class SkewController
 	
 	
 	//x and y are 2d-array-index values
-	private Map<String, String> getCoordInfoMap(int x, int y)
+	private Summary getCoordInfoMap(int x, int y)
 	{
-		Map<String, String> coordInfo = new LinkedHashMap<>();
+		Summary coordInfo = new Summary("Coordinates");
 		
-		coordInfo.put("X", ""+x);
-		coordInfo.put("Y", ""+y);
+		coordInfo.addValue("X", ""+x);
+		coordInfo.addValue("Y", ""+y);
 		return coordInfo;
 	}
 	

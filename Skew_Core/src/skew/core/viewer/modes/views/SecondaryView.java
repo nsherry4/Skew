@@ -9,8 +9,11 @@ import skew.core.viewer.modes.subviews.MapSubView;
 public abstract class SecondaryView extends MapView
 {
 
-	public SecondaryView(String title) {
+	private boolean silent;
+	
+	public SecondaryView(String title, boolean silent) {
 		super(title);
+		this.silent = silent;
 	}
 
 	@Override
@@ -41,7 +44,12 @@ public abstract class SecondaryView extends MapView
 	@Override
 	public String toString()
 	{
-		return "View";
+		return title;
+	}
+	
+	public boolean isSilent()
+	{
+		return silent;
 	}
 
 

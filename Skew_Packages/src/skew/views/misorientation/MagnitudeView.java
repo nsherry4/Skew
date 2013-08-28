@@ -2,9 +2,7 @@ package skew.views.misorientation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
@@ -13,6 +11,7 @@ import scidraw.drawing.map.painters.MapPainter;
 import scitypes.Spectrum;
 import skew.core.model.ISkewGrid;
 import skew.core.viewer.modes.subviews.MapSubView;
+import skew.core.viewer.modes.views.Summary;
 import skew.models.grain.Grain;
 import skew.models.misorientation.GrainModel;
 import skew.models.misorientation.MisAngle;
@@ -46,28 +45,25 @@ public class MagnitudeView extends MisAngleView
 	}
 
 	@Override
-	public Map<String, String> getSummaryData(int x, int y)
+	public List<Summary> getSummary(int x, int y)
 	{
-		Map<String, String> values = new LinkedHashMap<>();
+		List<Summary> summaries = new ArrayList<>();
+		Summary s = new Summary(getTitle());
+		summaries.add(s);
+		s.addHeader("Magnitude (Min)", "Magnitude, (Avg)", "Magnitude (Max)");
 		
+	
 		MisAngle point = misModel.getPoint(x, y).getData();
-		
-		values.put("Grain", formatGrainValue(point.grainIndex));
-		
-		if (!point.grainIndex.is()) return values;
+			
+		if (!point.grainIndex.is()) return summaries;
 		Grain g = grainModel.getGrain(point);
 		
-		values.put("Magnitude (Min)", formatMisValue(new Maybe<>(g.magMin)));
-		values.put("Magnitude (Avg)", formatMisValue(new Maybe<>(g.magAvg)));
-		values.put("Magnitude (Max)", formatMisValue(new Maybe<>(g.magMax)));
-		return values;
+		s.addValue("Magnitude (Min)", formatMisValue(new Maybe<>(g.magMin)));
+		s.addValue("Magnitude (Avg)", formatMisValue(new Maybe<>(g.magAvg)));
+		s.addValue("Magnitude (Max)", formatMisValue(new Maybe<>(g.magMax)));
+		return summaries;
 	}
 
-
-	@Override
-	public List<String> getSummaryHeaders() {
-		return new FList<>("Grain", "Magnitude (Min)", "Magnitude, (Avg)", "Magnitude (Max)");
-	}
 	
 
 	@Override
@@ -134,4 +130,7 @@ public class MagnitudeView extends MisAngleView
 
 
 
+	@Override
+	public void setPointSelected(int x, int y, boolean deselectAll) {}
+	
 }

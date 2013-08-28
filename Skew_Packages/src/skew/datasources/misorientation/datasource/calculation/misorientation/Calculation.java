@@ -20,6 +20,7 @@ import plural.executor.eachindex.implementations.PluralEachIndexExecutor;
 import plural.executor.map.MapExecutor;
 import scitypes.Coord;
 import skew.core.datasource.DataSource;
+import skew.core.model.IModel;
 import skew.core.model.ISkewDataset;
 import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
@@ -55,7 +56,7 @@ public class Calculation
 			@Override public MisAngle f() { return new MisAngle(); }});
 
 		final ISkewGrid<MisAngle> misModel = new SkewGrid<>(mapSize.x, mapSize.y, misList);
-		final GrainModel grainModel = new GrainModel();
+		final GrainModel grainModel = new GrainModel(mapSize.x, mapSize.y);
 		
 		//Create OrientationMatrix Grid
 		final List<ISkewPoint<IOrientationMatrix>> omList = DataSource.getEmptyPoints(mapSize, new FnGet<IOrientationMatrix>() {
@@ -106,7 +107,7 @@ public class Calculation
 
 				OrientationMap.calculateOrientation(misModel, omModel);
 								
-				return new SkewDataset(name, path, new FList<ISkewGrid<?>>(misModel, omModel), ds);
+				return new SkewDataset(name, path, new FList<IModel>(misModel, omModel, grainModel), ds);
 
 
 			}

@@ -2,9 +2,7 @@ package skew.views.misorientation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.SpinnerModel;
 
@@ -13,6 +11,7 @@ import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.Spectrum;
 import skew.core.model.ISkewGrid;
 import skew.core.viewer.modes.subviews.MapSubView;
+import skew.core.viewer.modes.views.Summary;
 import skew.models.grain.Grain;
 import skew.models.misorientation.GrainModel;
 import skew.models.misorientation.MisAngle;
@@ -36,21 +35,19 @@ public class InterGrainView extends MisAngleView
 	}
 
 	@Override
-	public Map<String, String> getSummaryData(int x, int y)
+	public List<Summary> getSummary(int x, int y)
 	{
-		Map<String, String> values = new LinkedHashMap<>();
 		
+		List<Summary> summaries = new ArrayList<>();
+		Summary s = new Summary(getTitle());
+		summaries.add(s);
+		s.addHeader("Misorientation");
+				
 		MisAngle point = misModel.getPoint(x, y).getData();
-		values.put("Grain", formatGrainValue(point.grainIndex));
-		values.put("Misorientation", formatMisValue(point.intraGrainMisorientation));
+		s.addValue("Misorientation", formatMisValue(point.intraGrainMisorientation));
 		
-		return values;
+		return summaries;
 		
-	}
-	
-	@Override
-	public List<String> getSummaryHeaders() {
-		return new FList<>("Grain", "Misorientation");
 	}
 
 	@Override
@@ -128,5 +125,7 @@ public class InterGrainView extends MisAngleView
 	}
 
 
+	@Override
+	public void setPointSelected(int x, int y, boolean deselectAll) {}
 	
 }

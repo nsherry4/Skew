@@ -1,9 +1,8 @@
 package skew.views.strain;
 
 import java.awt.Color;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
@@ -19,6 +18,7 @@ import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
+import skew.core.viewer.modes.views.Summary;
 import skew.models.strain.IXRDStrain;
 import fava.datatypes.Pair;
 import fava.functionable.FList;
@@ -50,31 +50,29 @@ public class StressView extends MapView
 	}
 
 	@Override
-	public Map<String, String> getSummaryData(int x, int y)
+	public List<Summary> getSummary(int x, int y)
 	{
+		List<Summary> summaries = new ArrayList<>();
+		Summary s = new Summary(getTitle());
+		summaries.add(s);
+		s.addHeader("XX", "YY", "ZZ", "XY", "XZ", "YZ", "VM");
 		
-		Map<String, String> values = new LinkedHashMap<>();
 		
 		ISkewPoint<IXRDStrain> point = model.getPoint(x, y);
-		if (! point.isValid()) return values;
+		if (! point.isValid()) return summaries;
 		
 		IXRDStrain data = point.getData();
 		
-		values.put("XX", fmt(data.stress()[0]));
-		values.put("YY", fmt(data.stress()[1]));
-		values.put("ZZ", fmt(data.stress()[2]));
-		values.put("XY", fmt(data.stress()[3]));
-		values.put("XZ", fmt(data.stress()[4]));
-		values.put("YZ", fmt(data.stress()[5]));
-		values.put("VM", fmt(data.strain()[6]));
+		s.addValue("XX", fmt(data.stress()[0]));
+		s.addValue("YY", fmt(data.stress()[1]));
+		s.addValue("ZZ", fmt(data.stress()[2]));
+		s.addValue("XY", fmt(data.stress()[3]));
+		s.addValue("XZ", fmt(data.stress()[4]));
+		s.addValue("YZ", fmt(data.stress()[5]));
+		s.addValue("VM", fmt(data.strain()[6]));
 				
-		return values;
+		return summaries;
 				
-	}
-
-	@Override
-	public List<String> getSummaryHeaders() {
-		return new FList<>("XX", "YY", "ZZ", "XY", "XZ", "YX", "VM");				
 	}
 
 
@@ -160,7 +158,7 @@ public class StressView extends MapView
 				false, 
 				"Strain", 
 				1,
-				false,
+				subview.getIndex() < 6,
 				axisMarkings);
 		
 		
@@ -193,4 +191,7 @@ public class StressView extends MapView
 	}
 
 
+	@Override
+	public void setPointSelected(int x, int y, boolean deselectAll) {}
+	
 }

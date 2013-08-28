@@ -1,7 +1,6 @@
 package skew.datasources.xrd.sequence;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import plural.executor.ExecutorSet;
@@ -18,11 +17,9 @@ import skew.core.viewer.modes.views.CompositeView;
 import skew.core.viewer.modes.views.MapView;
 import skew.datasources.misorientation.datasource.MisorientationDataSource;
 import skew.datasources.misorientation.datasource.calculation.misorientation.Calculation;
-import skew.models.misorientation.GrainModel;
 import skew.models.misorientation.MisAngle;
 import skew.models.orientation.IOrientationMatrix;
 import skew.models.strain.IXRDStrain;
-import skew.models.strain.XRDStrain;
 import skew.views.OrientationView;
 import skew.views.misorientation.GrainLabelView;
 import skew.views.misorientation.GrainSecondaryView;
@@ -181,7 +178,7 @@ public class SEQDataSource extends MisorientationDataSource implements IDataSour
 			);
 
 	}
-
+/*
 	private void createEmptyModels(Coord<Integer> mapsize)
 	{
 		List<ISkewPoint<MisAngle>> misanglePoints = new ArrayList<ISkewPoint<MisAngle>>();
@@ -193,16 +190,16 @@ public class SEQDataSource extends MisorientationDataSource implements IDataSour
 			strainPoints.add(new SkewPoint<IXRDStrain>(i % mapsize.x, i / mapsize.x, i, new XRDStrain()));
 		}
 		
-		grainModel = new GrainModel();
+		grainModel = new GrainModel(mapsize.x, mapsize.y);
 		misModel = new SkewGrid<MisAngle>(mapsize.x, mapsize.y, misanglePoints);
 		strainModel = new SkewGrid<IXRDStrain>(mapsize.x, mapsize.y, strainPoints);
 		
 	}
-	
+	*/
 	@Override
 	public ExecutorSet<ISkewDataset> loadDataset(List<String> filenames, Coord<Integer> mapsize) {
 		
-		createEmptyModels(mapsize);
+		//createEmptyModels(mapsize);
 		return Calculation.calculate(filenames, this, mapsize);
 				
 	}

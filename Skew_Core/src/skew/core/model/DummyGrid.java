@@ -116,11 +116,6 @@ public class DummyGrid implements ISkewGrid<Object>
 		};
 	}
 
-	@Override
-	public void setPointSelected(int x, int y, boolean deselectAll)
-	{
-		return;
-	}
 
 	@Override
 	public int getWidth()

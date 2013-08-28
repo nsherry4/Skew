@@ -9,23 +9,22 @@ public class SkewDataset implements ISkewDataset {
 
 	private String name;
 	private String path;
-	private List<ISkewGrid<?>> models;
+	private List<IModel> models;
 	private IDataSource ds;
 	
 	
 	
-	public SkewDataset(String name, String path, ISkewGrid<?> model, IDataSource ds) {
-		this(name, path, new FList<ISkewGrid<?>>(model), ds);
+	public SkewDataset(String name, String path, IModel model, IDataSource ds) {
+		this(name, path, new FList<IModel>(model), ds);
 	}
 	
-	public SkewDataset(String name, String path, List<ISkewGrid<?>> models, IDataSource ds) {
+	public SkewDataset(String name, String path, List<IModel> models, IDataSource ds) {
 		this.name = name;
 		this.path = path;
 		this.models = models;
 		this.ds = ds;
 	}
-	
-	
+
 	@Override
 	public String name() {
 		return name;
@@ -44,28 +43,22 @@ public class SkewDataset implements ISkewDataset {
 
 
 	@Override
-	public int height() {
+	public int getHeight() {
 		int max = 0;
-		for (ISkewGrid<?> g : models) {
+		for (IModel g : models) {
 			max = Math.max(max, g.getHeight());
 		}
 		return max;
 	}
 
 	@Override
-	public int width() {
+	public int getWidth() {
 		int max = 0;
-		for (ISkewGrid<?> g : models) {
+		for (IModel g : models) {
 			max = Math.max(max, g.getWidth());
 		}
 		return max;
 	}
 
-	@Override
-	public void setPointSelected(int x, int y, boolean deselectAll) {
-		for (ISkewGrid<?> model : models){
-			model.setPointSelected(x, y, deselectAll);
-		}
-	}
 
 }

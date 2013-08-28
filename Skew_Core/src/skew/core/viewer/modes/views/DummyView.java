@@ -1,16 +1,13 @@
 package skew.core.viewer.modes.views;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.SpinnerModel;
 
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.painters.axis.AxisPainter;
 import skew.core.viewer.modes.subviews.MapSubView;
-import fava.functionable.FList;
 
 public class DummyView extends MapView
 {
@@ -67,14 +64,11 @@ public class DummyView extends MapView
 
 
 	@Override
-	public Map<String, String> getSummaryData(int x, int y) {
-		return new LinkedHashMap<>();
+	public List<Summary> getSummary(int x, int y) {
+		return new ArrayList<>();
 	}
-
+	
 
 	@Override
-	public List<String> getSummaryHeaders() {
-		return new FList<>();
-	}
-
+	public void setPointSelected(int x, int y, boolean deselectAll) {}
 }

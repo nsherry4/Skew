@@ -1,8 +1,7 @@
 package skew.views.misorientation;
 
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
@@ -11,6 +10,7 @@ import scidraw.drawing.map.painters.MapPainter;
 import scitypes.Spectrum;
 import skew.core.model.ISkewGrid;
 import skew.core.viewer.modes.subviews.MapSubView;
+import skew.core.viewer.modes.views.Summary;
 import skew.models.misorientation.MisAngle;
 import fava.datatypes.Maybe;
 import fava.functionable.FList;
@@ -32,31 +32,28 @@ public class LocalView extends MisAngleView
 	}
 
 	@Override
-	public Map<String, String> getSummaryData(int x, int y)
+	public List<Summary> getSummary(int x, int y)
 	{
 		
-		Map<String, String> values = new LinkedHashMap<>();
+		List<Summary> summaries = new ArrayList<>();
+		Summary s = new Summary(getTitle());
+		summaries.add(s);
+		s.addHeader("8-Way Average", "Above", "Below", "Right", "Left");
 		
-		if (!misModel.getPoint(x, y).isValid()) {
-			values.put("Point", "Invalid Point");
-			return values;
-		}
+		
+		if (!misModel.getPoint(x, y).isValid()) return summaries;
+		
 		
 		MisAngle point = misModel.getData(x, y);
+		s.addValue("8-Way Average", formatMisValue(point.average));
+		s.addValue("Above", formatMisValue(point.north));
+		s.addValue("Below", formatMisValue(point.south));
+		s.addValue("Right", formatMisValue(point.east));
+		s.addValue("Left", formatMisValue(point.west));
 		
-		values.put("8-Way Average", formatMisValue(point.average));
-		values.put("Above", formatMisValue(point.north));
-		values.put("Below", formatMisValue(point.south));
-		values.put("Right", formatMisValue(point.east));
-		values.put("Left", formatMisValue(point.west));
-		
-		return values;
+		return summaries;
 	}
 	
-	@Override
-	public List<String> getSummaryHeaders() {
-		return new FList<>("8-Way Average", "Above", "Below", "Right", "Left");
-	}
 
 
 	@Override
@@ -107,5 +104,9 @@ public class LocalView extends MisAngleView
 		
 		misorientationPainter.setData(misorientationData);
 	}
+	
+
+	@Override
+	public void setPointSelected(int x, int y, boolean deselectAll) {}
 
 }

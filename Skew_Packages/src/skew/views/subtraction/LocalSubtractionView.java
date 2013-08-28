@@ -2,8 +2,6 @@ package skew.views.subtraction;
 
 import java.util.List;
 
-import fava.datatypes.Pair;
-import fava.functionable.FList;
 import scidraw.drawing.map.painters.RasterSpectrumMapPainter;
 import scidraw.drawing.map.painters.axis.SpectrumCoordsAxisPainter;
 import scidraw.drawing.map.palettes.AbstractPalette;
@@ -14,6 +12,8 @@ import skew.core.model.ISkewGrid;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.models.misorientation.MisAngle;
 import skew.views.misorientation.LocalView;
+import fava.datatypes.Pair;
+import fava.functionable.FList;
 
 public class LocalSubtractionView extends LocalView
 {

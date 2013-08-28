@@ -1,8 +1,7 @@
 package skew.views.misorientation;
 
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.SpinnerModel;
 
@@ -14,6 +13,7 @@ import scitypes.Spectrum;
 import skew.core.model.ISkewGrid;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
+import skew.core.viewer.modes.views.Summary;
 import skew.datasources.misorientation.drawing.GrainPalette;
 import skew.models.grain.Grain;
 import skew.models.misorientation.GrainModel;
@@ -49,26 +49,11 @@ public class GrainLabelView extends MapView
 	}
 
 	@Override
-	public Map<String, String> getSummaryData(int x, int y)
+	public List<Summary> getSummary(int x, int y)
 	{
-		Map<String, String> values = new LinkedHashMap<>();
-		
-		MisAngle point = misModel.getData(x, y);
-		values.put("Grain", formatGrainValue(point.grainIndex));
-		
-		//if this point is not part of a grain, return without g
-		if (!point.grainIndex.is()) return values;
-		
-		Grain g = grainModel.grains.get(point.grainIndex.get());
-		values.put("Size", g.points.size() + " pixels");
-		return values;
-		
+		return new ArrayList<>();
 	}
 	
-	@Override
-	public List<String> getSummaryHeaders() {
-		return new FList<>("Grain", "Size");
-	}
 
 	@Override
 	public boolean hasSublist()
@@ -127,5 +112,7 @@ public class GrainLabelView extends MapView
 	}
 
 
+	@Override
+	public void setPointSelected(int x, int y, boolean deselectAll) {}
 	
 }

@@ -20,7 +20,6 @@ public class Grain
 	public Set<Grain> neighbours = new HashSet<Grain>();
 	public int colourIndex = -1;
 	
-	public boolean selected = false;
 	public int index;
 	
 	public ISkewPoint<MisAngle> intraGrainCenter;

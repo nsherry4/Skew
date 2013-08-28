@@ -3,9 +3,7 @@ package skew.views;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.SpinnerModel;
 
@@ -17,6 +15,7 @@ import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
+import skew.core.viewer.modes.views.Summary;
 import skew.models.orientation.IOrientationMatrix;
 import skew.views.misorientation.OrientationSubView;
 import ca.sciencestudio.process.xrd.util.Orientation;
@@ -44,26 +43,33 @@ public class OrientationView extends MapView
 	}
 
 	@Override
-	public Map<String, String> getSummaryData(int x, int y)
+	public List<Summary> getSummary(int x, int y)
 	{
-		Map<String, String> values = new LinkedHashMap<>();
+		List<Summary> summaries = new ArrayList<>();
+		Summary s = new Summary("Orientation");
+		summaries.add(s);
+		s.addHeader("[001] Distance", "[001] Direction", "[110] Distance", "[110] Direction", "[111] Distance", "[111] Direction");
+
+		
 		ISkewPoint<IOrientationMatrix> omPoint = omModel.getPoint(x, y);
 		IOrientationMatrix omData = omPoint.getData();
 		
-		if (!omPoint.isValid()) return values;
+		if (!omPoint.isValid()) return summaries;
+		
+
 		
 		DirectionVector dv1 = omData.getOrientationVectors().get(0);
 		DirectionVector dv2 = omData.getOrientationVectors().get(1);
 		DirectionVector dv3 = omData.getOrientationVectors().get(2);
 		
-		values.put("[001] Distance", ""+dv1.getDistance());
-		values.put("[001] Direction", ""+dv1.getDirection());
-		values.put("[110] Distance", ""+dv2.getDistance());
-		values.put("[110] Direction", ""+dv2.getDirection());
-		values.put("[111] Distance", ""+dv3.getDistance());
-		values.put("[111] Direction", ""+dv3.getDirection());
+		s.addValue("[001] Distance",  fmt(dv1.getDistance()));
+		s.addValue("[001] Direction", fmt(dv1.getDirection()));
+		s.addValue("[110] Distance",  fmt(+dv2.getDistance()));
+		s.addValue("[110] Direction", fmt(dv2.getDirection()));
+		s.addValue("[111] Distance",  fmt(dv3.getDistance()));
+		s.addValue("[111] Direction", fmt(dv3.getDirection()));
 		
-		return values;
+		return summaries;
 		
 	}
 
@@ -130,52 +136,8 @@ public class OrientationView extends MapView
 		orientationPainter.setPixels(pixelColours);
 	}
 
-	/*
-	@Override
-	public void writeData(MapSubView subview, BufferedWriter writer) throws IOException
-	{		
-		writer.write("index, x, y, distance [001], direction [001], distance [110], direction [110], distance [111], direction [111]\n");
-		
-		for (ISkewPoint<IOrientationMatrix> omPoint : omModel.getPoints())
-		{		
-			IOrientationMatrix omData = omPoint.getData();
-			if (omData.getOrientationVectors() == null)
-			{
-				writer.write(omPoint.getIndex() + ", " + omPoint.getX() + ", " + omPoint.getY() + ", " + "-, -, -, -, -, -\n");
-			}
-			else
-			{
-				DirectionVector dv1 = omData.getOrientationVectors().get(0);
-				DirectionVector dv2 = omData.getOrientationVectors().get(1);
-				DirectionVector dv3 = omData.getOrientationVectors().get(2);
-				
-				writer.write(
-						omPoint.getIndex() + ", " + 
-						omPoint.getX() + ", " + 
-						omPoint.getY() + ", " +
-						(misModel == null ? "" : misModel.getData(omPoint.getIndex()).grain) + ", " + 
-						
-						fmt(dv1.getDistance()) + ", " + 
-						fmt(dv1.getDirection()) + ", " +
-												
-						fmt(dv2.getDistance()) + ", " + 
-						fmt(dv2.getDirection()) + ", " +
-						
-						fmt(dv3.getDistance()) + ", " + 
-						fmt(dv3.getDirection()) +
-						
-						"\n"
-					);
-			}
-		}
-	}
-	*/
-	
 
 	@Override
-	public List<String> getSummaryHeaders() {
-		return new FList<>("[001] Distance", "[001] Direction", "[110] Distance", "[110] Direction", "[111] Distance", "[111] Direction");
-	}
-	
+	public void setPointSelected(int x, int y, boolean deselectAll) {}
 	
 }

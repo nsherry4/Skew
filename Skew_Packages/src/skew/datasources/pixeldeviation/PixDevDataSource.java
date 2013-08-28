@@ -9,6 +9,7 @@ import plural.executor.PluralExecutor;
 import scitypes.Coord;
 import skew.core.datasource.Acceptance;
 import skew.core.datasource.BasicDataSource;
+import skew.core.model.IModel;
 import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 import skew.core.model.SkewGrid;
@@ -46,7 +47,7 @@ public class PixDevDataSource extends BasicDataSource
 	}
 
 	@Override
-	public List<ISkewGrid<?>> load(List<String> filenames, Coord<Integer> mapsize, final PluralExecutor executor)
+	public List<IModel> load(List<String> filenames, Coord<Integer> mapsize, final PluralExecutor executor)
 	{
 		//tokenize the file
 		String filename = filenames.get(0);
@@ -85,7 +86,7 @@ public class PixDevDataSource extends BasicDataSource
 		
 		//return data structure
 		model = new SkewGrid<Float>(mapsize.x, mapsize.y, values);
-		return new FList<ISkewGrid<?>>(model); 
+		return new FList<IModel>(model); 
 		
 	}
 	

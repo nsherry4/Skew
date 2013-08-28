@@ -67,10 +67,6 @@ public abstract class TranslatingSkewGrid<T> implements ISkewGrid<T>
 		return getPoint(x, y).getData();
 	}
 
-	@Override
-	public void setPointSelected(int x, int y, boolean deselectAll) {
-		backing.setPointSelected(x+dx, y+dy, deselectAll);
-	}
 	
 	protected abstract T getOutOfBoundsPoint();
 	

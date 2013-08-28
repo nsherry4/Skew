@@ -5,23 +5,27 @@ package skew.models.misorientation;
  * @author Jinhui Qin, 2011
  *
  */
-import java.util.ArrayList;
 import java.util.List;
 
+import skew.core.model.IModel;
 import skew.core.model.ISkewPoint;
 import skew.models.grain.Grain;
 import fava.functionable.FList;
 
 
-public class GrainModel
+public class GrainModel implements IModel
 {
 	
 	public List<Grain> grains;
 	public int grainCount = 0;
 
-	public GrainModel()
+	private int width, height;
+	
+	public GrainModel(int width, int height)
 	{
 		this.grains = new FList<>();
+		this.width = width;
+		this.height = height;
 	}
 		
 	
@@ -38,25 +42,20 @@ public class GrainModel
 		return grains.get(data.grainIndex.get());
 	}
 	 
-	public boolean selectGrain(MisAngle point, boolean multiselect)
-	{
-		Grain g = getGrain(point);
-		if (g == null) return false;
-		
-		boolean alreadySelected = g.selected;
-		if (!multiselect) for (Grain grain : grains) { grain.selected = false; }
-		g.selected = !alreadySelected;
-		
-		return g.selected;
-		
+
+
+	@Override
+	public int getWidth() {
+		return width;
 	}
-	
-	public List<Grain> getSelectedGrains()
-	{
-		List<Grain> selected = new ArrayList<Grain>();
-		for (Grain g : grains) { if (g.selected) selected.add(g); }
-		return selected;
+
+
+	@Override
+	public int getHeight() {
+		return height;
 	}
+
+
 
 	
 }

@@ -1,4 +1,4 @@
-package skew.datasources.xrd.strain;
+package skew.datasources.xrd.subtraction;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -10,11 +10,13 @@ import scitypes.Coord;
 import skew.core.datasource.Acceptance;
 import skew.core.datasource.BasicDataSource;
 import skew.core.datasource.DataSource;
+import skew.core.model.IModel;
 import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 import skew.core.model.SkewGrid;
 import skew.core.viewer.modes.views.MapView;
 import skew.datasources.misorientation.datasource.calculation.misorientation.IndexFileName;
+import skew.datasources.xrd.XRDUtil;
 import skew.models.strain.IXRDStrain;
 import skew.models.strain.XRDStrain;
 import skew.views.strain.StrainView;
@@ -54,7 +56,7 @@ public class SubtractionDataSource extends BasicDataSource
 	}
 
 	@Override
-	public List<ISkewGrid<?>> load(final List<String> filenames, final Coord<Integer> mapsize, final PluralExecutor executor) {
+	public List<IModel> load(final List<String> filenames, final Coord<Integer> mapsize, final PluralExecutor executor) {
 
 		executor.setStalling(false);
 		executor.setWorkUnits(filenames.size());
@@ -85,7 +87,7 @@ public class SubtractionDataSource extends BasicDataSource
 					data.strain()[3] = Double.parseDouble(contents.get(4));	//YY
 					data.strain()[4] = Double.parseDouble(contents.get(5));	//YZ
 					data.strain()[5] = Double.parseDouble(contents.get(8));	//ZZ
-					data.strain()[6] = XRDStrainUtil.vonMises(data.strain());
+					data.strain()[6] = XRDUtil.vonMises(data.strain());
 					
 					p.setValid(true);
 					
@@ -106,7 +108,7 @@ public class SubtractionDataSource extends BasicDataSource
 		views.add(new StrainView(model));
 		
 		//Return a list of Grids/Models 
-		return new FList<ISkewGrid<?>>(model);
+		return new FList<IModel>(model);
 	}
 	
 	@Override

@@ -1,10 +1,7 @@
 package skew.views;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.SpinnerModel;
 
@@ -17,6 +14,7 @@ import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.painter.RasterColorMapWrapper;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
+import skew.core.viewer.modes.views.Summary;
 import fava.datatypes.Pair;
 import fava.functionable.FList;
 
@@ -61,11 +59,6 @@ public class PixelDeviationComparisonView extends MapView
 		return null;
 	}
 
-	@Override
-	public Map<String, String> getSummaryData(int x, int y)
-	{
-		return new HashMap<>();
-	}
 
 	@Override
 	public boolean hasSublist()
@@ -147,11 +140,15 @@ public class PixelDeviationComparisonView extends MapView
 		}
 	}
 
+
 	@Override
-	public List<String> getSummaryHeaders() {
-		return new ArrayList<>();
+	public List<Summary> getSummary(int x, int y) {
+		return new FList<>(new Summary("Pixel Deviation"));
 	}
 
 
+
+	@Override
+	public void setPointSelected(int x, int y, boolean deselectAll) {}
 
 }

@@ -1,6 +1,6 @@
-package skew.datasources.xrd.strain;
+package skew.datasources.xrd;
 
-public class XRDStrainUtil {
+public class XRDUtil {
 
 	public static double vonMises(double[] a)
 	{

@@ -1,8 +1,8 @@
 package skew.core.viewer.modes.views;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.SpinnerModel;
 
@@ -88,15 +88,6 @@ public class CompositeView extends MapView
 		return primary.toString();
 	}
 
-	@Override
-	public Map<String, String> getSummaryData(int x, int y) {
-		return primary.getSummaryData(x, y);
-	}
-
-	@Override
-	public List<String> getSummaryHeaders() {
-		return primary.getSummaryHeaders();
-	}
 
 	@Override
 	public void setTitle(String title) {
@@ -107,6 +98,22 @@ public class CompositeView extends MapView
 	public String getTitle() {
 		return primary.getTitle();
 	}
+
+	@Override
+	public List<Summary> getSummary(int x, int y) {
+		List<Summary> summaries = new ArrayList<>();
+		summaries.addAll(primary.getSummary(x, y));
+		for (MapView v : secondary) {
+			summaries.addAll(v.getSummary(x, y));
+		}
+		return summaries;
+	}
 	
+
+	@Override
+	public void setPointSelected(int x, int y, boolean deselectAll) {
+		primary.setPointSelected(x, y, deselectAll);
+		for (MapView s : secondary) s.setPointSelected(x, y, deselectAll);
+	}
 	
 }
