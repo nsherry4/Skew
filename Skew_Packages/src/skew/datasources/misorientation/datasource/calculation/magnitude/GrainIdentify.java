@@ -3,7 +3,7 @@ package skew.datasources.misorientation.datasource.calculation.magnitude;
 import java.util.List;
 
 import skew.core.model.ISkewGrid;
-import skew.models.misorientation.GrainModel;
+import skew.models.grain.GrainPixel;
 import skew.models.misorientation.MisAngle;
 import fava.functionable.FList;
 
@@ -11,37 +11,39 @@ import fava.functionable.FList;
 public class GrainIdentify
 {
 	
-	private GrainModel grainModel;
+	private ISkewGrid<GrainPixel> grainModel;
 	private ISkewGrid<MisAngle> misModel;
 	
-	public static void calculate(ISkewGrid<MisAngle> misModel, GrainModel grainModel)
+	public static void calculate(ISkewGrid<MisAngle> misModel, ISkewGrid<GrainPixel> grainModel)
 	{
 		new GrainIdentify(misModel, grainModel).calculateGrains();
 		
 	}
 	
-	private GrainIdentify(ISkewGrid<MisAngle> misModel, GrainModel grainModel)
+	private GrainIdentify(ISkewGrid<MisAngle> misModel, ISkewGrid<GrainPixel> grainModel)
 	{
 		this.grainModel = grainModel;
 		this.misModel = misModel;
 	}
 	
+	//determines the grain index number for each pixel
 	private void calculateGrains()
 	{
 		
-		for (int i = 0; i < misModel.size(); i++)
+		for (int i = 0; i < grainModel.size(); i++)
 		{
-			misModel.getData(i).grainIndex.set(i);
+			grainModel.getData(i).grainIndex.set(i);
 		}
 		
-		for (int y = 0; y < misModel.getHeight(); y++) {
-			for (int x = 0; x < misModel.getWidth(); x++){
+		for (int y = 0; y < grainModel.getHeight(); y++) {
+			for (int x = 0; x < grainModel.getWidth(); x++){
 			
-				MisAngle point = misModel.getData(x, y);
+				GrainPixel grainData = grainModel.getData(x, y);
+				MisAngle misData = misModel.getData(x, y);
 				
 				//skip unindexed points, and points out of bounds
-				if (point == null) continue;
-				if (!point.average.is()) continue;
+				if (grainData == null) continue;
+				if (!misData.average.is()) continue;
 				
 				boolean north = sameGrainNorth(x, y);
 				boolean west = sameGrainWest(x, y);
@@ -52,53 +54,56 @@ public class GrainIdentify
 				if (north && west)
 				{
 					union(westGrain, northGrain);
-					point.grainIndex.set(northGrain);
+					grainData.grainIndex.set(northGrain);
 				}
 				else if (north)
 				{
-					point.grainIndex.set(northGrain);
+					grainData.grainIndex.set(northGrain);
 				}
 				else if (west)
 				{
-					point.grainIndex.set(westGrain);
+					grainData.grainIndex.set(westGrain);
 				}
 				else
 				{
-					if (!point.average.is()) point.grainIndex.set();
+					if (!misData.average.is()) grainData.grainIndex.set();
 				}
 
 			}
 		}
 		
-		for (int i = 0; i < misModel.size(); i++)
+		for (int i = 0; i < grainModel.size(); i++)
 		{
 			find(i);
 		}
 		
 		List<Integer> labels = new FList<Integer>();
 		int fresh = 0;
-		for (int i = 0; i < misModel.size(); i++)
+		for (int i = 0; i < grainModel.size(); i++)
 		{
 			
-			MisAngle p = misModel.getData(i);
-			if (p == null) continue;
-			if ((!p.average.is()) || isSinglePixelGrain(i)) {
-				p.grainIndex.set();
+			MisAngle misData = misModel.getData(i);
+			GrainPixel grainData = grainModel.getData(i);
+			
+			if (misData == null) continue;
+			if ((!misData.average.is()) || isSinglePixelGrain(i)) {
+				grainData.grainIndex.set();
 				continue;
 			}
 			
-			if (labels.size() <= p.grainIndex.get() || labels.get(p.grainIndex.get()) == null)
+			if (labels.size() <= grainData.grainIndex.get() || labels.get(grainData.grainIndex.get()) == null)
 			{
-				labels.set(p.grainIndex.get(), fresh);
+				labels.set(grainData.grainIndex.get(), fresh);
 				fresh++;
 			}
 			
-			p.grainIndex.set(labels.get(p.grainIndex.get()));
+			grainData.grainIndex.set(labels.get(grainData.grainIndex.get()));
 			
 			
 		}
 
-		grainModel.grainCount = fresh;
+		//TODO: Is this required anywhere? 
+		//grainModel.grainCount = fresh;
 		
 	}
 	
@@ -146,19 +151,19 @@ public class GrainIdentify
 	
 	private int find(int i)
 	{
-		if (i >= misModel.size()) return -1;
+		if (i >= grainModel.size()) return -1;
 		if (i < 0) return -1;
 		
 		int j = i;
-		while (misModel.getData(j).grainIndex.get() != j)
+		while (grainModel.getData(j).grainIndex.get() != j)
 		{
-			j = misModel.getData(j).grainIndex.get();
+			j = grainModel.getData(j).grainIndex.get();
 		}
 		
-		while (misModel.getData(i).grainIndex.get() != i)
+		while (grainModel.getData(i).grainIndex.get() != i)
 		{
-			int k = misModel.getData(i).grainIndex.get();
-			misModel.getData(i).grainIndex.set(j);
+			int k = grainModel.getData(i).grainIndex.get();
+			grainModel.getData(i).grainIndex.set(j);
 			i = k;
 		}
 		
@@ -168,7 +173,7 @@ public class GrainIdentify
 	
 	private void union(int x, int y)
 	{
-		misModel.getData(find(x)).grainIndex.set(find(y));
+		grainModel.getData(find(x)).grainIndex.set(find(y));
 		
 	}
 

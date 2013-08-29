@@ -23,7 +23,7 @@ import skew.datasources.misorientation.datasource.calculation.magnitude.Magnitud
 import skew.datasources.misorientation.datasource.calculation.misorientation.Calculation;
 import skew.datasources.misorientation.datasource.calculation.misorientation.IndexFileName;
 import skew.datasources.xrd.XRDUtil;
-import skew.models.misorientation.GrainModel;
+import skew.models.grain.GrainPixel;
 import skew.models.misorientation.MisAngle;
 import skew.models.orientation.IOrientationMatrix;
 import skew.models.orientation.OrientationMatrix;
@@ -56,7 +56,9 @@ public class PairSubtractionDataSource extends BasicDataSource
 	private ISkewGrid<MisAngle> beforeMisModel, afterMisModel, subtractMisModel;
 	
 	private TranslatingSkewGrid<MisAngle> beforeTranslatedMisModel, afterTranslatedMisModel;
-	private GrainModel beforeGrainModel, afterGrainModel;
+	private TranslatingSkewGrid<GrainPixel> beforeTranslatedGrainModel, afterTranslatedGrainModel;
+	
+	private ISkewGrid<GrainPixel> beforeGrainModel, afterGrainModel;
 	
 	
 	private Coord<Integer> dimensions;
@@ -95,10 +97,8 @@ public class PairSubtractionDataSource extends BasicDataSource
 		
 		//Strain models
 		FnGet<IXRDStrain> getStrPoint = new FnGet<IXRDStrain>() {
-
-			@Override
-			public IXRDStrain f() {	return new XRDStrain(); }
-		};
+			@Override public IXRDStrain f() {	return new XRDStrain(); }};
+			
 		final List<ISkewPoint<IXRDStrain>> beforeStrList = DataSource.getEmptyPoints(dimensions, getStrPoint);
 		final List<ISkewPoint<IXRDStrain>> afterStrList = DataSource.getEmptyPoints(dimensions, getStrPoint);
 		final List<ISkewPoint<IXRDStrain>> subtractStrList = DataSource.getEmptyPoints(dimensions, getStrPoint);
@@ -107,14 +107,16 @@ public class PairSubtractionDataSource extends BasicDataSource
 		
 		//Orientation models
 		FnGet<IOrientationMatrix> getOMPoint = new FnGet<IOrientationMatrix>() {
-
-			@Override
-			public IOrientationMatrix f() {	return new OrientationMatrix(); }
-		};		
+			@Override public IOrientationMatrix f() {	return new OrientationMatrix(); }};
+			
 		final List<ISkewPoint<IOrientationMatrix>> beforeOMList = DataSource.getEmptyPoints(dimensions, getOMPoint);
 		final List<ISkewPoint<IOrientationMatrix>> afterOMList = DataSource.getEmptyPoints(dimensions, getOMPoint);
 		
 		
+		//Grain models
+		FnGet<GrainPixel> getGrainPoint = new FnGet<GrainPixel>() {
+			@Override public GrainPixel f() {	return new GrainPixel(); }};
+			
 		
 		//MisAngle models
 		FnGet<MisAngle> getMisPoint = new FnGet<MisAngle>() {
@@ -127,8 +129,8 @@ public class PairSubtractionDataSource extends BasicDataSource
 		subtractMisModel = new SkewGrid<MisAngle>(dimensions.x , dimensions.y, DataSource.getEmptyPoints(dimensions, getMisPoint));
 		
 		
-		beforeGrainModel = new GrainModel(dimensions.x , dimensions.y);
-		afterGrainModel = new GrainModel(dimensions.x , dimensions.y);
+		beforeGrainModel = new SkewGrid<GrainPixel>(dimensions.x , dimensions.y, DataSource.getEmptyPoints(dimensions, getGrainPoint));
+		afterGrainModel = new SkewGrid<GrainPixel>(dimensions.x , dimensions.y, DataSource.getEmptyPoints(dimensions, getGrainPoint));
 		
 		
 		FList.wrap(filenames).each(new FnEach<String>() {
@@ -223,16 +225,32 @@ public class PairSubtractionDataSource extends BasicDataSource
 				return new MisAngle();
 			}};
 			
+		beforeTranslatedGrainModel = new TranslatingSkewGrid<GrainPixel>(beforeGrainModel, 0, 0) {
+
+			@Override
+			protected GrainPixel getOutOfBoundsPoint() {
+				return new GrainPixel();
+			}};
+		
+		afterTranslatedGrainModel = new TranslatingSkewGrid<GrainPixel>(afterGrainModel, 0, 0) {
+
+			@Override
+			protected GrainPixel getOutOfBoundsPoint() {
+				return new GrainPixel();
+			}};	
+	
+			
 			
 		recalculate();
+		MapView beforeTranslatedGrainView, afterTranslatedGrainView;
 		
-		MapView beforeGrain = new GrainSecondaryView(beforeTranslatedMisModel, beforeGrainModel, Color.black, false);
-		MapView afterGrain = new GrainSecondaryView(afterTranslatedMisModel, afterGrainModel, Color.white, false);
-		beforeGrain.setTitle(beforeGrain.getTitle() + " (Before)");
-		afterGrain.setTitle(afterGrain.getTitle() + " (After)");
+		beforeTranslatedGrainView = new GrainSecondaryView(beforeTranslatedMisModel, beforeTranslatedGrainModel, Color.black, true);
+		afterTranslatedGrainView = new GrainSecondaryView(afterTranslatedMisModel, afterTranslatedGrainModel, Color.white, true);
+		beforeTranslatedGrainView.setTitle(beforeTranslatedGrainView.getTitle() + " (Before)");
+		afterTranslatedGrainView.setTitle(afterTranslatedGrainView.getTitle() + " (After)");
 
 		
-		views.add(new CompositeView(new StrainView(subtractStrModel), beforeGrain, afterGrain));
+		views.add(new CompositeView(new StrainView(subtractStrModel), beforeTranslatedGrainView, afterTranslatedGrainView));
 		
 		
 		MapView primary;
@@ -253,14 +271,20 @@ public class PairSubtractionDataSource extends BasicDataSource
 		
 		primary = new LocalSubtractionView(subtractMisModel);
 		primary.setTitle(primary.getTitle() + " (Subtracted)");
-		views.add(new CompositeView(primary, beforeGrain, afterGrain));
+		
+		beforeTranslatedGrainView = new GrainSecondaryView(beforeTranslatedMisModel, beforeTranslatedGrainModel, Color.black, true);
+		afterTranslatedGrainView = new GrainSecondaryView(afterTranslatedMisModel, afterTranslatedGrainModel, Color.white, true);
+		beforeTranslatedGrainView.setTitle(beforeTranslatedGrainView.getTitle() + " (Before)");
+		afterTranslatedGrainView.setTitle(afterTranslatedGrainView.getTitle() + " (After)");
+		
+		views.add(new CompositeView(primary, beforeTranslatedGrainView, afterTranslatedGrainView));
 		
 		
 		//Return a list of Grids/Models 
 		return new FList<IModel>(subtractStrModel, beforeMisModel, afterMisModel, beforeGrainModel, afterGrainModel);
 	}
 	
-	private void calculateMisModel(ISkewGrid<MisAngle> misModel, GrainModel grainModel, ISkewGrid<IOrientationMatrix> omGrid)
+	private void calculateMisModel(ISkewGrid<MisAngle> misModel, ISkewGrid<GrainPixel> grainModel, ISkewGrid<IOrientationMatrix> omGrid)
 	{
 		Calculation.calcLocalMisorientation(misModel, omGrid, dimensions.x, dimensions.y).executeBlocking();
 			
@@ -268,7 +292,7 @@ public class PairSubtractionDataSource extends BasicDataSource
 		GrainIdentify.calculate(misModel, grainModel);
 
 		//create grain objects for all grain labels
-		Magnitude.setupGrains(grainModel, misModel);
+		Magnitude.setupGrains(grainModel);
 		
 		Calculation.calculateGrainMagnitude(grainModel, misModel, omGrid).executeBlocking();
 	}
@@ -314,6 +338,7 @@ public class PairSubtractionDataSource extends BasicDataSource
 		int ty = (Integer)vShift.getValue();
 		
 		beforeTranslatedMisModel.setTranslation(-tx, -ty);
+		beforeTranslatedGrainModel.setTranslation(-tx,  -ty);
 		
 		//After = After - Before
 		for (int x = 0; x < dimensions.x; x++)	{

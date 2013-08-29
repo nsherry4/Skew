@@ -1,6 +1,7 @@
 package skew.core.model;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class SkewGrid<T> implements ISkewGrid<T>
@@ -41,6 +42,11 @@ public class SkewGrid<T> implements ISkewGrid<T>
 		return getPoint(width * y + x);
 	}
 	
+	@Override
+	public ISkewPoint<T> getPoint(ISkewPoint<?> point) {
+		return getPoint(point.getIndex());
+	}
+	
 	
 	@Override
 	public int getWidth()
@@ -72,6 +78,10 @@ public class SkewGrid<T> implements ISkewGrid<T>
 		return getPoint(x, y).getData();
 	}
 
+	@Override
+	public T getData(ISkewPoint<?> point) {
+		return getData(point.getIndex());
+	}
 
 
 	
@@ -128,6 +138,18 @@ public class SkewGrid<T> implements ISkewGrid<T>
 	{
 		return grid.getPoint(p.getX(), p.getY()-1);
 	}
-	
+
+
+	@Override
+	public Iterator<ISkewPoint<T>> iterator() {
+		return getPoints().iterator();
+	}
+
+
+
+
+
+
+
 
 }

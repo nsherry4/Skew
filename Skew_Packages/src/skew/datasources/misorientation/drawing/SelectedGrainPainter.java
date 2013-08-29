@@ -8,24 +8,27 @@ import java.util.List;
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.map.palettes.ThermalScalePalette;
 import scidraw.drawing.painters.PainterData;
+import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 import skew.models.grain.Grain;
-import skew.models.misorientation.GrainModel;
-import skew.models.misorientation.MisAngle;
+import skew.models.grain.GrainUtil;
+import skew.models.grain.GrainPixel;
 
 public class SelectedGrainPainter extends MapPainter
 {
 
-	private GrainModel grid;
+	private ISkewGrid<GrainPixel> grainModel;
 	private List<Grain> selectedGrains = new ArrayList<>();
+	private List<Grain> grains;
 	
-	public SelectedGrainPainter(GrainModel data) {
+	public SelectedGrainPainter(ISkewGrid<GrainPixel> data) {
 		super(new ThermalScalePalette());
-		this.grid = data;
+		setData(data);
 	}
 	
-	public void setData(GrainModel data) {
-		this.grid = data;
+	public void setData(ISkewGrid<GrainPixel> data) {
+		this.grainModel = data;
+		grains = GrainUtil.getGrains(grainModel);
 	}
 	
 	@Override
@@ -36,14 +39,15 @@ public class SelectedGrainPainter extends MapPainter
 		p.context.clip();
 		
 		float pad = cellSize * 0.1f;
+			
 		
-		for (Grain g : grid.grains)
+		for (Grain g : grains)
 		{
 		
 			if (g == null) continue;
 			if (!isGrainSelected(g)) continue;
 				
-			for (ISkewPoint<MisAngle> point : g.points)
+			for (ISkewPoint<GrainPixel> point : GrainUtil.getGrainPoints(grainModel, g))
 			{
 				if (  (point.getX() % 2 == 1 && point.getY() % 2 == 1)  ||  (point.getX() % 2 == 0 && point.getY() % 2 == 0)  ){
 					//p.context.rectangle(cellSize * point.x, cellSize * point.y, cellSize, cellSize);
@@ -58,13 +62,13 @@ public class SelectedGrainPainter extends MapPainter
 		
 		
 		
-		for (Grain g : grid.grains)
+		for (Grain g : grains)
 		{
 		
 			if (g == null) continue;
 			if (!isGrainSelected(g)) continue;
 				
-			for (ISkewPoint<MisAngle> point : g.points)
+			for (ISkewPoint<GrainPixel> point : GrainUtil.getGrainPoints(grainModel, g))
 			{
 				if (!(  (point.getX() % 2 == 1 && point.getY() % 2 == 1)  ||  (point.getX() % 2 == 0 && point.getY() % 2 == 0)  )){
 					p.context.addShape(new Ellipse2D.Double(cellSize * point.getX() + pad, cellSize * point.getY() + pad, cellSize - (2*pad), cellSize - (2*pad)));
@@ -86,9 +90,9 @@ public class SelectedGrainPainter extends MapPainter
 		return false;
 	}
 
-	public void setPointSelected(ISkewPoint<MisAngle> misData, boolean multiselect) 
+	public void setPointSelected(ISkewPoint<GrainPixel> grainPoint, boolean multiselect) 
 	{
-		Grain g = grid.getGrain(misData);
+		Grain g = grainPoint.getData().grain;
 		if (g == null) return;
 		
 		// if grain was already selected
@@ -99,30 +103,8 @@ public class SelectedGrainPainter extends MapPainter
 	}
 	
 	private boolean isGrainSelected(Grain g) { return selectedGrains.contains(g); }
-	private void deselectGrain(Grain g) { selectedGrains.remove(g); }
 	private void deselectAllGrains() { selectedGrains.clear(); }
 	private void selectGrain(Grain g) { selectedGrains.add(g); }
 	
-/*
-	public boolean selectGrain(MisAngle point, boolean multiselect)
-	{
-		Grain g = getGrain(point);
-		if (g == null) return false;
-		
-		boolean alreadySelected = g.selected;
-		if (!multiselect) for (Grain grain : grains) { grain.selected = false; }
-		g.selected = !alreadySelected;
-		
-		return g.selected;
-		
-	}
-	
-	public List<Grain> getSelectedGrains()
-	{
-		List<Grain> selected = new ArrayList<Grain>();
-		for (Grain g : grains) { if (g.selected) selected.add(g); }
-		return selected;
-	}
-*/
 	
 }

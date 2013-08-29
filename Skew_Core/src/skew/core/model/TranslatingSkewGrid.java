@@ -1,6 +1,7 @@
 package skew.core.model;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public abstract class TranslatingSkewGrid<T> implements ISkewGrid<T>
@@ -47,6 +48,11 @@ public abstract class TranslatingSkewGrid<T> implements ISkewGrid<T>
 		}
 		return new SkewPoint<T>(x, y, x+y*getWidth(), backing.getData(x+dx, y+dy));
 	}
+	
+	@Override
+	public ISkewPoint<T> getPoint(ISkewPoint<?> point) {
+		return getPoint(point.getIndex());
+	}
 
 	@Override
 	public List<ISkewPoint<T>> getPoints() {
@@ -67,7 +73,38 @@ public abstract class TranslatingSkewGrid<T> implements ISkewGrid<T>
 		return getPoint(x, y).getData();
 	}
 
+	@Override
+	public T getData(ISkewPoint<?> point) {
+		return getData(point.getIndex());
+	}
+
+	
+
+	@Override
+	public Iterator<ISkewPoint<T>> iterator() {
+		return new Iterator<ISkewPoint<T>>() {
+
+			Iterator<ISkewPoint<T>> backingIterator = backing.iterator();
+			
+			@Override
+			public boolean hasNext() {
+				return backingIterator.hasNext();
+			}
+
+			@Override
+			public ISkewPoint<T> next() {
+				ISkewPoint<T> raw = backingIterator.next();
+				return TranslatingSkewGrid.this.getPoint(raw.getIndex());
+			}
+
+			@Override
+			public void remove() {
+				backingIterator.remove();
+			}};
+	}
 	
 	protected abstract T getOutOfBoundsPoint();
+
+
 	
 }

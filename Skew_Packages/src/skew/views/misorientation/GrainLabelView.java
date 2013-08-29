@@ -16,7 +16,7 @@ import skew.core.viewer.modes.views.MapView;
 import skew.core.viewer.modes.views.Summary;
 import skew.datasources.misorientation.drawing.GrainPalette;
 import skew.models.grain.Grain;
-import skew.models.misorientation.GrainModel;
+import skew.models.grain.GrainPixel;
 import skew.models.misorientation.MisAngle;
 import fava.functionable.FList;
 
@@ -28,10 +28,10 @@ public class GrainLabelView extends MapView
 	
 	AbstractPalette grainpalette = new GrainPalette();
 	private ISkewGrid<MisAngle> misModel;
-	private GrainModel grainModel;
+	private ISkewGrid<GrainPixel> grainModel;
 	
 	
-	public GrainLabelView(ISkewGrid<MisAngle> model, GrainModel grainModel)
+	public GrainLabelView(ISkewGrid<MisAngle> model, ISkewGrid<GrainPixel> grainModel)
 	{
 		super("Grain Labels");
 		this.misModel = model;
@@ -97,14 +97,14 @@ public class GrainLabelView extends MapView
 		
 		Spectrum misorientationData = new Spectrum(misModel.size());
 		
-		for (int i = 0; i < misModel.size(); i++)
+		for (int i = 0; i < grainModel.size(); i++)
 		{
-			MisAngle misAngle = misModel.getData(i);
-			if (!misAngle.grainIndex.is()) {
+			GrainPixel grainData = grainModel.getData(i);
+			if (!grainData.grainIndex.is()) {
 				misorientationData.set(i, -1f); 
 				continue;
 			}
-			Grain g = grainModel.getGrain(misAngle);
+			Grain g = grainData.grain;
 			misorientationData.set(i, g.colourIndex);
 		}
 		

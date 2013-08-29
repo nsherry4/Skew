@@ -13,7 +13,8 @@ import skew.core.model.ISkewGrid;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.Summary;
 import skew.models.grain.Grain;
-import skew.models.misorientation.GrainModel;
+import skew.models.grain.GrainUtil;
+import skew.models.grain.GrainPixel;
 import skew.models.misorientation.MisAngle;
 import fava.datatypes.Maybe;
 import fava.functionable.FList;
@@ -21,7 +22,7 @@ import fava.functionable.FList;
 
 public class MagnitudeView extends MisAngleView
 {
-	public MagnitudeView(ISkewGrid<MisAngle> misModel, GrainModel grainModel) {
+	public MagnitudeView(ISkewGrid<MisAngle> misModel, ISkewGrid<GrainPixel> grainModel) {
 		super("Grain Magnitude", misModel, grainModel);
 	}
 
@@ -33,7 +34,7 @@ public class MagnitudeView extends MisAngleView
 		
 		float grainVal;
 		float maxVal = 0;
-		for (Grain g : grainModel.grains)
+		for (Grain g : GrainUtil.getGrains(grainModel))
 		{
 			grainVal = (float) gms.select(new double[]{g.magMin, g.magMax, g.magAvg});
 			maxVal = Math.max(grainVal, maxVal);
@@ -53,10 +54,10 @@ public class MagnitudeView extends MisAngleView
 		s.addHeader("Magnitude (Min)", "Magnitude, (Avg)", "Magnitude (Max)");
 		
 	
-		MisAngle point = misModel.getPoint(x, y).getData();
+		GrainPixel grainData = grainModel.getData(x, y);
 			
-		if (!point.grainIndex.is()) return summaries;
-		Grain g = grainModel.getGrain(point);
+		if (!grainData.grainIndex.is()) return summaries;
+		Grain g = grainData.grain;
 		
 		s.addValue("Magnitude (Min)", formatMisValue(new Maybe<>(g.magMin)));
 		s.addValue("Magnitude (Avg)", formatMisValue(new Maybe<>(g.magAvg)));
@@ -112,13 +113,13 @@ public class MagnitudeView extends MisAngleView
 		
 		for (int i = 0; i < misModel.size(); i++)
 		{
-			MisAngle misData = misModel.getData(i);
+			GrainPixel grainData = grainModel.getData(i);
 			double v;
-			if (!misData.grainIndex.is())
+			if (!grainData.grainIndex.is())
 			{
 				v = -1;
 			} else {
-				Grain g = grainModel.getGrain(misData);
+				Grain g = grainData.grain;
 				v = mag.select(new double[]{g.magMin, g.magMax, g.magAvg});
 			}
 			misorientationData.set(i, (float)v);

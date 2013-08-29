@@ -11,7 +11,7 @@ import skew.core.model.ISkewGrid;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
 import skew.datasources.misorientation.drawing.EBSDPalette;
-import skew.models.misorientation.GrainModel;
+import skew.models.grain.GrainPixel;
 import skew.models.misorientation.MisAngle;
 import fava.datatypes.Pair;
 import fava.functionable.FList;
@@ -29,9 +29,9 @@ public abstract class MisAngleView extends MapView
 	protected AxisPainter spectrum;
 	
 	protected ISkewGrid<MisAngle> misModel;
-	protected GrainModel grainModel;
+	protected ISkewGrid<GrainPixel> grainModel;
 	
-	public MisAngleView(String title, ISkewGrid<MisAngle> misModel, GrainModel grainModel)
+	public MisAngleView(String title, ISkewGrid<MisAngle> misModel, ISkewGrid<GrainPixel> grainModel)
 	{
 		super(title);
 		

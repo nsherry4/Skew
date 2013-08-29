@@ -17,11 +17,7 @@ public class MisAngle
 	
 	// average is mean average of all eight neighbors (if any<5)
 	public Maybe<Double> average, north, east, south, west;
-	
-	public Maybe<Integer> grainIndex;
-	public double grainMagnitude;
-	public Maybe<Double> intraGrainMisorientation;
-	
+
 	public MisAngle()
 	{		
 		average = new Maybe<>();
@@ -30,8 +26,7 @@ public class MisAngle
 		south = new Maybe<>();
 		west = new Maybe<>();
 		
-		grainIndex = new Maybe<>();
-		intraGrainMisorientation = new Maybe<>();
+
 		
 	}
 

@@ -1,8 +1,10 @@
 package skew.datasources.misorientation.datasource.calculation.magnitude;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import skew.core.model.ISkewGrid;
@@ -10,53 +12,57 @@ import skew.core.model.ISkewPoint;
 import skew.core.model.SkewGrid;
 import skew.datasources.misorientation.datasource.calculation.misorientation.Calculation;
 import skew.models.grain.Grain;
-import skew.models.misorientation.GrainModel;
-import skew.models.misorientation.MisAngle;
+import skew.models.grain.GrainUtil;
+import skew.models.grain.GrainPixel;
 import skew.models.orientation.IOrientationMatrix;
 import fava.functionable.FList;
 
 public class Magnitude
 {
-	public static int setupGrains(GrainModel data, ISkewGrid<MisAngle> misModel)
+	public static int setupGrains(ISkewGrid<GrainPixel> grainModel)
 	{
 		
-		//Construct a list of Grains from the data
-		data.grains = new FList<Grain>();
-		for (int y = 0; y < misModel.getHeight(); y++){
-			for (int x = 0; x < misModel.getWidth(); x++){
+		//Construct a list of Grains from the data in the grain index value for each point
+		List<Grain> grains = new FList<>();
+		for (int y = 0; y < grainModel.getHeight(); y++){
+			for (int x = 0; x < grainModel.getWidth(); x++){
 
-				ISkewPoint<MisAngle> misPoint = misModel.getPoint(x, y);	
+				ISkewPoint<GrainPixel> gridPoint = grainModel.getPoint(x, y);
 				
-				if (misPoint == null) continue;
-				if (!misPoint.getData().grainIndex.is()) continue;
-				int index = misPoint.getData().grainIndex.get();
+				if (!gridPoint.getData().grainIndex.is()) continue;
+				int index = gridPoint.getData().grainIndex.get();
 				
 				//if the grain array isn't as large as the index, or the element at this index is null, set this element to a new grain 
-				if (data.grains.size() <= index || data.grains.get(index) == null)
+				if (grains.size() <= index || grains.get(index) == null)
 				{
-					data.grains.set(index, new Grain(index));
+					grains.set(index, new Grain(index));
 				}
 				
-				Grain g = data.grains.get(index);
-				g.points.add(misPoint);
 			}
 		}
 
+		//Give each GrainPixel a reference to its Grain
+		for (ISkewPoint<GrainPixel> grainPoint : grainModel){
+			GrainPixel grainData = grainPoint.getData();
+			if (!grainData.grainIndex.is()) continue;
+			grainData.grain = grains.get(grainData.grainIndex.get());
+		}
+		
 		//find the neighbours of each grain
 		int maxNeighbours = 0;
-		for (Grain grain : data.grains)
+		for (Grain grain : grains)
 		{
-			for (ISkewPoint<MisAngle> misPoint : grain.points)
+			for (ISkewPoint<GrainPixel> grainPoint : GrainUtil.getGrainPoints(grainModel, grain))
 			{
-				addNeighbour(grain, data, SkewGrid.goNorth(misModel, misPoint));
-				addNeighbour(grain, data, SkewGrid.goEast(misModel, misPoint));
-				addNeighbour(grain, data, SkewGrid.goSouth(misModel, misPoint));
-				addNeighbour(grain, data, SkewGrid.goWest(misModel, misPoint));
+				addNeighbour(grain, grainModel, SkewGrid.goNorth(grainModel, grainPoint));
+				addNeighbour(grain, grainModel, SkewGrid.goEast(grainModel, grainPoint));
+				addNeighbour(grain, grainModel, SkewGrid.goSouth(grainModel, grainPoint));
+				addNeighbour(grain, grainModel, SkewGrid.goWest(grainModel, grainPoint));
 				
-				addNeighbour(grain, data, SkewGrid.goNorthEast(misModel, misPoint));
-				addNeighbour(grain, data, SkewGrid.goNorthWest(misModel, misPoint));
-				addNeighbour(grain, data, SkewGrid.goSouthEast(misModel, misPoint));
-				addNeighbour(grain, data, SkewGrid.goSouthWest(misModel, misPoint));
+				addNeighbour(grain, grainModel, SkewGrid.goNorthEast(grainModel, grainPoint));
+				addNeighbour(grain, grainModel, SkewGrid.goNorthWest(grainModel, grainPoint));
+				addNeighbour(grain, grainModel, SkewGrid.goSouthEast(grainModel, grainPoint));
+				addNeighbour(grain, grainModel, SkewGrid.goSouthWest(grainModel, grainPoint));
 				
 			}
 			
@@ -65,7 +71,7 @@ public class Magnitude
 		
 		
 		
-		FList<Grain> sortedGrains = new FList<Grain>(data.grains);
+		FList<Grain> sortedGrains = new FList<Grain>(grains);
 		sortedGrains.sort(new Comparator<Grain>() {
 			
 			@Override
@@ -86,10 +92,10 @@ public class Magnitude
 		
 	}
 	
-	private static void addNeighbour(Grain g, GrainModel data, ISkewPoint<MisAngle> p)
+	private static void addNeighbour(Grain g, ISkewGrid<GrainPixel> grainModel, ISkewPoint<GrainPixel> otherPoint)
 	{
-		if (p == null) return;
-		Grain other = data.getGrain(p);
+		if (otherPoint == null) return;
+		Grain other = otherPoint.getData().grain;
 		if (other != null) g.neighbours.add(other);
 	}
 	
@@ -102,74 +108,72 @@ public class Magnitude
 		
 	}
 	
-	public static void calcMagnitude(ISkewGrid<MisAngle> misGrid, ISkewGrid<IOrientationMatrix> omGrid, Grain g)
+	public static void calcMagnitude(ISkewGrid<IOrientationMatrix> omGrid, Collection<ISkewPoint<GrainPixel>> grainPoints, Grain g)
 	{
 		double magAvg = 0;
 		double magMax = 0;
 		double magMin = Double.MAX_VALUE;
-		ISkewPoint<MisAngle> minPoint = null;
 		
+		ISkewPoint<GrainPixel> minPoint = null;
+		double grainMagnitude;
+		double innerSum;
 		
-		for (ISkewPoint<MisAngle> point : g.points)
+		IOrientationMatrix omPoint, otherOMPoint;
+		
+		for (ISkewPoint<GrainPixel> point : grainPoints)
 		{
-			MisAngle data = point.getData();
-			data.grainMagnitude = calcPointMagnitude( g, omGrid, omGrid.getData(point.getIndex()) );
+			innerSum = 0;
+			omPoint = omGrid.getData(point);
 			
-			magAvg += data.grainMagnitude;
-			
-			if (data.grainMagnitude > magMax)
+			for (ISkewPoint<GrainPixel> otherGrainPoint : grainPoints)
 			{
-				magMax = data.grainMagnitude;
+				otherOMPoint = omGrid.getData(otherGrainPoint);
+				if (otherOMPoint == omPoint) continue;
+				innerSum += Calculation.calculateAngle(omPoint, otherOMPoint);
 			}
 			
-			if (data.grainMagnitude < magMin)
-			{
-				magMin = data.grainMagnitude;
+			magAvg += innerSum;
+			
+			if (innerSum > magMax) {
+				magMax = innerSum;
+			}
+			
+			if (innerSum < magMin) {
+				magMin = innerSum;
 				minPoint = point;
 			}
 			
 		}
-		magAvg /= g.points.size();
+		magAvg /= (grainPoints.size() * grainPoints.size());
+		magMin /= grainPoints.size();
+		magMax /= grainPoints.size();
 		g.magMin = magMin;
 		g.magAvg = magAvg;
 		g.magMax = magMax;
 		
-		
+	
 		//calculate the grain maximum misorientation angle.
 		//actually find the angle in the 95th percentile to avoid
 		//an errant pixel making the rest of a grain look flat
 		g.intraGrainCenter = minPoint;
 		//List<Double> intraGrainValues = new ArrayList<Double>(g.points.size()); 
-		double[] igv = new double[g.points.size()];
+		double[] igv = new double[grainPoints.size()];
 		int count = 0;
-		for (ISkewPoint<MisAngle> misPoint : g.points)
+		IOrientationMatrix minOMPoint = omGrid.getData(minPoint);
+		for (ISkewPoint<GrainPixel> misPoint : grainPoints)
 		{
-			IOrientationMatrix omPoint = omGrid.getData(misPoint.getIndex());
-			IOrientationMatrix minOMPoint = omGrid.getData(minPoint.getIndex());
+			omPoint = omGrid.getData(misPoint);
 			
 			misPoint.getData().intraGrainMisorientation.set(Calculation.calculateAngle(omPoint, minOMPoint));
 			igv[count++] = misPoint.getData().intraGrainMisorientation.get();
-			//intraGrainValues.add(point.intraGrainMisorientation);
-			//g.intraGrainMax = Math.max(g.intraGrainMax, point.intraGrainMisorientation);
 		}
 		Arrays.sort(igv);
-		//Collections.sort(intraGrainValues);
-		g.intraGrainMax = igv[(int)(g.points.size() * 0.95)];
+		g.intraGrainMax = igv[(int)(grainPoints.size() * 0.95)];
 		
 		
 	}
 	
-	private static double calcPointMagnitude(Grain g, ISkewGrid<IOrientationMatrix> omGrid, IOrientationMatrix omPoint)
-	{
-		double sum = 0;
-		for (ISkewPoint<MisAngle> misPoint : g.points)
-		{
-			IOrientationMatrix grainOMPoint = omGrid.getData(misPoint.getIndex());
-			if (grainOMPoint == omPoint) continue;
-			sum += Calculation.calculateAngle(omPoint, grainOMPoint);
-		}
-		return sum / g.points.size();
-	}
+	
 	
 	
 }

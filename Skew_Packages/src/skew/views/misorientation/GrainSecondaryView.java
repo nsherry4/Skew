@@ -13,7 +13,8 @@ import skew.core.viewer.modes.views.Summary;
 import skew.datasources.misorientation.drawing.BoundaryMapPainter;
 import skew.datasources.misorientation.drawing.SelectedGrainPainter;
 import skew.models.grain.Grain;
-import skew.models.misorientation.GrainModel;
+import skew.models.grain.GrainUtil;
+import skew.models.grain.GrainPixel;
 import skew.models.misorientation.MisAngle;
 import fava.functionable.FList;
 
@@ -26,14 +27,14 @@ public class GrainSecondaryView extends SecondaryView
 	protected SelectedGrainPainter selectedGrainPainter;
 
 	protected ISkewGrid<MisAngle> misModel;
-	protected GrainModel grainModel;
+	protected ISkewGrid<GrainPixel> grainModel;
 	
-	public GrainSecondaryView(ISkewGrid<MisAngle> misModel, GrainModel grainModel)
+	public GrainSecondaryView(ISkewGrid<MisAngle> misModel, ISkewGrid<GrainPixel> grainModel)
 	{
 		this(misModel, grainModel, Color.black, true);
 	}
 	
-	public GrainSecondaryView(ISkewGrid<MisAngle> misModel, GrainModel grainModel, Color boundaryColor, boolean selectable)
+	public GrainSecondaryView(ISkewGrid<MisAngle> misModel, ISkewGrid<GrainPixel> grainModel, Color boundaryColor, boolean selectable)
 	{
 		super("Grain", false);
 		boundaryPainter = new BoundaryMapPainter(misModel, boundaryColor);
@@ -45,7 +46,7 @@ public class GrainSecondaryView extends SecondaryView
 	
 	
 	
-	protected void setData(ISkewGrid<MisAngle> misModel, GrainModel grainModel)
+	protected void setData(ISkewGrid<MisAngle> misModel, ISkewGrid<GrainPixel> grainModel)
 	{
 		this.misModel = misModel;
 		this.grainModel = grainModel;
@@ -78,12 +79,12 @@ public class GrainSecondaryView extends SecondaryView
 		summaries.add(s);
 		s.addHeader("Number", "Size");
 
-		MisAngle misData = misModel.getData(x, y);
-		if (!misData.grainIndex.is()) return summaries;
+		GrainPixel grainData = grainModel.getData(x, y);
+		if (!grainData.grainIndex.is()) return summaries;
 		
-		s.addValue("Number", ""+misData.grainIndex.get());
-		Grain g = grainModel.getGrain(misData);
-		s.addValue("Size", g.points.size() + " pixels");
+		s.addValue("Number", ""+grainData.grainIndex.get());
+		Grain g = grainData.grain;
+		s.addValue("Size", GrainUtil.getGrainPoints(grainModel, g).size() + " pixels");
 		
 		
 		return summaries;
@@ -92,7 +93,7 @@ public class GrainSecondaryView extends SecondaryView
 	@Override
 	public void setPointSelected(int x, int y, boolean deselectAll) {
 		if (!selectable) return;
-		selectedGrainPainter.setPointSelected(misModel.getPoint(x, y), deselectAll);
+		selectedGrainPainter.setPointSelected(grainModel.getPoint(x, y), deselectAll);
 		
 	}
 

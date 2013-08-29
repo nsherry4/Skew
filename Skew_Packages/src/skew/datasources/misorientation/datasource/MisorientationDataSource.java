@@ -9,18 +9,18 @@ import skew.core.datasource.DataSource;
 import skew.core.model.ISkewDataset;
 import skew.core.model.ISkewGrid;
 import skew.datasources.misorientation.datasource.calculation.misorientation.Calculation;
-import skew.models.misorientation.GrainModel;
+import skew.models.grain.GrainPixel;
 import skew.models.misorientation.MisAngle;
 import skew.models.orientation.IOrientationMatrix;
 
 public abstract class MisorientationDataSource extends DataSource
 {
 
-	protected GrainModel grainModel;
+	protected ISkewGrid<GrainPixel> grainModel;
 	protected ISkewGrid<MisAngle> misModel;
 	protected ISkewGrid<IOrientationMatrix> omModel;
 	
-	public void setModels(GrainModel grainModel, ISkewGrid<MisAngle> misModel, ISkewGrid<IOrientationMatrix> omGrid)
+	public void setModels(ISkewGrid<GrainPixel> grainModel, ISkewGrid<MisAngle> misModel, ISkewGrid<IOrientationMatrix> omGrid)
 	{
 		this.grainModel = grainModel;
 		this.omModel = omGrid;

@@ -14,6 +14,8 @@ package skew.datasources.misorientation.datasource.calculation.misorientation;
 import java.io.File;
 import java.util.List;
 
+import com.google.common.collect.Multimap;
+
 import plural.executor.ExecutorSet;
 import plural.executor.eachindex.EachIndexExecutor;
 import plural.executor.eachindex.implementations.PluralEachIndexExecutor;
@@ -30,13 +32,13 @@ import skew.datasources.misorientation.datasource.MisorientationDataSource;
 import skew.datasources.misorientation.datasource.calculation.magnitude.GrainIdentify;
 import skew.datasources.misorientation.datasource.calculation.magnitude.Magnitude;
 import skew.datasources.misorientation.datasource.calculation.magnitude.OrientationMap;
-import skew.models.misorientation.GrainModel;
+import skew.models.grain.Grain;
+import skew.models.grain.GrainUtil;
+import skew.models.grain.GrainPixel;
 import skew.models.misorientation.MisAngle;
 import skew.models.orientation.IOrientationMatrix;
 import skew.models.orientation.OrientationMatrix;
-
 import commonenvironment.IOOperations;
-
 import fava.functionable.FList;
 import fava.signatures.FnEach;
 import fava.signatures.FnGet;
@@ -46,7 +48,6 @@ public class Calculation
 
 	private static CubicSymOP	symmetryOperators	= new CubicSymOP();
 
-
 	
 	public static ExecutorSet<ISkewDataset> calculate(final List<String> filenames, final MisorientationDataSource ds, final Coord<Integer> mapSize)
 	{
@@ -54,17 +55,23 @@ public class Calculation
 		//Create MisAngleGrid
 		List<ISkewPoint<MisAngle>> misList = DataSource.getEmptyPoints(mapSize, new FnGet<MisAngle>(){
 			@Override public MisAngle f() { return new MisAngle(); }});
-
 		final ISkewGrid<MisAngle> misModel = new SkewGrid<>(mapSize.x, mapSize.y, misList);
-		final GrainModel grainModel = new GrainModel(mapSize.x, mapSize.y);
+		
+		
+		//Create Grain Grid
+		List<ISkewPoint<GrainPixel>> grainList = DataSource.getEmptyPoints(mapSize, new FnGet<GrainPixel>(){
+			@Override public GrainPixel f() { return new GrainPixel(); }});
+		final ISkewGrid<GrainPixel> grainModel = new SkewGrid<GrainPixel>(mapSize.x, mapSize.y, grainList);
+		
 		
 		//Create OrientationMatrix Grid
 		final List<ISkewPoint<IOrientationMatrix>> omList = DataSource.getEmptyPoints(mapSize, new FnGet<IOrientationMatrix>() {
 			@Override public IOrientationMatrix f() { return new OrientationMatrix(); }});
-		
 		final ISkewGrid<IOrientationMatrix> omModel = new SkewGrid<>(mapSize.x, mapSize.y, omList);
 
 				
+		
+		
 		//give the datasource the models
 		ds.setModels(grainModel, misModel, omModel);
 
@@ -99,14 +106,14 @@ public class Calculation
 				GrainIdentify.calculate(misModel, grainModel);
 
 				//create grain objects for all grain labels
-				Magnitude.setupGrains(grainModel, misModel);
+				Magnitude.setupGrains(grainModel);
 
 				//calculate the misorientation magnitude of each grain
-				calcGrainExec.setWorkUnits(grainModel.grains.size());
+				calcGrainExec.setWorkUnits(GrainUtil.grainCount(grainModel));
 				calcGrainExec.executeBlocking();
 
 				OrientationMap.calculateOrientation(misModel, omModel);
-								
+				
 				return new SkewDataset(name, path, new FList<IModel>(misModel, omModel, grainModel), ds);
 
 
@@ -146,14 +153,19 @@ public class Calculation
 
 	}
 
-	public static EachIndexExecutor calculateGrainMagnitude(final GrainModel grainModel, final ISkewGrid<MisAngle> misModel, final ISkewGrid<IOrientationMatrix> omModel)
+	public static EachIndexExecutor calculateGrainMagnitude(final ISkewGrid<GrainPixel> grainModel, final ISkewGrid<MisAngle> misModel, final ISkewGrid<IOrientationMatrix> omModel)
 	{
 		FnEach<Integer> eachIndex = new FnEach<Integer>() {
 
+			Multimap<Grain, ISkewPoint<GrainPixel>> grainPoints;
+			
 			@Override
 			public void f(Integer index)
 			{
-				Magnitude.calcMagnitude(misModel, omModel, grainModel.grains.get(index));
+				if (grainPoints == null) grainPoints = GrainUtil.getGrainPointMap(grainModel);
+				Grain grain = GrainUtil.getGrains(grainModel).get(index);
+				if (grain == null) return;
+				Magnitude.calcMagnitude(omModel, grainPoints.get(grain), grain);
 			}
 		};
 
@@ -177,7 +189,7 @@ public class Calculation
 
 		points = 0;
 		angle_total = 0.;
-		// deside center point and its 8 eight neighbours' indices
+		// decide center point and its 8 eight neighbours' indices
 
 
 		// row=anglelist.get(i).row;
@@ -394,13 +406,14 @@ public class Calculation
 	{
 
 		float[][] delta_g, mis;
+		
 
-		double minAngle = 400., temp;
+		float minAngle = 400f, temp;
 
-		// gA = mA.getMatrix();
 		delta_g = new float[3][3];
 		mis = new float[3][3];
 
+		
 		prodmat(gB.getInverse(), gA.getDirect(), delta_g);
 
 		minAngle = -1;
@@ -408,16 +421,15 @@ public class Calculation
 		{
 			prodmatDiag(delta_g, symmetryOperators.getOP(i), mis);
 
-			temp = (mis[0][0] + mis[1][1] + mis[2][2] - 1.0) * 0.5;
+			temp = (mis[0][0] + mis[1][1] + mis[2][2] - 1f) * 0.5f;
 
 			// do this backwards to save the arccos and division calls
 			if (temp > minAngle) minAngle = temp;
-			// angle = Math.acos(temp)/Math.PI*180.;
-			// if (angle < minAngle) minAngle = angle;
 		}
-		if (minAngle > 1.0) minAngle = 1.0;
-		if (minAngle < -1.0) minAngle = -1.0;
-		return Math.acos(minAngle) / Math.PI * 180.;
+		if (minAngle > 1f) minAngle = 1f;
+		if (minAngle < -1f) minAngle = -1f;
+		return Math.toDegrees(Math.acos(minAngle));
+
 	}
 
 	public static void printMat(double[][] op)
@@ -432,16 +444,15 @@ public class Calculation
 	{
 
 		int i, j, k;
-		int n = 3;
 
-		for (i = 0; i < n; i++)
-			for (j = 0; j < n; j++)
+		for (i = 0; i < 3; i++)
+			for (j = 0; j < 3; j++)
 				ab[i][j] = 0.f;
 
 
-		for (i = 0; i < n; i++)
-			for (j = 0; j < n; j++)
-				for (k = 0; k < n; k++)
+		for (i = 0; i < 3; i++)
+			for (j = 0; j < 3; j++)
+				for (k = 0; k < 3; k++)
 					ab[i][j] += a[i][k] * b[k][j];
 	}
 	
@@ -467,16 +478,13 @@ public class Calculation
 	public static void prodmatDiag(float[][] a, float[][] b, float[][] ab)
 	{
 
-		int i, k;
-		int n = 3;
-
 		ab[0][0] = 0;
 		ab[1][1] = 0;
 		ab[2][2] = 0;
 
-		for (i = 0; i < n; i++)
+		for (int i = 0; i < 3; i++)
 		{
-			for (k = 0; k < n; k++)
+			for (int k = 0; k < 3; k++)
 			{
 				ab[i][i] += a[i][k] * b[k][i];
 			}

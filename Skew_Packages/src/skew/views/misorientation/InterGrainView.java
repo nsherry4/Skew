@@ -13,7 +13,7 @@ import skew.core.model.ISkewGrid;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.Summary;
 import skew.models.grain.Grain;
-import skew.models.misorientation.GrainModel;
+import skew.models.grain.GrainPixel;
 import skew.models.misorientation.MisAngle;
 import fava.functionable.FList;
 
@@ -22,7 +22,7 @@ public class InterGrainView extends MisAngleView
 {
 
 
-	public InterGrainView(ISkewGrid<MisAngle> misModel, GrainModel grainModel) {
+	public InterGrainView(ISkewGrid<MisAngle> misModel, ISkewGrid<GrainPixel> grainModel) {
 		super("Intragrain Misorientation", misModel, grainModel);
 	}
 
@@ -43,7 +43,7 @@ public class InterGrainView extends MisAngleView
 		summaries.add(s);
 		s.addHeader("Misorientation");
 				
-		MisAngle point = misModel.getPoint(x, y).getData();
+		GrainPixel point = grainModel.getData(x, y);
 		s.addValue("Misorientation", formatMisValue(point.intraGrainMisorientation));
 		
 		return summaries;
@@ -107,15 +107,15 @@ public class InterGrainView extends MisAngleView
 		
 		for (int i = 0; i < misModel.size(); i++)
 		{
-			MisAngle p = misModel.getData(i);
-			if (p == null)	{ misorientationData.set(i, -1.0f); continue; }
+			GrainPixel grainData = grainModel.getData(i);
+			if (grainData == null)	{ misorientationData.set(i, -1.0f); continue; }
 
 			
-			if (!p.grainIndex.is()) { misorientationData.set(i, -1.0f); continue; }
-			Grain g = grainModel.getGrain(misModel.getPoint(i));
+			if (!grainData.grainIndex.is()) { misorientationData.set(i, -1.0f); continue; }
+			Grain g = grainModel.getData(i).grain;
 			
 			
-			float v = p.intraGrainMisorientation.get().floatValue();
+			float v = grainData.intraGrainMisorientation.get().floatValue();
 			if (relative) v /= g.intraGrainMax;
 			misorientationData.set(i, (float)v);
 			
