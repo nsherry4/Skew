@@ -79,14 +79,14 @@ public class LocalView extends MisAngleView
 	{
 		if (isUpdateRequired())
 		{
-			setupPainters(subview);
+			setupPainters();
 			setUpdateComplete();
 		}
 		return new FList<MapPainter>(super.misorientationPainter);
 	}
 	
 	
-	private void setupPainters(MapSubView subview)
+	private void setupPainters()
 	{
 		
 		Spectrum misorientationData = new Spectrum(misModel.size());

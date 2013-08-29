@@ -8,6 +8,6 @@ public class Version
 	public static String short_version = "2";
 	public static String long_version = "2.2.0";
 	
-	public static String date = "August 27th, 2013";
+	public static String date = "August 29th, 2013";
 	
 }

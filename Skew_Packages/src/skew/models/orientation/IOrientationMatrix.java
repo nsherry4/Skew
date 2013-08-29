@@ -7,16 +7,16 @@ import scitypes.DirectionVector;
 public interface IOrientationMatrix 
 {
 
-	public abstract void printInverseMatrix();
+	void printInverseMatrix();
 
-	public abstract float[][] getInverse();
-	public abstract void setInverse(float[][] inverse);
+	float[][] getInverse();
+	void setInverse(float[][] inverse);
 
-	public abstract float[][] getDirect();
-	public abstract void setDirect(float[][] direct);
+	float[][] getDirect();
+	void setDirect(float[][] direct);
 	
-	public void setOrientationVectors(List<DirectionVector> directions);
-	public List<DirectionVector> getOrientationVectors();
+	void setOrientationVectors(List<DirectionVector> directions);
+	List<DirectionVector> getOrientationVectors();
 
 	
 }

@@ -104,7 +104,7 @@ public class StrainView extends MapView
 	{		
 		if (isUpdateRequired())
 		{
-			setupPainters(model, subview, maximum);
+			setupPainters(subview, maximum);
 			setUpdateComplete();
 		}
 		return new FList<MapPainter>(painter);
@@ -159,7 +159,7 @@ public class StrainView extends MapView
 	}
 
 	
-	private void setupPainters(ISkewGrid<IXRDStrain> skewdata, MapSubView subview, float maximum)
+	private void setupPainters(MapSubView subview, float maximum)
 	{
 		
 		List<Color> pixelColours = new FList<Color>(model.getWidth() * model.getHeight());

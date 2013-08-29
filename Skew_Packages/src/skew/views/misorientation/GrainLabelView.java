@@ -79,7 +79,7 @@ public class GrainLabelView extends MapView
 		
 		if (isUpdateRequired())
 		{
-			setupPainters(subview);
+			setupPainters();
 			setUpdateComplete();
 		}
 		return new FList<MapPainter>(grainPainter);
@@ -92,7 +92,7 @@ public class GrainLabelView extends MapView
 	}
 
 	
-	private void setupPainters(MapSubView subview)
+	private void setupPainters()
 	{
 		
 		Spectrum misorientationData = new Spectrum(misModel.size());

@@ -54,15 +54,15 @@ public class Magnitude
 		{
 			for (ISkewPoint<GrainPixel> grainPoint : GrainUtil.getGrainPoints(grainModel, grain))
 			{
-				addNeighbour(grain, grainModel, SkewGrid.goNorth(grainModel, grainPoint));
-				addNeighbour(grain, grainModel, SkewGrid.goEast(grainModel, grainPoint));
-				addNeighbour(grain, grainModel, SkewGrid.goSouth(grainModel, grainPoint));
-				addNeighbour(grain, grainModel, SkewGrid.goWest(grainModel, grainPoint));
+				addNeighbour(grain, SkewGrid.goNorth(grainModel, grainPoint));
+				addNeighbour(grain, SkewGrid.goEast(grainModel, grainPoint));
+				addNeighbour(grain, SkewGrid.goSouth(grainModel, grainPoint));
+				addNeighbour(grain, SkewGrid.goWest(grainModel, grainPoint));
 				
-				addNeighbour(grain, grainModel, SkewGrid.goNorthEast(grainModel, grainPoint));
-				addNeighbour(grain, grainModel, SkewGrid.goNorthWest(grainModel, grainPoint));
-				addNeighbour(grain, grainModel, SkewGrid.goSouthEast(grainModel, grainPoint));
-				addNeighbour(grain, grainModel, SkewGrid.goSouthWest(grainModel, grainPoint));
+				addNeighbour(grain, SkewGrid.goNorthEast(grainModel, grainPoint));
+				addNeighbour(grain, SkewGrid.goNorthWest(grainModel, grainPoint));
+				addNeighbour(grain, SkewGrid.goSouthEast(grainModel, grainPoint));
+				addNeighbour(grain, SkewGrid.goSouthWest(grainModel, grainPoint));
 				
 			}
 			
@@ -92,7 +92,8 @@ public class Magnitude
 		
 	}
 	
-	private static void addNeighbour(Grain g, ISkewGrid<GrainPixel> grainModel, ISkewPoint<GrainPixel> otherPoint)
+	
+	private static void addNeighbour(Grain g, ISkewPoint<GrainPixel> otherPoint)
 	{
 		if (otherPoint == null) return;
 		Grain other = otherPoint.getData().grain;
@@ -115,7 +116,6 @@ public class Magnitude
 		double magMin = Double.MAX_VALUE;
 		
 		ISkewPoint<GrainPixel> minPoint = null;
-		double grainMagnitude;
 		double innerSum;
 		
 		IOrientationMatrix omPoint, otherOMPoint;

@@ -97,7 +97,7 @@ public class PairSubtractionDataSource extends BasicDataSource
 		
 		//Strain models
 		FnGet<IXRDStrain> getStrPoint = new FnGet<IXRDStrain>() {
-			@Override public IXRDStrain f() {	return new XRDStrain(); }};
+			@Override public IXRDStrain f() { return new XRDStrain(); }};
 			
 		final List<ISkewPoint<IXRDStrain>> beforeStrList = DataSource.getEmptyPoints(dimensions, getStrPoint);
 		final List<ISkewPoint<IXRDStrain>> afterStrList = DataSource.getEmptyPoints(dimensions, getStrPoint);
@@ -107,7 +107,7 @@ public class PairSubtractionDataSource extends BasicDataSource
 		
 		//Orientation models
 		FnGet<IOrientationMatrix> getOMPoint = new FnGet<IOrientationMatrix>() {
-			@Override public IOrientationMatrix f() {	return new OrientationMatrix(); }};
+			@Override public IOrientationMatrix f() { return new OrientationMatrix(); }};
 			
 		final List<ISkewPoint<IOrientationMatrix>> beforeOMList = DataSource.getEmptyPoints(dimensions, getOMPoint);
 		final List<ISkewPoint<IOrientationMatrix>> afterOMList = DataSource.getEmptyPoints(dimensions, getOMPoint);
@@ -115,14 +115,14 @@ public class PairSubtractionDataSource extends BasicDataSource
 		
 		//Grain models
 		FnGet<GrainPixel> getGrainPoint = new FnGet<GrainPixel>() {
-			@Override public GrainPixel f() {	return new GrainPixel(); }};
+			@Override public GrainPixel f() { return new GrainPixel(); }};
 			
 		
 		//MisAngle models
 		FnGet<MisAngle> getMisPoint = new FnGet<MisAngle>() {
 
 			@Override
-			public MisAngle f() {	return new MisAngle(); }
+			public MisAngle f() { return new MisAngle(); }
 		};		
 		beforeMisModel = new SkewGrid<MisAngle>(dimensions.x , dimensions.y, DataSource.getEmptyPoints(dimensions, getMisPoint));
 		afterMisModel = new SkewGrid<MisAngle>(dimensions.x , dimensions.y, DataSource.getEmptyPoints(dimensions, getMisPoint));
@@ -240,8 +240,9 @@ public class PairSubtractionDataSource extends BasicDataSource
 			}};	
 	
 			
-			
+		//(Re)calculates anything that can change due to runtime parameter adjustment (eg subtracted/differenced models) 	
 		recalculate();
+		
 		MapView beforeTranslatedGrainView, afterTranslatedGrainView;
 		
 		beforeTranslatedGrainView = new GrainSecondaryView(beforeTranslatedMisModel, beforeTranslatedGrainModel, Color.black, true);

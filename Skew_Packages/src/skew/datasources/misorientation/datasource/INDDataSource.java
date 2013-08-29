@@ -167,9 +167,9 @@ public class INDDataSource extends MisorientationDataSource
 			catch (IOException e)
 			{
 				e.printStackTrace();
-				return false;
 			}
 		}
+		
 	}
 
 	@Override

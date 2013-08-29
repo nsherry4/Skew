@@ -13,28 +13,28 @@ import autodialog.model.Parameter;
 public interface IDataSource
 {
 	
-	public String extension();
-	public String description();
-	public String title();
+	String extension();
+	String description();
+	String title();
 	
-	public Acceptance accepts(List<String> filenames);
+	Acceptance accepts(List<String> filenames);
 	
-	public List<Parameter<?>> getLoadParameters();
-	public String getLoadParametersInformation();
-	public List<Parameter<?>> getRuntimeParameters();
+	List<Parameter<?>> getLoadParameters();
+	String getLoadParametersInformation();
+	List<Parameter<?>> getRuntimeParameters();
 	
 	
-	public List<MapView> getViews();	
+	List<MapView> getViews();	
 	
 	/**
 	 * Loads a dataset from the given filename(s) on disk 
 	 */
-	public ExecutorSet<ISkewDataset> loadDataset(List<String> filenames, Coord<Integer> mapsize);
+	ExecutorSet<ISkewDataset> loadDataset(List<String> filenames, Coord<Integer> mapsize);
 	
 	/**
 	 * If a dataset has any runtime parameters, this method is called to recalculate the dataset values
 	 * with altered parameter values
 	 */
-	public void recalculate();
+	void recalculate();
 
 }

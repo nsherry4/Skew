@@ -57,8 +57,8 @@ import autodialog.view.AutoPanel;
 import autodialog.view.layouts.FramesADLayout;
 
 import com.ezware.dialog.task.TaskDialogs;
-import commonenvironment.IOOperations;
 
+import commonenvironment.IOOperations;
 import eventful.EventfulListener;
 
 /**
@@ -409,9 +409,8 @@ public class SkewUI extends JPanel {
 						"",
 						Version.long_version,
 						"",
-						Version.date,
-						true
-				);
+						Version.date
+					);
 			}
 		});
 		
@@ -575,7 +574,7 @@ public class SkewUI extends JPanel {
 		sidebarParameterPanel.removeAll();
 		
 		List<Parameter<?>> params = controller.data.datasource().getRuntimeParameters();
-		AutoPanel panel = new AutoPanel(params, new FramesADLayout(), false);
+		AutoPanel panel = new AutoPanel(params, new FramesADLayout(), 0);
 		sidebarParameterPanel.add(panel);
 		sidebarParameterPanel.setVisible(params.size() > 0);
 		
