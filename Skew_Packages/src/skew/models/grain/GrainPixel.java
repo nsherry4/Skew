@@ -1,16 +1,17 @@
 package skew.models.grain;
 
-import fava.datatypes.Maybe;
+import com.google.common.base.Optional;
+
 
 public class GrainPixel
 {
-	public Maybe<Integer> grainIndex;
+	public Optional<Integer> grainIndex;
 	public Grain grain;
-	public Maybe<Double> intraGrainMisorientation;
+	public Optional<Double> intraGrainMisorientation;
 	
 	public GrainPixel() {
-		grainIndex = new Maybe<>();
-		intraGrainMisorientation = new Maybe<>();
+		grainIndex = Optional.absent();
+		intraGrainMisorientation = Optional.absent();
 	}
 	
 }

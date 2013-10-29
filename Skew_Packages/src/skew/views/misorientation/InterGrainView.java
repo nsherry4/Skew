@@ -118,7 +118,7 @@ public class InterGrainView extends MisAngleView
 			if (grainData == null)	{ misorientationData.set(i, -1.0f); continue; }
 
 			
-			if (!grainData.grainIndex.is()) { misorientationData.set(i, -1.0f); continue; }
+			if (!grainData.grainIndex.isPresent()) { misorientationData.set(i, -1.0f); continue; }
 			Grain g = grainModel.getData(i).grain;
 			
 			

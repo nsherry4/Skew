@@ -7,6 +7,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.base.Optional;
+
 import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 import skew.core.model.SkewGrid;
@@ -29,7 +31,7 @@ public class Magnitude
 
 				ISkewPoint<GrainPixel> gridPoint = grainModel.getPoint(x, y);
 				
-				if (!gridPoint.getData().grainIndex.is()) continue;
+				if (!gridPoint.getData().grainIndex.isPresent()) continue;
 				int index = gridPoint.getData().grainIndex.get();
 				
 				//if the grain array isn't as large as the index, or the element at this index is null, set this element to a new grain 
@@ -44,7 +46,7 @@ public class Magnitude
 		//Give each GrainPixel a reference to its Grain
 		for (ISkewPoint<GrainPixel> grainPoint : grainModel){
 			GrainPixel grainData = grainPoint.getData();
-			if (!grainData.grainIndex.is()) continue;
+			if (!grainData.grainIndex.isPresent()) continue;
 			grainData.grain = grains.get(grainData.grainIndex.get());
 		}
 		
@@ -164,7 +166,7 @@ public class Magnitude
 		{
 			omPoint = omGrid.getData(misPoint);
 			
-			misPoint.getData().intraGrainMisorientation.set(Calculation.calculateAngle(omPoint, minOMPoint));
+			misPoint.getData().intraGrainMisorientation = Optional.of(Calculation.calculateAngle(omPoint, minOMPoint));
 			igv[count++] = misPoint.getData().intraGrainMisorientation.get();
 		}
 		Arrays.sort(igv);

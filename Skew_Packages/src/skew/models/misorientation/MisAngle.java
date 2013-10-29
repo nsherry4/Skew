@@ -1,6 +1,7 @@
 package skew.models.misorientation;
 
-import fava.datatypes.Maybe;
+import com.google.common.base.Optional;
+
 
 /**
  * MisAnglePoint defines the structure for storing the mis-angle for one scan
@@ -16,18 +17,16 @@ public class MisAngle
 {
 	
 	// average is mean average of all eight neighbors (of those < boundary)
-	public Maybe<Double> average, north, east, south, west;
+	public Optional<Double> average, north, east, south, west;
 
 	public MisAngle()
 	{		
-		average = new Maybe<>();
-		north = new Maybe<>();
-		east = new Maybe<>();
-		south = new Maybe<>();
-		west = new Maybe<>();
-		
+		average = Optional.absent();
+		north = Optional.absent();
+		east = Optional.absent();
+		south = Optional.absent();
+		west = Optional.absent();
 
-		
 	}
 
 

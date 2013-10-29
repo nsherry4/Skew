@@ -6,6 +6,8 @@ import java.util.List;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 
+import com.google.common.base.Optional;
+
 import scidraw.drawing.map.painters.MapPainter;
 import scitypes.Spectrum;
 import skew.core.model.ISkewGrid;
@@ -13,7 +15,6 @@ import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.Summary;
 import skew.models.misorientation.MisAngle;
-import fava.datatypes.Maybe;
 import fava.functionable.FList;
 
 
@@ -47,14 +48,14 @@ public class LocalView extends MisAngleView
 		int count = 0;
 		for (ISkewPoint<MisAngle> point : misModel) {
 			if (!point.isValid()) continue;
-			if (!point.getData().average.is()) continue;
+			if (!point.getData().average.isPresent()) continue;
 			average += point.getData().average.get();
 			count++;
 		}
 		average /= count;
 		
 		
-		s.addValue("Average", formatMisValue(new Maybe<Double>(average)));
+		s.addValue("Average", formatMisValue(Optional.of(average)));
 	
 		return summaries;
 	}
@@ -122,8 +123,8 @@ public class LocalView extends MisAngleView
 
 		for (int i = 0; i < misModel.size(); i++)
 		{
-			Maybe<Double> average = misModel.getData(i).average;
-			if (misModel.getPoint(i).isValid() && average.is()) {
+			Optional<Double> average = misModel.getData(i).average;
+			if (misModel.getPoint(i).isValid() && average.isPresent()) {
 				misorientationData.set(i, average.get().floatValue());	
 			} else {
 				misorientationData.set(i, invalidValue);

@@ -7,6 +7,8 @@ import java.util.List;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 
+import com.google.common.base.Optional;
+
 import scidraw.drawing.map.painters.MapPainter;
 import scitypes.Spectrum;
 import skew.core.model.ISkewGrid;
@@ -16,7 +18,6 @@ import skew.models.grain.Grain;
 import skew.models.grain.GrainUtil;
 import skew.models.grain.GrainPixel;
 import skew.models.misorientation.MisAngle;
-import fava.datatypes.Maybe;
 import fava.functionable.FList;
 
 
@@ -63,12 +64,12 @@ public class MagnitudeView extends MisAngleView
 	
 		GrainPixel grainData = grainModel.getData(x, y);
 			
-		if (!grainData.grainIndex.is()) return summaries;
+		if (!grainData.grainIndex.isPresent()) return summaries;
 		Grain g = grainData.grain;
 		
-		s.addValue("Magnitude (Min)", formatMisValue(new Maybe<>(g.magMin)));
-		s.addValue("Magnitude (Avg)", formatMisValue(new Maybe<>(g.magAvg)));
-		s.addValue("Magnitude (Max)", formatMisValue(new Maybe<>(g.magMax)));
+		s.addValue("Magnitude (Min)", formatMisValue(Optional.of(g.magMin)));
+		s.addValue("Magnitude (Avg)", formatMisValue(Optional.of(g.magAvg)));
+		s.addValue("Magnitude (Max)", formatMisValue(Optional.of(g.magMax)));
 		return summaries;
 	}
 
@@ -122,7 +123,7 @@ public class MagnitudeView extends MisAngleView
 		{
 			GrainPixel grainData = grainModel.getData(i);
 			double v;
-			if (!grainData.grainIndex.is())
+			if (!grainData.grainIndex.isPresent())
 			{
 				v = -1;
 			} else {

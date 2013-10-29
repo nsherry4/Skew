@@ -2,6 +2,8 @@ package skew.datasources.misorientation.datasource.calculation.magnitude;
 
 import java.util.List;
 
+import com.google.common.base.Optional;
+
 import skew.core.model.ISkewGrid;
 import skew.models.grain.GrainPixel;
 import skew.models.misorientation.MisAngle;
@@ -34,7 +36,7 @@ public class GrainIdentify
 		
 		for (int i = 0; i < grainModel.size(); i++)
 		{
-			grainModel.getData(i).grainIndex.set(i);
+			grainModel.getData(i).grainIndex = Optional.of(i);
 		}
 		
 		for (int y = 0; y < grainModel.getHeight(); y++) {
@@ -45,7 +47,7 @@ public class GrainIdentify
 				
 				//skip unindexed points, and points out of bounds
 				if (grainData == null) continue;
-				if (!misData.average.is()) continue;
+				if (!misData.average.isPresent()) continue;
 				
 				boolean north = sameGrainNorth(x, y);
 				boolean west = sameGrainWest(x, y);
@@ -56,19 +58,19 @@ public class GrainIdentify
 				if (north && west)
 				{
 					union(westGrain, northGrain);
-					grainData.grainIndex.set(northGrain);
+					grainData.grainIndex = Optional.of(northGrain);
 				}
 				else if (north)
 				{
-					grainData.grainIndex.set(northGrain);
+					grainData.grainIndex = Optional.of(northGrain);
 				}
 				else if (west)
 				{
-					grainData.grainIndex.set(westGrain);
+					grainData.grainIndex = Optional.of(westGrain);
 				}
 				else
 				{
-					if (!misData.average.is()) grainData.grainIndex.set();
+					if (!misData.average.isPresent()) grainData.grainIndex = Optional.absent();
 				}
 
 			}
@@ -88,9 +90,9 @@ public class GrainIdentify
 			GrainPixel grainData = grainModel.getData(i);
 			
 			if (misData == null) continue;
-			//if ((!misData.average.is()) || isSinglePixelGrain(i)) {
-			if ((!misData.average.is())) {
-				grainData.grainIndex.set();
+			//if ((!misData.average.isPresent()) || isSinglePixelGrain(i)) {
+			if ((!misData.average.isPresent())) {
+				grainData.grainIndex = Optional.absent();
 				continue;
 			}
 			
@@ -100,7 +102,7 @@ public class GrainIdentify
 				fresh++;
 			}
 			
-			grainData.grainIndex.set(labels.get(grainData.grainIndex.get()));
+			grainData.grainIndex = Optional.of(labels.get(grainData.grainIndex.get()));
 			
 			
 		}
@@ -116,7 +118,7 @@ public class GrainIdentify
 		MisAngle point = misModel.getData(x, y);
 		MisAngle pointNorth = misModel.getData(x, y-1);
 		
-		if (!pointNorth.average.is()) return false;
+		if (!pointNorth.average.isPresent()) return false;
 		return point.north.get() < boundary && point.north.get() >= 0;
 		
 	}
@@ -127,7 +129,7 @@ public class GrainIdentify
 		MisAngle point = misModel.getData(x, y);
 		MisAngle pointWest = misModel.getData(x-1, y);
 		
-		if (!pointWest.average.is()) return false;
+		if (!pointWest.average.isPresent()) return false;
 		return point.west.get() < boundary && point.west.get() >= 0;
 		
 	}
@@ -137,10 +139,10 @@ public class GrainIdentify
 		MisAngle p = misModel.getData(i);
 		if (p == null) return true;
 		
-		boolean west = (!p.west.is()) || p.west.get() > boundary;
-		boolean east = (!p.east.is()) || p.east.get() > boundary;
-		boolean north = (!p.north.is()) || p.north.get() > boundary;
-		boolean south = (!p.south.is()) || p.south.get() > boundary;
+		boolean west = (!p.west.isPresent()) || p.west.get() > boundary;
+		boolean east = (!p.east.isPresent()) || p.east.get() > boundary;
+		boolean north = (!p.north.isPresent()) || p.north.get() > boundary;
+		boolean south = (!p.south.isPresent()) || p.south.get() > boundary;
 		
 		if (west && east && south && north) return true;
 		return false;
@@ -166,7 +168,7 @@ public class GrainIdentify
 		while (grainModel.getData(i).grainIndex.get() != i)
 		{
 			int k = grainModel.getData(i).grainIndex.get();
-			grainModel.getData(i).grainIndex.set(j);
+			grainModel.getData(i).grainIndex = Optional.of(j);
 			i = k;
 		}
 		
@@ -176,7 +178,7 @@ public class GrainIdentify
 	
 	private void union(int x, int y)
 	{
-		grainModel.getData(find(x)).grainIndex.set(find(y));
+		grainModel.getData(find(x)).grainIndex = Optional.of(find(y));
 		
 	}
 

@@ -5,12 +5,13 @@ import java.util.List;
 
 import javax.swing.SpinnerModel;
 
+import com.google.common.base.Optional;
+
 import scidraw.drawing.map.painters.MapPainter;
 import scidraw.drawing.map.palettes.AbstractPalette;
 import scidraw.drawing.painters.axis.AxisPainter;
 import scitypes.SigDigits;
 import skew.core.viewer.modes.subviews.MapSubView;
-import fava.datatypes.Maybe;
 
 
 
@@ -73,9 +74,9 @@ public abstract class MapView
 		return fmt((float)d);
 	}
 	
-	protected String fmt(Maybe<Double> d)
+	protected String fmt(Optional<Double> d)
 	{
-		return d.is() ? fmt(d.get()) : "-"; 
+		return d.isPresent() ? fmt(d.get()) : "-"; 
 	}
 	
 	
@@ -107,16 +108,16 @@ public abstract class MapView
 	
 	
 	
-	protected static String formatGrainValue(Maybe<Integer> value)
+	protected static String formatGrainValue(Optional<Integer> value)
 	{
-		if (!value.is()) return "None";
+		if (!value.isPresent()) return "None";
 		return "#" + value.get();
 	}
 	
 	
-	protected static String formatMisValue(Maybe<Double> value)
+	protected static String formatMisValue(Optional<Double> value)
 	{
-		if (value.is()) {
+		if (value.isPresent()) {
 			return SigDigits.roundFloatTo(value.get().floatValue(), 3) + "\u00B0";
 		} else {
 			return "Boundary";

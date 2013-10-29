@@ -14,6 +14,7 @@ package skew.datasources.misorientation.datasource.calculation.misorientation;
 import java.io.File;
 import java.util.List;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Multimap;
 
 import plural.executor.ExecutorSet;
@@ -254,10 +255,10 @@ public class Calculation
 					angle_total += angle;
 					points++;
 				}
-				misData.north.set(angle);
+				misData.north = Optional.of(angle);
 
 			}
-			else { misData.north.set(); }
+			else { misData.north = Optional.absent(); }
 		}
 		if (s >= 0)
 		{ // has south neighbor
@@ -275,11 +276,11 @@ public class Calculation
 					angle_total += angle;
 					points++;
 				}
-				misData.south.set(angle);
+				misData.south = Optional.of(angle);
 				
 
 			}
-			else { misData.south.set(); }
+			else { misData.south = Optional.absent(); }
 		}
 		if (w >= 0)
 		{ // has west neighbor
@@ -297,9 +298,9 @@ public class Calculation
 					angle_total += angle;
 					points++;
 				}
-				misData.west.set(angle);
+				misData.west = Optional.of(angle);
 			}
-			else { misData.west.set(); }
+			else { misData.west = Optional.absent(); }
 		}
 		if (e >= 0)
 		{ // has east neighbor
@@ -319,10 +320,10 @@ public class Calculation
 					angle_total += angle;
 					points++;
 				}
-				misData.east.set(angle);
+				misData.east = Optional.of(angle);
 
 			}
-			else { misData.east.set(); }
+			else { misData.east = Optional.absent(); }
 		}
 		if (nw >= 0)
 		{ // has north-west neighbor
@@ -388,12 +389,12 @@ public class Calculation
 
 		if (points != 0)
 		{
-			misData.average.set(angle_total / points);
+			misData.average = Optional.of(angle_total / points);
 			misPoint.setValid(true);
 		}
 		else
 		{
-			misData.average.set();
+			misData.average = Optional.absent();
 			misPoint.setValid(false);
 		}
 		// printf("%10d %10d %15.8f %15.8f %15.8f \n",row,

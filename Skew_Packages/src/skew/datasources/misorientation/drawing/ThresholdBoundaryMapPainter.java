@@ -74,7 +74,7 @@ public class ThresholdBoundaryMapPainter extends MapPainter
 				float fx = (float)x;
 				float fy = (float)y;
 				
-				if (point.east.is() && point.east.get() >= boundary)
+				if (point.east.isPresent() && point.east.get() >= boundary)
 				{
 					
 					p.context.moveTo( (fx+1f) * cellSize, fy * cellSize );
@@ -82,7 +82,7 @@ public class ThresholdBoundaryMapPainter extends MapPainter
 					
 				}
 
-				if (point.south.is() && point.south.get() >= boundary)
+				if (point.south.isPresent() && point.south.get() >= boundary)
 				{
 					p.context.moveTo(fx * cellSize, (fy+1f) * cellSize);
 					p.context.lineTo((fx+1f) * cellSize, (fy+1f) * cellSize);

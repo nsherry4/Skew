@@ -107,7 +107,7 @@ public class GrainLabelView extends MapView
 		for (int i = 0; i < grainModel.size(); i++)
 		{
 			GrainPixel grainData = grainModel.getData(i);
-			if (!grainData.grainIndex.is()) {
+			if (!grainData.grainIndex.isPresent()) {
 				misorientationData.set(i, -1f); 
 				continue;
 			}

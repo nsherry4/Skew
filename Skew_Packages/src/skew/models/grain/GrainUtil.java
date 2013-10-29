@@ -10,12 +10,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
 import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
-import fava.datatypes.Maybe;
 
 
 public class GrainUtil
@@ -24,8 +24,8 @@ public class GrainUtil
 	public static int grainCount(ISkewGrid<GrainPixel> grainModel) {
 		int max = 0;
 		for (ISkewPoint<GrainPixel> grainPoint : grainModel) {
-			Maybe<Integer> index = grainPoint.getData().grainIndex;
-			if (!index.is()) continue;
+			Optional<Integer> index = grainPoint.getData().grainIndex;
+			if (!index.isPresent()) continue;
 			max = Math.max(max, index.get());
 		}
 		return max+1;

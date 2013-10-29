@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.base.Optional;
+
 import plural.executor.PluralExecutor;
 import scitypes.Coord;
 import skew.core.datasource.Acceptance;
@@ -400,11 +402,11 @@ public class PairSubtractionDataSource extends BasicDataSource
 		MisAngle after = afterPoint.getData();
 		
 		
-		if (before.north.is() && after.north.is()) 		diff.north.set(after.north.get() - before.north.get());
-		if (before.south.is() && after.south.is()) 		diff.south.set(after.south.get() - before.south.get());
-		if (before.east.is() && after.east.is()) 		diff.east.set(after.east.get() - before.east.get());
-		if (before.west.is() && after.west.is()) 		diff.west.set(after.west.get() - before.west.get());
-		if (before.average.is() && after.average.is()) 	diff.average.set(after.average.get() - before.average.get());
+		if (before.north.isPresent() && after.north.isPresent()) 		diff.north = Optional.of(after.north.get() - before.north.get());
+		if (before.south.isPresent() && after.south.isPresent()) 		diff.south = Optional.of(after.south.get() - before.south.get());
+		if (before.east.isPresent() && after.east.isPresent()) 		diff.east = Optional.of(after.east.get() - before.east.get());
+		if (before.west.isPresent() && after.west.isPresent()) 		diff.west = Optional.of(after.west.get() - before.west.get());
+		if (before.average.isPresent() && after.average.isPresent()) 	diff.average = Optional.of(after.average.get() - before.average.get());
 		
 		diffPoint.setValid(true);
 		
