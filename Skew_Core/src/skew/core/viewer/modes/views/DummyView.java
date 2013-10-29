@@ -64,7 +64,12 @@ public class DummyView extends MapView
 
 
 	@Override
-	public List<Summary> getSummary(int x, int y) {
+	public List<Summary> getMapSummary() {
+		return new ArrayList<>();
+	}
+
+	@Override
+	public List<Summary> getPointSummary(int x, int y) {
 		return new ArrayList<>();
 	}
 	

@@ -45,8 +45,15 @@ public class MagnitudeView extends MisAngleView
 		return new SpinnerNumberModel(maxVal, 0.0, 180.0, 0.1);
 	}
 
+
 	@Override
-	public List<Summary> getSummary(int x, int y)
+	public List<Summary> getMapSummary() {
+		return new ArrayList<>();
+	}
+	
+	
+	@Override
+	public List<Summary> getPointSummary(int x, int y)
 	{
 		List<Summary> summaries = new ArrayList<>();
 		Summary s = new Summary(getTitle());

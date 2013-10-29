@@ -14,14 +14,11 @@ public class OrientationMap
 {
 	public static void calculateOrientation(ISkewGrid<MisAngle> misGrid, ISkewGrid<IOrientationMatrix> omGrid)
 	{
-		for (ISkewPoint<MisAngle> misPoint : misGrid.getPoints())
+		for (ISkewPoint<MisAngle> misPoint : misGrid)
 		{
 			if (misPoint == null) continue;
 			
-			ISkewPoint<IOrientationMatrix> omPoint = omGrid.getPoint(misPoint.getX(), misPoint.getY());
-			if (omPoint == null) continue;
-			
-			IOrientationMatrix omData = omPoint.getData();
+			IOrientationMatrix omData = omGrid.getData(misPoint.getX(), misPoint.getY());
 			MisAngle misData = misPoint.getData();
 			if (omData == null || misData == null) continue;
 			

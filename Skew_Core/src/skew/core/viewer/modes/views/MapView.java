@@ -83,8 +83,8 @@ public abstract class MapView
 	public abstract boolean hasSublist();
 	public abstract List<MapSubView> getSubList();
 
-	public abstract List<Summary> getSummary(int x, int y);
-
+	public abstract List<Summary> getPointSummary(int x, int y);
+	public abstract List<Summary> getMapSummary();
 	
 	public abstract float getMaximumIntensity(MapSubView subview);
 	public abstract List<MapPainter> getPainters(MapSubView subview, float maximum);
@@ -123,8 +123,16 @@ public abstract class MapView
 		}
 		
 	}
-	
 
 	
+	protected static String formatOMTiltValue(float value)
+	{
+		return SigDigits.roundFloatTo(value, 2) + "%";		
+	}
+
+	protected static String formatOMDirectionValue(float value)
+	{
+		return SigDigits.roundFloatTo(value, 2) + "\u00B0";		
+	}
 	
 }

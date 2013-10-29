@@ -70,9 +70,15 @@ public class GrainSecondaryView extends SecondaryView
 	public List<AxisPainter> getAxisPainters(MapSubView subview, float maxValue) {
 		return new ArrayList<AxisPainter>();
 	}
+	
 
 	@Override
-	public List<Summary> getSummary(int x, int y) {
+	public List<Summary> getMapSummary() {
+		return new ArrayList<>();
+	}
+	
+	@Override
+	public List<Summary> getPointSummary(int x, int y) {
 
 		List<Summary> summaries = new ArrayList<>();
 		Summary s = new Summary(getTitle());

@@ -126,7 +126,7 @@ public class SkewController
 			OutputStream os = new FileOutputStream(tempfile);
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
 
-			List<Summary> summaries = viewMode.getSummary(0, 0);
+			List<Summary> summaries = viewMode.getPointSummary(0, 0);
 			
 			
 			writer.write("X,  Y");
@@ -143,7 +143,7 @@ public class SkewController
 					writer.write(summary.getValues().get("X") + ", ");
 					writer.write(summary.getValues().get("Y"));
 					
-					summaries = viewMode.getSummary(x, y);
+					summaries = viewMode.getPointSummary(x, y);
 					for (Summary s : summaries) writeSummary(writer, s);
 					
 					writer.write("\n");
@@ -197,7 +197,10 @@ public class SkewController
 		panel.setBorder(new TitledBorder("Coordinates"));
 		ui.sidebarInfoPanel.add(panel);
 		
-		List<Summary> summaries = viewMode.getSummary(coord.x, coord.y);
+		List<Summary> summaries = new ArrayList<>();
+		summaries.addAll(viewMode.getPointSummary(coord.x, coord.y));
+		summaries.addAll(viewMode.getMapSummary());
+		
 		for (Summary s : summaries) {
 			if (s.getValues().size() == 0) continue;
 			panel = new PropertyViewPanel(s.getValues(), null, 0, false, false);

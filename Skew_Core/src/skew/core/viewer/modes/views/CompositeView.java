@@ -99,12 +99,23 @@ public class CompositeView extends MapView
 		return primary.getTitle();
 	}
 
+
 	@Override
-	public List<Summary> getSummary(int x, int y) {
+	public List<Summary> getMapSummary() {
 		List<Summary> summaries = new ArrayList<>();
-		summaries.addAll(primary.getSummary(x, y));
+		summaries.addAll(primary.getMapSummary());
 		for (MapView v : secondary) {
-			summaries.addAll(v.getSummary(x, y));
+			summaries.addAll(v.getMapSummary());
+		}
+		return summaries;
+	}
+	
+	@Override
+	public List<Summary> getPointSummary(int x, int y) {
+		List<Summary> summaries = new ArrayList<>();
+		summaries.addAll(primary.getPointSummary(x, y));
+		for (MapView v : secondary) {
+			summaries.addAll(v.getPointSummary(x, y));
 		}
 		return summaries;
 	}
@@ -115,5 +126,6 @@ public class CompositeView extends MapView
 		primary.setPointSelected(x, y, deselectAll);
 		for (MapView s : secondary) s.setPointSelected(x, y, deselectAll);
 	}
+
 	
 }

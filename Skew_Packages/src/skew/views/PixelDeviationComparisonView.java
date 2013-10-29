@@ -1,6 +1,7 @@
 package skew.views;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.SpinnerModel;
@@ -141,9 +142,16 @@ public class PixelDeviationComparisonView extends MapView
 	}
 
 
+
 	@Override
-	public List<Summary> getSummary(int x, int y) {
-		return new FList<>(new Summary("Pixel Deviation"));
+	public List<Summary> getMapSummary() {
+		return new ArrayList<>();
+	}
+	
+	
+	@Override
+	public List<Summary> getPointSummary(int x, int y) {
+		return new FList<>();
 	}
 
 

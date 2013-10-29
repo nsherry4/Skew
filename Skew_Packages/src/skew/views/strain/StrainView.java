@@ -48,11 +48,17 @@ public class StrainView extends MapView
 		return new SpinnerNumberModel(5.0, 0.1, 1000.0, 0.1);
 	}
 
+
 	@Override
-	public List<Summary> getSummary(int x, int y)
+	public List<Summary> getMapSummary() {
+		return new ArrayList<>();
+	}
+	
+	@Override
+	public List<Summary> getPointSummary(int x, int y)
 	{
 		List<Summary> summaries = new ArrayList<>();
-		Summary s = new Summary(getTitle());
+		Summary s = new Summary(getTitle() + " Point");
 		summaries.add(s);
 		s.addHeader("XX", "YY", "ZZ", "XY", "XZ", "YZ", "VM");
 		
@@ -185,5 +191,6 @@ public class StrainView extends MapView
 
 	@Override
 	public void setPointSelected(int x, int y, boolean deselectAll) {}
+
 
 }

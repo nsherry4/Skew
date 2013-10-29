@@ -25,11 +25,16 @@ public class DummySecondaryView extends SecondaryView
 	}
 
 	@Override
-	public List<Summary> getSummary(int x, int y) {
+	public List<Summary> getPointSummary(int x, int y) {
 		return new ArrayList<>();
 	}
 
 	@Override
 	public void setPointSelected(int x, int y, boolean deselectAll) {}
+
+	@Override
+	public List<Summary> getMapSummary() {
+		return new ArrayList<>();
+	}
 
 }

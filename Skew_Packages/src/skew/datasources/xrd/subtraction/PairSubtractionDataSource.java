@@ -45,6 +45,7 @@ public class PairSubtractionDataSource extends BasicDataSource
 	String g = "Overlay";
 	private Parameter<Integer> hShift = new Parameter<>("Horizontal Shift", new IntegerEditor(), 0, g);
 	private Parameter<Integer> vShift = new Parameter<>("Vertical Shift", new IntegerEditor(), 0, g);
+	private Parameter<Integer> boundaryParameter = new Parameter<Integer>("Grain Boundary Angle", new IntegerEditor(), 5);
 	
 	private static String ext = "pair";
 	private int startNum = 1;
@@ -287,9 +288,13 @@ public class PairSubtractionDataSource extends BasicDataSource
 	
 	private void calculateMisModel(ISkewGrid<MisAngle> misModel, ISkewGrid<GrainPixel> grainModel, ISkewGrid<IOrientationMatrix> omGrid)
 	{
+		int angle = boundaryParameter.getValue();
+		
+		//Calculation.calcLocalMisorientation(misModel, omGrid, dimensions.x, dimensions.y, angle).executeBlocking();
 		Calculation.calcLocalMisorientation(misModel, omGrid, dimensions.x, dimensions.y).executeBlocking();
 			
 		//calculate which grain each pixel belongs to
+		//GrainIdentify.calculate(misModel, grainModel, angle);
 		GrainIdentify.calculate(misModel, grainModel);
 
 		//create grain objects for all grain labels
@@ -313,10 +318,7 @@ public class PairSubtractionDataSource extends BasicDataSource
 	
 	@Override
 	public List<Parameter<?>> getLoadParameters() {
-		List<Parameter<?>> params = new FList<>();
-		params.add(hShift);
-		params.add(vShift);
-		return params;
+		return new FList<Parameter<?>>(hShift, vShift, boundaryParameter);
 	}
 	
 	@Override

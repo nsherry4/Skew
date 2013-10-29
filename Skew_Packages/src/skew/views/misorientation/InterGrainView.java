@@ -34,8 +34,15 @@ public class InterGrainView extends MisAngleView
 		return igv.getSpinnerModel(misModel);
 	}
 
+
 	@Override
-	public List<Summary> getSummary(int x, int y)
+	public List<Summary> getMapSummary() {
+		return new ArrayList<>();
+	}
+	
+	
+	@Override
+	public List<Summary> getPointSummary(int x, int y)
 	{
 		
 		List<Summary> summaries = new ArrayList<>();

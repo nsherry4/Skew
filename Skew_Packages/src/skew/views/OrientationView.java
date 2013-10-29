@@ -42,13 +42,27 @@ public class OrientationView extends MapView
 		return null;
 	}
 
+
 	@Override
-	public List<Summary> getSummary(int x, int y)
+	public List<Summary> getMapSummary() {
+		return new ArrayList<>();
+	}
+	
+	
+	@Override
+	public List<Summary> getPointSummary(int x, int y)
 	{
 		List<Summary> summaries = new ArrayList<>();
 		Summary s = new Summary("Orientation");
 		summaries.add(s);
-		s.addHeader("[001] Distance", "[001] Direction", "[110] Distance", "[110] Direction", "[111] Distance", "[111] Direction");
+		s.addHeader(
+				"Direction [001]", 
+				"Tilt [001]",
+				"Direction [110]", 
+				"Tilt [110]",
+				"Direction [111]",
+				"Tilt [111]"
+			);
 
 		
 		ISkewPoint<IOrientationMatrix> omPoint = omModel.getPoint(x, y);
@@ -61,13 +75,15 @@ public class OrientationView extends MapView
 		DirectionVector dv1 = omData.getOrientationVectors().get(0);
 		DirectionVector dv2 = omData.getOrientationVectors().get(1);
 		DirectionVector dv3 = omData.getOrientationVectors().get(2);
+
+		s.addValue("Direction [001]", formatOMDirectionValue(dv1.getDirection() * 360));
+		s.addValue("Tilt [001]",  formatOMTiltValue(dv1.getDistance() * 100));
 		
-		s.addValue("[001] Distance",  fmt(dv1.getDistance()));
-		s.addValue("[001] Direction", fmt(dv1.getDirection()));
-		s.addValue("[110] Distance",  fmt(+dv2.getDistance()));
-		s.addValue("[110] Direction", fmt(dv2.getDirection()));
-		s.addValue("[111] Distance",  fmt(dv3.getDistance()));
-		s.addValue("[111] Direction", fmt(dv3.getDirection()));
+		s.addValue("Direction [110]", formatOMDirectionValue(dv2.getDirection() * 360));
+		s.addValue("Tilt [110]",  formatOMTiltValue(dv2.getDistance() * 100));
+		
+		s.addValue("Direction [111]", formatOMDirectionValue(dv3.getDirection() * 360));
+		s.addValue("Tilt [111]",  formatOMTiltValue(dv3.getDistance() * 100));
 		
 		return summaries;
 		

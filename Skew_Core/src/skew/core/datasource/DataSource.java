@@ -10,6 +10,7 @@ import fava.signatures.FnGet;
 
 public abstract class DataSource implements IDataSource {
 
+	
 	public static <S> List<ISkewPoint<S>> getEmptyPoints(Coord<Integer> mapsize, FnGet<S> create)
 	{
 		List<ISkewPoint<S>> points = new ArrayList<ISkewPoint<S>>();
@@ -19,5 +20,6 @@ public abstract class DataSource implements IDataSource {
 		}
 		return points;
 	}
+		
 	
 }

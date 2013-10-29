@@ -47,9 +47,16 @@ public class GrainLabelView extends MapView
 	{
 		return null;
 	}
+	
 
 	@Override
-	public List<Summary> getSummary(int x, int y)
+	public List<Summary> getMapSummary() {
+		return new ArrayList<>();
+	}
+	
+
+	@Override
+	public List<Summary> getPointSummary(int x, int y)
 	{
 		return new ArrayList<>();
 	}

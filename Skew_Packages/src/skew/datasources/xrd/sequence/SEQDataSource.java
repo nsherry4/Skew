@@ -31,6 +31,7 @@ import skew.views.misorientation.MagnitudeView;
 import skew.views.strain.StrainView;
 import skew.views.strain.StressView;
 import autodialog.model.Parameter;
+import autodialog.view.editors.IntegerEditor;
 import ca.sciencestudio.process.xrd.util.SequenceEntry;
 
 import com.ezware.dialog.task.TaskDialogs;
@@ -42,6 +43,7 @@ import fava.signatures.FnMap;
 public class SEQDataSource extends MisorientationDataSource implements IDataSource
 {
 
+	private Parameter<Integer> boundaryParameter = new Parameter<Integer>("Grain Boundary Angle", new IntegerEditor(), 5);
 	
 	SkewGrid<IXRDStrain> strainModel;
 	
@@ -202,27 +204,10 @@ public class SEQDataSource extends MisorientationDataSource implements IDataSour
 	public ExecutorSet<ISkewDataset> loadDataset(List<String> filenames, Coord<Integer> mapsize) {
 		
 		createEmptyModels(mapsize);
+		//return Calculation.calculate(filenames, this, mapsize, boundaryParameter.getValue());
 		return Calculation.calculate(filenames, this, mapsize);
 				
 	}
-	
-	@Override
-	public List<Parameter<?>> getLoadParameters() {
-		return new FList<>();
-	}
-	
-	@Override
-	public String getLoadParametersInformation() {
-		return null;
-	}
-
-	@Override
-	public List<Parameter<?>> getRuntimeParameters() {
-		return new FList<>();
-	}
-
-	@Override
-	public void recalculate() {}
 
 
 }

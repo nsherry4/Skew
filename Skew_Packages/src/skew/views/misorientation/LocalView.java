@@ -9,6 +9,7 @@ import javax.swing.SpinnerNumberModel;
 import scidraw.drawing.map.painters.MapPainter;
 import scitypes.Spectrum;
 import skew.core.model.ISkewGrid;
+import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.Summary;
 import skew.models.misorientation.MisAngle;
@@ -31,8 +32,36 @@ public class LocalView extends MisAngleView
 		return new SpinnerNumberModel(2, 0.0, 180.0, 0.1);
 	}
 
+
+	
+
 	@Override
-	public List<Summary> getSummary(int x, int y)
+	public List<Summary> getMapSummary() {
+		List<Summary> summaries = new ArrayList<>();
+		Summary s = new Summary(getTitle() + " Map");
+		summaries.add(s);
+		s.addHeader("Average");
+		
+		
+		double average = 0d;
+		int count = 0;
+		for (ISkewPoint<MisAngle> point : misModel) {
+			if (!point.isValid()) continue;
+			if (!point.getData().average.is()) continue;
+			average += point.getData().average.get();
+			count++;
+		}
+		average /= count;
+		
+		
+		s.addValue("Average", formatMisValue(new Maybe<Double>(average)));
+	
+		return summaries;
+	}
+	
+	
+	@Override
+	public List<Summary> getPointSummary(int x, int y)
 	{
 		
 		List<Summary> summaries = new ArrayList<>();
