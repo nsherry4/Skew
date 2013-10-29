@@ -6,7 +6,6 @@ public class GrainPixel
 {
 	public Maybe<Integer> grainIndex;
 	public Grain grain;
-	//public double grainMagnitude;
 	public Maybe<Double> intraGrainMisorientation;
 	
 	public GrainPixel() {

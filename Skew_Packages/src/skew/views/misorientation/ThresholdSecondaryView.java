@@ -10,34 +10,34 @@ import skew.core.model.ISkewGrid;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.SecondaryView;
 import skew.core.viewer.modes.views.Summary;
-import skew.datasources.misorientation.drawing.BoundaryMapPainter;
 import skew.datasources.misorientation.drawing.SelectedGrainPainter;
+import skew.datasources.misorientation.drawing.ThresholdBoundaryMapPainter;
 import skew.models.grain.Grain;
 import skew.models.grain.GrainUtil;
 import skew.models.grain.GrainPixel;
 import skew.models.misorientation.MisAngle;
 import fava.functionable.FList;
 
-public class GrainSecondaryView extends SecondaryView
+public class ThresholdSecondaryView extends SecondaryView
 {
 	
-	protected BoundaryMapPainter boundaryPainter;
+	protected ThresholdBoundaryMapPainter boundaryPainter;
 	
 	protected boolean selectable;
 	protected SelectedGrainPainter selectedGrainPainter;
 
-	protected ISkewGrid<MisAngle> misModel;
 	protected ISkewGrid<GrainPixel> grainModel;
+	protected ISkewGrid<MisAngle> misModel; 
 	
-	public GrainSecondaryView(ISkewGrid<MisAngle> misModel, ISkewGrid<GrainPixel> grainModel)
+	public ThresholdSecondaryView(ISkewGrid<MisAngle> misModel, ISkewGrid<GrainPixel> grainModel, double boundary)
 	{
-		this(misModel, grainModel, Color.black, true);
+		this(misModel, grainModel, Color.black, true, boundary);
 	}
 	
-	public GrainSecondaryView(ISkewGrid<MisAngle> misModel, ISkewGrid<GrainPixel> grainModel, Color boundaryColor, boolean selectable)
+	public ThresholdSecondaryView(ISkewGrid<MisAngle> misModel, ISkewGrid<GrainPixel> grainModel, Color boundaryColor, boolean selectable, double boundary)
 	{
 		super("Grain", false);
-		boundaryPainter = new BoundaryMapPainter(misModel, boundaryColor);
+		boundaryPainter = new ThresholdBoundaryMapPainter(misModel, boundaryColor, boundary);
 		this.selectable = selectable;
 		selectedGrainPainter = new SelectedGrainPainter(grainModel);
 		setData(misModel, grainModel);

@@ -16,7 +16,7 @@ import skew.datasources.misorientation.datasource.calculation.misorientation.Cal
 import skew.models.orientation.IOrientationMatrix;
 import skew.views.OrientationView;
 import skew.views.misorientation.GrainLabelView;
-import skew.views.misorientation.GrainSecondaryView;
+import skew.views.misorientation.ThresholdSecondaryView;
 import skew.views.misorientation.InterGrainView;
 import skew.views.misorientation.LocalView;
 import skew.views.misorientation.MagnitudeView;
@@ -124,12 +124,14 @@ public class EBSDDataSource extends MisorientationDataSource
 	@Override
 	public List<MapView> getViews()
 	{
+		double angle = boundaryParameter.getValue();
+	
 		return new FList<MapView>(
-				new CompositeView(new LocalView(misModel), new GrainSecondaryView(misModel, grainModel)),
-				new CompositeView(new InterGrainView(misModel, grainModel), new GrainSecondaryView(misModel, grainModel)),
-				new CompositeView(new MagnitudeView(misModel, grainModel), new GrainSecondaryView(misModel, grainModel)),
-				new CompositeView(new OrientationView(omModel), new GrainSecondaryView(misModel, grainModel)),
-				new CompositeView(new GrainLabelView(misModel, grainModel), new GrainSecondaryView(misModel, grainModel))
+				new CompositeView(new LocalView(misModel), new ThresholdSecondaryView(misModel, grainModel,angle)),
+				new CompositeView(new InterGrainView(misModel, grainModel), new ThresholdSecondaryView(misModel, grainModel, angle)),
+				new CompositeView(new MagnitudeView(misModel, grainModel), new ThresholdSecondaryView(misModel, grainModel, angle)),
+				new CompositeView(new OrientationView(omModel), new ThresholdSecondaryView(misModel, grainModel, angle)),
+				new CompositeView(new GrainLabelView(misModel, grainModel), new ThresholdSecondaryView(misModel, grainModel, angle))
 			);
 
 	}

@@ -17,17 +17,19 @@ import skew.models.misorientation.MisAngle;
  * @author Nathaniel Sherry, 2011
  */
 
-public class BoundaryMapPainter extends MapPainter
+public class ThresholdBoundaryMapPainter extends MapPainter
 {
 
 	private Color color;
 	private ISkewGrid<MisAngle> misModel;
+	private double boundary;
 	
 	
-	public BoundaryMapPainter(ISkewGrid<MisAngle> grid, Color color) {
+	public ThresholdBoundaryMapPainter(ISkewGrid<MisAngle> data, Color color, double boundary) {
 		super(new ThermalScalePalette());
 		this.color = color;
-		this.misModel = grid;
+		this.misModel = data;
+		this.boundary = boundary;
 	}
 	
 	public void setData(ISkewGrid<MisAngle> data)
@@ -72,7 +74,7 @@ public class BoundaryMapPainter extends MapPainter
 				float fx = (float)x;
 				float fy = (float)y;
 				
-				if (point.east.is() && point.east.get() >= 5)
+				if (point.east.is() && point.east.get() >= boundary)
 				{
 					
 					p.context.moveTo( (fx+1f) * cellSize, fy * cellSize );
@@ -80,7 +82,7 @@ public class BoundaryMapPainter extends MapPainter
 					
 				}
 
-				if (point.south.is() && point.south.get() >= 5)
+				if (point.south.is() && point.south.get() >= boundary)
 				{
 					p.context.moveTo(fx * cellSize, (fy+1f) * cellSize);
 					p.context.lineTo((fx+1f) * cellSize, (fy+1f) * cellSize);

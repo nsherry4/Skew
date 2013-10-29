@@ -4,6 +4,7 @@ import java.util.List;
 
 import fava.functionable.FList;
 import autodialog.model.Parameter;
+import autodialog.view.editors.DoubleEditor;
 import autodialog.view.editors.IntegerEditor;
 import plural.executor.ExecutorSet;
 import plural.executor.map.MapExecutor;
@@ -23,7 +24,7 @@ public abstract class MisorientationDataSource extends DataSource
 	protected ISkewGrid<MisAngle> misModel;
 	protected ISkewGrid<IOrientationMatrix> omModel;
 	
-	private Parameter<Integer> boundaryParameter = new Parameter<Integer>("Grain Boundary Angle", new IntegerEditor(), 5);
+	protected Parameter<Double> boundaryParameter = new Parameter<Double>("Grain Boundary Angle", new DoubleEditor(), 5.);
 	
 	public void setModels(ISkewGrid<GrainPixel> grainModel, ISkewGrid<MisAngle> misModel, ISkewGrid<IOrientationMatrix> omGrid)
 	{
@@ -63,8 +64,7 @@ public abstract class MisorientationDataSource extends DataSource
 	 */
 	public ExecutorSet<ISkewDataset> loadDataset(List<String> filenames, Coord<Integer> mapsize)
 	{
-		//return Calculation.calculate(filenames, this, mapsize, boundaryParameter.getValue());
-		return Calculation.calculate(filenames, this, mapsize);
+		return Calculation.calculate(filenames, this, mapsize, boundaryParameter.getValue());
 	}
 		
 }

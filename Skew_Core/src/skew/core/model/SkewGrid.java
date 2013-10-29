@@ -69,13 +69,17 @@ public class SkewGrid<T> implements ISkewGrid<T>
 
 	@Override
 	public T getData(int position) {
-		return getPoint(position).getData();
+		ISkewPoint<T> point =  getPoint(position);
+		if (point == null) return null;
+		return point.getData();
 	}
 
 
 	@Override
 	public T getData(int x, int y) {
-		return getPoint(x, y).getData();
+		ISkewPoint<T> point =  getPoint(x, y);
+		if (point == null) return null;
+		return point.getData();
 	}
 
 	@Override

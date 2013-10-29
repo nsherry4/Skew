@@ -13,17 +13,19 @@ public class GrainIdentify
 	
 	private ISkewGrid<GrainPixel> grainModel;
 	private ISkewGrid<MisAngle> misModel;
+	private double boundary;
 	
-	public static void calculate(ISkewGrid<MisAngle> misModel, ISkewGrid<GrainPixel> grainModel)
+	public static void calculate(ISkewGrid<MisAngle> misModel, ISkewGrid<GrainPixel> grainModel, double boundary)
 	{
-		new GrainIdentify(misModel, grainModel).calculateGrains();
+		new GrainIdentify(misModel, grainModel, boundary).calculateGrains();
 		
 	}
 	
-	private GrainIdentify(ISkewGrid<MisAngle> misModel, ISkewGrid<GrainPixel> grainModel)
+	private GrainIdentify(ISkewGrid<MisAngle> misModel, ISkewGrid<GrainPixel> grainModel, double boundary)
 	{
 		this.grainModel = grainModel;
 		this.misModel = misModel;
+		this.boundary = boundary;		
 	}
 	
 	//determines the grain index number for each pixel
@@ -86,7 +88,8 @@ public class GrainIdentify
 			GrainPixel grainData = grainModel.getData(i);
 			
 			if (misData == null) continue;
-			if ((!misData.average.is()) || isSinglePixelGrain(i)) {
+			//if ((!misData.average.is()) || isSinglePixelGrain(i)) {
+			if ((!misData.average.is())) {
 				grainData.grainIndex.set();
 				continue;
 			}
@@ -114,7 +117,7 @@ public class GrainIdentify
 		MisAngle pointNorth = misModel.getData(x, y-1);
 		
 		if (!pointNorth.average.is()) return false;
-		return point.north.get() < 5 && point.north.get() >= 0;
+		return point.north.get() < boundary && point.north.get() >= 0;
 		
 	}
 	
@@ -125,7 +128,7 @@ public class GrainIdentify
 		MisAngle pointWest = misModel.getData(x-1, y);
 		
 		if (!pointWest.average.is()) return false;
-		return point.west.get() < 5 && point.west.get() >= 0;
+		return point.west.get() < boundary && point.west.get() >= 0;
 		
 	}
 	
@@ -134,10 +137,10 @@ public class GrainIdentify
 		MisAngle p = misModel.getData(i);
 		if (p == null) return true;
 		
-		boolean west = (!p.west.is()) || p.west.get() > 5;
-		boolean east = (!p.east.is()) || p.east.get() > 5;
-		boolean north = (!p.north.is()) || p.north.get() > 5;
-		boolean south = (!p.south.is()) || p.south.get() > 5;
+		boolean west = (!p.west.is()) || p.west.get() > boundary;
+		boolean east = (!p.east.is()) || p.east.get() > boundary;
+		boolean north = (!p.north.is()) || p.north.get() > boundary;
+		boolean south = (!p.south.is()) || p.south.get() > boundary;
 		
 		if (west && east && south && north) return true;
 		return false;

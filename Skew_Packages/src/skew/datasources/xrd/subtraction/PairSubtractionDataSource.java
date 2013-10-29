@@ -29,11 +29,12 @@ import skew.models.orientation.IOrientationMatrix;
 import skew.models.orientation.OrientationMatrix;
 import skew.models.strain.IXRDStrain;
 import skew.models.strain.XRDStrain;
-import skew.views.misorientation.GrainSecondaryView;
+import skew.views.misorientation.ThresholdSecondaryView;
 import skew.views.misorientation.LocalView;
 import skew.views.strain.StrainView;
 import skew.views.subtraction.LocalSubtractionView;
 import autodialog.model.Parameter;
+import autodialog.view.editors.DoubleEditor;
 import autodialog.view.editors.IntegerEditor;
 import fava.functionable.FList;
 import fava.functionable.FStringInput;
@@ -45,7 +46,7 @@ public class PairSubtractionDataSource extends BasicDataSource
 	String g = "Overlay";
 	private Parameter<Integer> hShift = new Parameter<>("Horizontal Shift", new IntegerEditor(), 0, g);
 	private Parameter<Integer> vShift = new Parameter<>("Vertical Shift", new IntegerEditor(), 0, g);
-	private Parameter<Integer> boundaryParameter = new Parameter<Integer>("Grain Boundary Angle", new IntegerEditor(), 5);
+	private Parameter<Double> boundaryParameter = new Parameter<Double>("Grain Boundary Angle", new DoubleEditor(), 5.);
 	
 	private static String ext = "pair";
 	private int startNum = 1;
@@ -244,10 +245,12 @@ public class PairSubtractionDataSource extends BasicDataSource
 		//(Re)calculates anything that can change due to runtime parameter adjustment (eg subtracted/differenced models) 	
 		recalculate();
 		
+		double angle = boundaryParameter.getValue();
+		
 		MapView beforeTranslatedGrainView, afterTranslatedGrainView;
 		
-		beforeTranslatedGrainView = new GrainSecondaryView(beforeTranslatedMisModel, beforeTranslatedGrainModel, Color.black, true);
-		afterTranslatedGrainView = new GrainSecondaryView(afterTranslatedMisModel, afterTranslatedGrainModel, Color.white, true);
+		beforeTranslatedGrainView = new ThresholdSecondaryView(beforeTranslatedMisModel, beforeTranslatedGrainModel, Color.black, true, angle);
+		afterTranslatedGrainView = new ThresholdSecondaryView(afterTranslatedMisModel, afterTranslatedGrainModel, Color.white, true, angle);
 		beforeTranslatedGrainView.setTitle(beforeTranslatedGrainView.getTitle() + " (Before)");
 		afterTranslatedGrainView.setTitle(afterTranslatedGrainView.getTitle() + " (After)");
 
@@ -260,22 +263,22 @@ public class PairSubtractionDataSource extends BasicDataSource
 		primary = new LocalView(beforeMisModel);
 		primary.setTitle(primary.getTitle() + " (Before)");
 		views.add(new CompositeView(primary, 
-				new GrainSecondaryView(beforeMisModel, beforeGrainModel, Color.black, true)
+				new ThresholdSecondaryView(beforeMisModel, beforeGrainModel, Color.black, true, angle)
 			));
 		
 		
 		primary = new LocalView(afterMisModel);
 		primary.setTitle(primary.getTitle() + " (After)");
 		views.add(new CompositeView(primary, 
-				new GrainSecondaryView(afterMisModel, afterGrainModel, Color.white, true)
+				new ThresholdSecondaryView(afterMisModel, afterGrainModel, Color.white, true, angle)
 			));
 		
 		
 		primary = new LocalSubtractionView(subtractMisModel);
 		primary.setTitle(primary.getTitle() + " (Subtracted)");
 		
-		beforeTranslatedGrainView = new GrainSecondaryView(beforeTranslatedMisModel, beforeTranslatedGrainModel, Color.black, true);
-		afterTranslatedGrainView = new GrainSecondaryView(afterTranslatedMisModel, afterTranslatedGrainModel, Color.white, true);
+		beforeTranslatedGrainView = new ThresholdSecondaryView(beforeTranslatedMisModel, beforeTranslatedGrainModel, Color.black, true, angle);
+		afterTranslatedGrainView = new ThresholdSecondaryView(afterTranslatedMisModel, afterTranslatedGrainModel, Color.white, true, angle);
 		beforeTranslatedGrainView.setTitle(beforeTranslatedGrainView.getTitle() + " (Before)");
 		afterTranslatedGrainView.setTitle(afterTranslatedGrainView.getTitle() + " (After)");
 		
@@ -288,14 +291,13 @@ public class PairSubtractionDataSource extends BasicDataSource
 	
 	private void calculateMisModel(ISkewGrid<MisAngle> misModel, ISkewGrid<GrainPixel> grainModel, ISkewGrid<IOrientationMatrix> omGrid)
 	{
-		int angle = boundaryParameter.getValue();
+		double angle = boundaryParameter.getValue();
 		
-		//Calculation.calcLocalMisorientation(misModel, omGrid, dimensions.x, dimensions.y, angle).executeBlocking();
-		Calculation.calcLocalMisorientation(misModel, omGrid, dimensions.x, dimensions.y).executeBlocking();
+		Calculation.calcLocalMisorientation(misModel, omGrid, dimensions.x, dimensions.y, angle).executeBlocking();
 			
 		//calculate which grain each pixel belongs to
-		//GrainIdentify.calculate(misModel, grainModel, angle);
-		GrainIdentify.calculate(misModel, grainModel);
+		GrainIdentify.calculate(misModel, grainModel, angle);
+		
 
 		//create grain objects for all grain labels
 		Magnitude.setupGrains(grainModel);

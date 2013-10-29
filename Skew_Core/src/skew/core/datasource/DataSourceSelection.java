@@ -50,9 +50,6 @@ public class DataSourceSelection extends JDialog
 		
 		TitleGradientPanel title = new TitleGradientPanel("Skew can't decide what format this data is in.", true);
 		title.setBorder(Spacing.bMedium());
-		//JLabel title = new JLabel("<html><b>Skew can't decide what format this data is</b></html>", JLabel.CENTER);
-		//title.setFont(title.getFont().deriveFont(title.getFont().getSize() * 1.5f));
-		//title.setBorder(Spacing.bMedium());
 		c.add(title, BorderLayout.NORTH);
 	
 		

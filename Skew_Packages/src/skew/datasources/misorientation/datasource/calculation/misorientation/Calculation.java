@@ -3,8 +3,8 @@ package skew.datasources.misorientation.datasource.calculation.misorientation;
 /**
  * This package provides the routines for calculating mis-orientation angles for each scan point in an area scan.
  * The mis-angle for each scan point is set as the average of all mis-angles to its 8  neighbors if the angle value  
- * is less than 5 degree; it also recorded the angles to the east and to the south neighbors as the reference 
- * for drawing grain boundaries, e.g. if any of these two angles is large than 5 degree, draw a boundary line at the
+ * is less than 'boundary' degrees; it also recorded the angles to the east and to the south neighbors as the reference 
+ * for drawing grain boundaries, e.g. if any of these two angles is large than 'boundary' degrees, draw a boundary line at the
  * east/south side of this scan point.     
  * @author Jinhui Qin, 2011
  *
@@ -49,7 +49,7 @@ public class Calculation
 	private static CubicSymOP	symmetryOperators	= new CubicSymOP();
 
 	
-	public static ExecutorSet<ISkewDataset> calculate(final List<String> filenames, final MisorientationDataSource ds, final Coord<Integer> mapSize)
+	public static ExecutorSet<ISkewDataset> calculate(final List<String> filenames, final MisorientationDataSource ds, final Coord<Integer> mapSize, final double boundary)
 	{
 
 		//Create MisAngleGrid
@@ -80,7 +80,7 @@ public class Calculation
 		final MapExecutor<String, String> loadFilesExec = ds.loadPoints(filenames);
 		
 		//Perform various calculations on loaded data
-		final EachIndexExecutor calculateExec = calcLocalMisorientation(misModel, omModel, mapSize.x, mapSize.y);
+		final EachIndexExecutor calculateExec = calcLocalMisorientation(misModel, omModel, mapSize.x, mapSize.y, boundary);
 		final EachIndexExecutor calcGrainExec = calculateGrainMagnitude(grainModel, misModel, omModel);
 
 		
@@ -103,7 +103,7 @@ public class Calculation
 				calculateExec.executeBlocking();
 
 				//calculate which grain each pixel belongs to
-				GrainIdentify.calculate(misModel, grainModel);
+				GrainIdentify.calculate(misModel, grainModel, boundary);
 
 				//create grain objects for all grain labels
 				Magnitude.setupGrains(grainModel);
@@ -135,7 +135,7 @@ public class Calculation
 	/**
 	 * Calculates the local misorientation from the Orientation Matrix information
 	 */
-	public static EachIndexExecutor calcLocalMisorientation(final ISkewGrid<MisAngle> misModel, final ISkewGrid<IOrientationMatrix> omModel, final int width, final int height)
+	public static EachIndexExecutor calcLocalMisorientation(final ISkewGrid<MisAngle> misModel, final ISkewGrid<IOrientationMatrix> omModel, final int width, final int height, final double boundary)
 	{
 
 		FnEach<Integer> eachIndex = new FnEach<Integer>() {
@@ -143,7 +143,7 @@ public class Calculation
 			@Override
 			public void f(Integer index)
 			{
-				setMisAnglePoints(index, misModel, omModel, width, height);
+				setMisAnglePoints(index, misModel, omModel, width, height, boundary);
 			}
 		};
 
@@ -174,7 +174,7 @@ public class Calculation
 		return exec;
 	}
 
-	private static void setMisAnglePoints(int i, ISkewGrid<MisAngle> misGrid, ISkewGrid<IOrientationMatrix> omGrid, int width, int height)
+	private static void setMisAnglePoints(int i, ISkewGrid<MisAngle> misGrid, ISkewGrid<IOrientationMatrix> omGrid, int width, int height, double boundary)
 	{
 		ISkewPoint<MisAngle> misPoint = misGrid.getPoint(i);
 		ISkewPoint<IOrientationMatrix> omPoint = omGrid.getPoint(i);
@@ -249,7 +249,7 @@ public class Calculation
 
 				angle = calculateAngle(omData, otherOMData);
 
-				if (angle < 5.)
+				if (angle < boundary)
 				{
 					angle_total += angle;
 					points++;
@@ -270,7 +270,7 @@ public class Calculation
 
 				angle = calculateAngle(omData, otherOMData);
 
-				if (angle < 5.)
+				if (angle < boundary)
 				{
 					angle_total += angle;
 					points++;
@@ -292,7 +292,7 @@ public class Calculation
 
 				angle = calculateAngle(omData, otherOMData);
 
-				if (angle < 5.)
+				if (angle < boundary)
 				{
 					angle_total += angle;
 					points++;
@@ -314,7 +314,7 @@ public class Calculation
 
 				angle = calculateAngle(omData, otherOMData);
 
-				if (angle < 5.)
+				if (angle < boundary)
 				{
 					angle_total += angle;
 					points++;
@@ -333,7 +333,7 @@ public class Calculation
 			{
 				angle = calculateAngle(omData, otherOMData);
 
-				if (angle < 5.)
+				if (angle < boundary)
 				{
 					angle_total += angle;
 					points++;
@@ -348,7 +348,7 @@ public class Calculation
 			if (otherOMPoint.isValid())
 			{
 				angle = calculateAngle(omData, otherOMData);
-				if (angle < 5.)
+				if (angle < boundary)
 				{
 					angle_total += angle;
 					points++;
@@ -363,7 +363,7 @@ public class Calculation
 			if (otherOMPoint.isValid())
 			{
 				angle = calculateAngle(omData, otherOMData);
-				if (angle < 5.)
+				if (angle < boundary)
 				{
 					angle_total += angle;
 					points++;
@@ -378,7 +378,7 @@ public class Calculation
 			if (otherOMPoint.isValid())
 			{
 				angle = calculateAngle(omData, otherOMData);
-				if (angle < 5)
+				if (angle < boundary)
 				{
 					angle_total += angle;
 					points++;

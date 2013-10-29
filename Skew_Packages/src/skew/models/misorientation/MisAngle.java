@@ -15,7 +15,7 @@ import fava.datatypes.Maybe;
 public class MisAngle
 {
 	
-	// average is mean average of all eight neighbors (if any<5)
+	// average is mean average of all eight neighbors (of those < boundary)
 	public Maybe<Double> average, north, east, south, west;
 
 	public MisAngle()

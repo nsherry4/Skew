@@ -24,13 +24,14 @@ import skew.models.strain.IXRDStrain;
 import skew.models.strain.XRDStrain;
 import skew.views.OrientationView;
 import skew.views.misorientation.GrainLabelView;
-import skew.views.misorientation.GrainSecondaryView;
+import skew.views.misorientation.ThresholdSecondaryView;
 import skew.views.misorientation.InterGrainView;
 import skew.views.misorientation.LocalView;
 import skew.views.misorientation.MagnitudeView;
 import skew.views.strain.StrainView;
 import skew.views.strain.StressView;
 import autodialog.model.Parameter;
+import autodialog.view.editors.DoubleEditor;
 import autodialog.view.editors.IntegerEditor;
 import ca.sciencestudio.process.xrd.util.SequenceEntry;
 
@@ -42,9 +43,6 @@ import fava.signatures.FnMap;
 
 public class SEQDataSource extends MisorientationDataSource implements IDataSource
 {
-
-	private Parameter<Integer> boundaryParameter = new Parameter<Integer>("Grain Boundary Angle", new IntegerEditor(), 5);
-	
 	SkewGrid<IXRDStrain> strainModel;
 	
 	public ISkewPoint<MisAngle> createPoint(int index, int x, int y)
@@ -171,14 +169,15 @@ public class SEQDataSource extends MisorientationDataSource implements IDataSour
 	@Override
 	public List<MapView> getViews()
 	{
+		ThresholdSecondaryView threshold = new ThresholdSecondaryView(misModel, grainModel, boundaryParameter.getValue());
 		return new FList<MapView>(
-				new CompositeView(new LocalView(misModel), new GrainSecondaryView(misModel, grainModel)),
-				new CompositeView(new InterGrainView(misModel, grainModel), new GrainSecondaryView(misModel, grainModel)),
-				new CompositeView(new MagnitudeView(misModel, grainModel), new GrainSecondaryView(misModel, grainModel)),
-				new CompositeView(new OrientationView(omModel), new GrainSecondaryView(misModel, grainModel)),
-				new CompositeView(new GrainLabelView(misModel, grainModel), new GrainSecondaryView(misModel, grainModel)),
-				new CompositeView(new StrainView(strainModel), new GrainSecondaryView(misModel, grainModel)),
-				new CompositeView(new StressView(strainModel), new GrainSecondaryView(misModel, grainModel))
+				new CompositeView(new LocalView(misModel), threshold),
+				new CompositeView(new InterGrainView(misModel, grainModel), threshold),
+				new CompositeView(new MagnitudeView(misModel, grainModel), threshold),
+				new CompositeView(new OrientationView(omModel), threshold),
+				new CompositeView(new GrainLabelView(misModel, grainModel), threshold),
+				new CompositeView(new StrainView(strainModel), threshold),
+				new CompositeView(new StressView(strainModel), threshold)
 			);
 
 	}
@@ -204,8 +203,8 @@ public class SEQDataSource extends MisorientationDataSource implements IDataSour
 	public ExecutorSet<ISkewDataset> loadDataset(List<String> filenames, Coord<Integer> mapsize) {
 		
 		createEmptyModels(mapsize);
-		//return Calculation.calculate(filenames, this, mapsize, boundaryParameter.getValue());
-		return Calculation.calculate(filenames, this, mapsize);
+		return Calculation.calculate(filenames, this, mapsize, boundaryParameter.getValue());
+		
 				
 	}
 
