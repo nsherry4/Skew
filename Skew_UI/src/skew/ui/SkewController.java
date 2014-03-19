@@ -20,10 +20,10 @@ import plural.swing.ExecutorSetView;
 import scidraw.swing.SavePicture;
 import scitypes.Coord;
 import skew.DataSources;
-import skew.core.datasource.Acceptance;
 import skew.core.datasource.DataSourceSelection;
 import skew.core.datasource.DummyDataSource;
 import skew.core.datasource.IDataSource;
+import skew.core.datasource.IDataSource.FileFormatAcceptance;
 import skew.core.model.DummyGrid;
 import skew.core.model.ISkewDataset;
 import skew.core.model.SkewDataset;
@@ -44,8 +44,8 @@ import autodialog.view.editors.IntegerEditor;
 import autodialog.view.layouts.FramesADLayout;
 
 import com.ezware.dialog.task.TaskDialogs;
-import commonenvironment.AbstractFile;
 
+import commonenvironment.AbstractFile;
 import fava.functionable.FList;
 
 public class SkewController
@@ -294,7 +294,7 @@ public class SkewController
 		}
 		
 		//get a list of filenames from the user
-		List<AbstractFile> absfiles = SwidgetIO.openFiles(window, "Select Data Files to Open", exts, descs, path);
+		List<AbstractFile> absfiles = SwidgetIO.openFiles(window, "Select Data Files to Open", exts, descs, path, true);
 		if (absfiles == null || absfiles.size() == 0) return null;
 		
 		List<String> files = new ArrayList<String>();
@@ -309,9 +309,9 @@ public class SkewController
 		List<IDataSource> maybeFormats = new ArrayList<IDataSource>();
 		for (IDataSource ds : formats)
 		{
-			Acceptance acc = ds.accepts(files);
-			if (acc == Acceptance.ACCEPT) acceptingFormats.add(ds);
-			if (acc == Acceptance.MAYBE) maybeFormats.add(ds);
+			FileFormatAcceptance acc = ds.accepts(files);
+			if (acc == FileFormatAcceptance.ACCEPT) acceptingFormats.add(ds);
+			if (acc == FileFormatAcceptance.MAYBE) maybeFormats.add(ds);
 		}
 		
 		
@@ -358,7 +358,8 @@ public class SkewController
 			List<Parameter<?>> params = new FList<>();
 			params.add(paramWidth);
 			params.add(paramHeight);
-			params.addAll(ds.getLoadParameters());
+			List<Parameter<?>> loadParameters = ds.getLoadParameters();
+			if (loadParameters != null) params.addAll(loadParameters);
 			
 			SimpleADController dialogController = new SimpleADController(params);
 			

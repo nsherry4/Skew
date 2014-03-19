@@ -7,7 +7,6 @@ import java.util.List;
 
 import plural.executor.PluralExecutor;
 import scitypes.Coord;
-import skew.core.datasource.Acceptance;
 import skew.core.datasource.BasicDataSource;
 import skew.core.model.IModel;
 import skew.core.model.ISkewGrid;
@@ -31,13 +30,13 @@ public class PixDevDataSource extends BasicDataSource
 	}
 
 	@Override
-	public Acceptance accepts(List<String> filenames)
+	public FileFormatAcceptance accepts(List<String> filenames)
 	{
 		for (String fn : filenames)
 		{
-			if (!fn.toLowerCase().endsWith("xpdm")) return Acceptance.REJECT;
+			if (!fn.toLowerCase().endsWith("xpdm")) return FileFormatAcceptance.REJECT;
 		}
-		return Acceptance.ACCEPT;
+		return FileFormatAcceptance.ACCEPT;
 	}
 
 	@Override
@@ -108,5 +107,10 @@ public class PixDevDataSource extends BasicDataSource
 	@Override
 	public void recalculate() {}
 	
+
+	@Override
+	public FileOrFolder fileOrFolder() {
+		return FileOrFolder.FILE;
+	}
 
 }

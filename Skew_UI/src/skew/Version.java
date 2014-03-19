@@ -6,8 +6,8 @@ public class Version
 	public static String description = "Crystallographic Data Visualization Tool";
 	
 	public static String short_version = "2";
-	public static String long_version = "2.2.0";
+	public static String long_version = "2.2.2";
 	
-	public static String date = "August 29th, 2013";
+	public static String date = "March 19th, 2014";
 	
 }

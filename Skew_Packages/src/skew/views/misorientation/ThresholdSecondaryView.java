@@ -24,6 +24,7 @@ public class ThresholdSecondaryView extends SecondaryView
 	protected ThresholdBoundaryMapPainter boundaryPainter;
 	
 	protected boolean selectable;
+	protected boolean showGrainBoundary;
 	protected SelectedGrainPainter selectedGrainPainter;
 
 	protected ISkewGrid<GrainPixel> grainModel;
@@ -40,10 +41,13 @@ public class ThresholdSecondaryView extends SecondaryView
 		boundaryPainter = new ThresholdBoundaryMapPainter(misModel, boundaryColor, boundary);
 		this.selectable = selectable;
 		selectedGrainPainter = new SelectedGrainPainter(grainModel);
+		showGrainBoundary = true;
 		setData(misModel, grainModel);
 	}
 	
-	
+	public void setShowGrainBoundary(boolean show) {
+		showGrainBoundary = show;
+	}
 	
 	
 	protected void setData(ISkewGrid<MisAngle> misModel, ISkewGrid<GrainPixel> grainModel)
@@ -58,11 +62,10 @@ public class ThresholdSecondaryView extends SecondaryView
 	@Override
 	public List<MapPainter> getPainters(MapSubView subview,	float maximum) {
 		setData(misModel, grainModel);
-		if (!selectable) {
-			return new FList<MapPainter>(boundaryPainter);
-		} else {
-			return new FList<MapPainter>(boundaryPainter, selectedGrainPainter);
-		}
+		List<MapPainter> painters = new ArrayList<>();
+		if (showGrainBoundary) painters.add(boundaryPainter);
+		if (selectable && showGrainBoundary) painters.add(selectedGrainPainter);
+		return painters;
 	}
 
 

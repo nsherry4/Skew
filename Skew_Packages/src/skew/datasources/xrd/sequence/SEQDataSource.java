@@ -8,7 +8,6 @@ import plural.executor.ExecutorSet;
 import plural.executor.map.MapExecutor;
 import plural.executor.map.implementations.PluralMapExecutor;
 import scitypes.Coord;
-import skew.core.datasource.Acceptance;
 import skew.core.datasource.IDataSource;
 import skew.core.model.ISkewDataset;
 import skew.core.model.ISkewPoint;
@@ -30,9 +29,6 @@ import skew.views.misorientation.LocalView;
 import skew.views.misorientation.MagnitudeView;
 import skew.views.strain.StrainView;
 import skew.views.strain.StressView;
-import autodialog.model.Parameter;
-import autodialog.view.editors.DoubleEditor;
-import autodialog.view.editors.IntegerEditor;
 import ca.sciencestudio.process.xrd.util.SequenceEntry;
 
 import com.ezware.dialog.task.TaskDialogs;
@@ -69,11 +65,11 @@ public class SEQDataSource extends MisorientationDataSource implements IDataSour
 	}
 
 	@Override
-	public Acceptance accepts(List<String> filenames)
+	public FileFormatAcceptance accepts(List<String> filenames)
 	{
-		if (filenames.size() > 1) return Acceptance.REJECT;
+		if (filenames.size() > 1) return FileFormatAcceptance.REJECT;
 		boolean accept = filenames.get(0).toLowerCase().endsWith("seq");
-		return accept ? Acceptance.ACCEPT : Acceptance.REJECT;
+		return accept ? FileFormatAcceptance.ACCEPT : FileFormatAcceptance.REJECT;
 	}
 
 	public MapExecutor<String, String> loadPoints(List<String> filenames)
@@ -169,20 +165,19 @@ public class SEQDataSource extends MisorientationDataSource implements IDataSour
 	@Override
 	public List<MapView> getViews()
 	{
-		ThresholdSecondaryView threshold = new ThresholdSecondaryView(misModel, grainModel, boundaryParameter.getValue());
 		return new FList<MapView>(
-				new CompositeView(new LocalView(misModel), threshold),
-				new CompositeView(new InterGrainView(misModel, grainModel), threshold),
-				new CompositeView(new MagnitudeView(misModel, grainModel), threshold),
-				new CompositeView(new OrientationView(omModel), threshold),
-				new CompositeView(new GrainLabelView(misModel, grainModel), threshold),
-				new CompositeView(new StrainView(strainModel), threshold),
-				new CompositeView(new StressView(strainModel), threshold)
+				new CompositeView(new LocalView(misModel), grainView()),
+				new CompositeView(new InterGrainView(misModel, grainModel), grainView()),
+				new CompositeView(new MagnitudeView(misModel, grainModel), grainView()),
+				new CompositeView(new OrientationView(omModel), grainView()),
+				new CompositeView(new GrainLabelView(misModel, grainModel), grainView()),
+				new CompositeView(new StrainView(strainModel), grainView()),
+				new CompositeView(new StressView(strainModel), grainView())
 			);
 
 	}
 
-	private void createEmptyModels(Coord<Integer> mapsize)
+	private void createStrainModel(Coord<Integer> mapsize)
 	{
 		//List<ISkewPoint<MisAngle>> misanglePoints = new ArrayList<ISkewPoint<MisAngle>>();
 		List<ISkewPoint<IXRDStrain>> strainPoints = new ArrayList<ISkewPoint<IXRDStrain>>();
@@ -202,11 +197,16 @@ public class SEQDataSource extends MisorientationDataSource implements IDataSour
 	@Override
 	public ExecutorSet<ISkewDataset> loadDataset(List<String> filenames, Coord<Integer> mapsize) {
 		
-		createEmptyModels(mapsize);
-		return Calculation.calculate(filenames, this, mapsize, boundaryParameter.getValue());
+		super.createModels(mapsize);
+		createStrainModel(mapsize);
 		
+		return Calculation.calculate(filenames, this, mapsize, boundaryParameter.getValue());
 				
 	}
 
+	@Override
+	public FileOrFolder fileOrFolder() {
+		return FileOrFolder.FILE;
+	}
 
 }

@@ -31,9 +31,9 @@ public class DummyDataSource implements IDataSource
 	}
 
 	@Override
-	public Acceptance accepts(List<String> filenames)
+	public FileFormatAcceptance accepts(List<String> filenames)
 	{
-		return Acceptance.REJECT;
+		return FileFormatAcceptance.REJECT;
 	}
 
 
@@ -67,5 +67,10 @@ public class DummyDataSource implements IDataSource
 
 	@Override
 	public void recalculate() {}
+
+	@Override
+	public FileOrFolder fileOrFolder() {
+		return FileOrFolder.FILE;
+	}
 
 }

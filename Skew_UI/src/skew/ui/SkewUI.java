@@ -16,6 +16,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -574,6 +575,8 @@ public class SkewUI extends JPanel {
 		sidebarParameterPanel.removeAll();
 		
 		List<Parameter<?>> params = controller.data.datasource().getRuntimeParameters();
+		if (params == null) params = new ArrayList<>();
+		
 		AutoPanel panel = new AutoPanel(params, new FramesADLayout(), 0);
 		sidebarParameterPanel.add(panel);
 		sidebarParameterPanel.setVisible(params.size() > 0);

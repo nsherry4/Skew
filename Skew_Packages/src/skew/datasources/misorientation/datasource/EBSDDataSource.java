@@ -6,9 +6,11 @@ import static java.lang.Math.sin;
 import java.io.File;
 import java.util.List;
 
+import plural.executor.ExecutorSet;
 import plural.executor.map.MapExecutor;
 import plural.executor.map.implementations.PluralMapExecutor;
-import skew.core.datasource.Acceptance;
+import scitypes.Coord;
+import skew.core.model.ISkewDataset;
 import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.views.CompositeView;
 import skew.core.viewer.modes.views.MapView;
@@ -20,7 +22,6 @@ import skew.views.misorientation.ThresholdSecondaryView;
 import skew.views.misorientation.InterGrainView;
 import skew.views.misorientation.LocalView;
 import skew.views.misorientation.MagnitudeView;
-import autodialog.model.Parameter;
 
 import com.ezware.dialog.task.TaskDialogs;
 
@@ -50,10 +51,15 @@ public class EBSDDataSource extends MisorientationDataSource
 	}
 
 	@Override
-	public Acceptance accepts(List<String> filenames)
+	public FileFormatAcceptance accepts(List<String> filenames)
 	{
-		if (filenames.size() > 1) return Acceptance.REJECT;
-		return Acceptance.MAYBE;
+		if (filenames.size() > 1) return FileFormatAcceptance.REJECT;
+		
+		String filename = filenames.get(0);
+		File file = new File(filename);
+		if (file.exists() && !file.isDirectory() && filename.toLowerCase().endsWith("txt")) return FileFormatAcceptance.MAYBE;
+		
+		return FileFormatAcceptance.REJECT;
 	}
 
 	@Override
@@ -127,17 +133,25 @@ public class EBSDDataSource extends MisorientationDataSource
 		double angle = boundaryParameter.getValue();
 	
 		return new FList<MapView>(
-				new CompositeView(new LocalView(misModel), new ThresholdSecondaryView(misModel, grainModel,angle)),
-				new CompositeView(new InterGrainView(misModel, grainModel), new ThresholdSecondaryView(misModel, grainModel, angle)),
-				new CompositeView(new MagnitudeView(misModel, grainModel), new ThresholdSecondaryView(misModel, grainModel, angle)),
-				new CompositeView(new OrientationView(omModel), new ThresholdSecondaryView(misModel, grainModel, angle)),
-				new CompositeView(new GrainLabelView(misModel, grainModel), new ThresholdSecondaryView(misModel, grainModel, angle))
+				new CompositeView(new LocalView(misModel), grainView()),
+				new CompositeView(new InterGrainView(misModel, grainModel), grainView()),
+				new CompositeView(new MagnitudeView(misModel, grainModel), grainView()),
+				new CompositeView(new OrientationView(omModel), grainView()),
+				new CompositeView(new GrainLabelView(misModel, grainModel), grainView())
 			);
 
 	}
 
 
+	@Override
+	public FileOrFolder fileOrFolder() {
+		return FileOrFolder.FILE;
+	}
 
-	
+	@Override
+	public ExecutorSet<ISkewDataset> loadDataset(List<String> filenames, Coord<Integer> mapsize) {
+		super.createModels(mapsize);
+		return Calculation.calculate(filenames, this, mapsize, boundaryParameter.getValue());
+	}
 
 }

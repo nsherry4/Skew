@@ -7,7 +7,6 @@ import java.util.List;
 
 import plural.executor.PluralExecutor;
 import scitypes.Coord;
-import skew.core.datasource.Acceptance;
 import skew.core.datasource.BasicDataSource;
 import skew.core.datasource.DataSource;
 import skew.core.model.IModel;
@@ -15,7 +14,7 @@ import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 import skew.core.model.SkewGrid;
 import skew.core.viewer.modes.views.MapView;
-import skew.datasources.misorientation.datasource.calculation.misorientation.IndexFileName;
+import skew.datasources.misorientation.datasource.calculation.misorientation.FoxmasFileName;
 import skew.datasources.xrd.XRDUtil;
 import skew.models.strain.IXRDStrain;
 import skew.models.strain.XRDStrain;
@@ -40,13 +39,13 @@ public class SubtractionDataSource extends BasicDataSource
 	}
 
 	@Override
-	public Acceptance accepts(List<String> filenames) {
+	public FileFormatAcceptance accepts(List<String> filenames) {
 		for (String filename : filenames)
 		{
-			if (!filename.endsWith(".dif")) { return Acceptance.REJECT; }
+			if (!filename.endsWith(".dif")) { return FileFormatAcceptance.REJECT; }
 		}
 		
-		return Acceptance.ACCEPT;
+		return FileFormatAcceptance.ACCEPT;
 			
 	}
 
@@ -75,7 +74,7 @@ public class SubtractionDataSource extends BasicDataSource
 			@Override
 			public void f(String filename) {
 				
-				int index = IndexFileName.getFileNumber(filename)-startNum;
+				int index = FoxmasFileName.getFileNumber(filename)-startNum;
 				ISkewPoint<IXRDStrain> p = points.get(index);
 				IXRDStrain data = p.getData();
 				
@@ -128,5 +127,10 @@ public class SubtractionDataSource extends BasicDataSource
 
 	@Override
 	public void recalculate() {}
+
+	@Override
+	public FileOrFolder fileOrFolder() {
+		return FileOrFolder.FILE;
+	}
 
 }

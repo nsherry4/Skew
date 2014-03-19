@@ -10,9 +10,9 @@ import com.google.common.base.Optional;
 
 import plural.executor.PluralExecutor;
 import scitypes.Coord;
-import skew.core.datasource.Acceptance;
 import skew.core.datasource.BasicDataSource;
 import skew.core.datasource.DataSource;
+import skew.core.datasource.IDataSource.FileOrFolder;
 import skew.core.model.IModel;
 import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
@@ -23,7 +23,7 @@ import skew.core.viewer.modes.views.MapView;
 import skew.datasources.misorientation.datasource.calculation.magnitude.GrainIdentify;
 import skew.datasources.misorientation.datasource.calculation.magnitude.Magnitude;
 import skew.datasources.misorientation.datasource.calculation.misorientation.Calculation;
-import skew.datasources.misorientation.datasource.calculation.misorientation.IndexFileName;
+import skew.datasources.misorientation.datasource.calculation.misorientation.FoxmasFileName;
 import skew.datasources.xrd.XRDUtil;
 import skew.models.grain.GrainPixel;
 import skew.models.misorientation.MisAngle;
@@ -75,13 +75,13 @@ public class PairSubtractionDataSource extends BasicDataSource
 	}
 
 	@Override
-	public Acceptance accepts(List<String> filenames) {
+	public FileFormatAcceptance accepts(List<String> filenames) {
 		for (String filename : filenames)
 		{
-			if (!filename.endsWith(ext)) { return Acceptance.REJECT; }
+			if (!filename.endsWith(ext)) { return FileFormatAcceptance.REJECT; }
 		}
 		
-		return Acceptance.ACCEPT;
+		return FileFormatAcceptance.ACCEPT;
 			
 	}
 
@@ -188,7 +188,7 @@ public class PairSubtractionDataSource extends BasicDataSource
 			@Override
 			public void f(String filename) {
 				
-				int index = IndexFileName.getFileNumber(filename)-startNum;
+				int index = FoxmasFileName.getFileNumber(filename)-startNum;
 				
 				try {
 					FList<String> fileParts = FStringInput.tokens(new File(filename), "\n\n").toSink();					
@@ -411,6 +411,10 @@ public class PairSubtractionDataSource extends BasicDataSource
 		diffPoint.setValid(true);
 		
 	}
-	
+
+	@Override
+	public FileOrFolder fileOrFolder() {
+		return FileOrFolder.FILE;
+	}
 
 }

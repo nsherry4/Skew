@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import scitypes.Coord;
+import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
+import skew.core.model.SkewGrid;
 import skew.core.model.SkewPoint;
 import fava.signatures.FnGet;
 
@@ -19,7 +21,11 @@ public abstract class DataSource implements IDataSource {
 			points.add(new SkewPoint<S>(i % mapsize.x, i / mapsize.x, i, create.f()));
 		}
 		return points;
+		
 	}
 		
+	public static <S> ISkewGrid<S> getEmptyGrid(Coord<Integer> mapsize, FnGet<S> create) {
+		return new SkewGrid<>(mapsize.x, mapsize.y, getEmptyPoints(mapsize, create));
+	}
 	
 }

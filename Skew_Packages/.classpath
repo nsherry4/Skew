@@ -4,6 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Skew_Core"/>
 	<classpathentry kind="lib" path="jars/processxrd.jar"/>
-	<classpathentry kind="lib" path="/Skew_Core/jars/guava-14.0.1.jar"/>
+	<classpathentry kind="lib" path="/Skew_Core/jars/guava-15.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

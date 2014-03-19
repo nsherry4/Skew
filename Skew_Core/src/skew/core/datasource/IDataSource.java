@@ -13,11 +13,28 @@ import autodialog.model.Parameter;
 public interface IDataSource
 {
 	
+	public enum FileFormatAcceptance
+	{
+		REJECT, MAYBE, ACCEPT
+	}
+
+	public enum FileOrFolder
+	{
+		FILE, FOLDER, EITHER
+	}
+	
+	/**
+	 * The file extension for this type of data. This should not include any leading dot.
+	 */
 	String extension();
 	String description();
 	String title();
 	
-	Acceptance accepts(List<String> filenames);
+	/**
+	 * Specifies if this datasource opens an entire folder, or one or more files.
+	 */
+	FileOrFolder fileOrFolder();
+	FileFormatAcceptance accepts(List<String> filenames);
 	
 	List<Parameter<?>> getLoadParameters();
 	String getLoadParametersInformation();
