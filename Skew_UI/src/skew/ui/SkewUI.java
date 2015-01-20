@@ -2,6 +2,7 @@ package skew.ui;
 
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -24,13 +25,17 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
+import javax.swing.OverlayLayout;
 import javax.swing.SpinnerModel;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -77,6 +82,11 @@ public class SkewUI extends JPanel {
 	SkewTabs parent;
 	SkewController controller;
 	
+	CardLayout cards = new CardLayout();
+	JPanel mainLayer = new JPanel();
+	JPanel dialogLayer = new JPanel();
+	
+	
 	boolean dummy= true;
 	
 	public GraphicsPanel graphics;
@@ -121,8 +131,16 @@ public class SkewUI extends JPanel {
 		this.controller = controller;
 		controller.setUI(this);
 		
+
+		setLayout(cards);
+		add(dialogLayer, "dialog");
+		add(mainLayer, "main");
+		dialogLayer.setBackground( new Color(0, 0, 0, 128) );
+		dialogLayer.setOpaque(true);
+		dialogLayer.setLayout(new GridBagLayout());
+		cards.show(this, "main");
 		
-		
+		setDialog(null);
 		
 		//////////////////////////
 		//Map Drawing
@@ -137,9 +155,8 @@ public class SkewUI extends JPanel {
 		//UI
 		//////////////////////////
 		
-		setLayout(new BorderLayout());
-		
-		add(createToolbar(), BorderLayout.NORTH);
+		mainLayer.setLayout(new BorderLayout());
+		mainLayer.add(createToolbar(), BorderLayout.NORTH);
 		
 		
 		createGraphicsPanel();
@@ -192,13 +209,13 @@ public class SkewUI extends JPanel {
 		mainPanel.setDividerSize(8);
 		mainPanel.setOneTouchExpandable(true);
 		
-		add(mainPanel, BorderLayout.CENTER);
+		mainLayer.add(mainPanel, BorderLayout.CENTER);
 		
 
 		
 		
 		JPanel statusbar = createBottomControls();
-		add(statusbar, BorderLayout.SOUTH);
+		mainLayer.add(statusbar, BorderLayout.SOUTH);
 		
 		availableViewsChanged();
 		selectedViewChanged();
@@ -232,7 +249,7 @@ public class SkewUI extends JPanel {
 		
 		
 		
-		addComponentListener(new ComponentListener() {
+		mainLayer.addComponentListener(new ComponentListener() {
 			
 			@Override
 			public void componentShown(ComponentEvent e) {}
@@ -257,17 +274,10 @@ public class SkewUI extends JPanel {
 	{
 		JPanel statusbar = new JPanel();
 		
-		
 		statusbar.setLayout(new BorderLayout());
 		zoomslider = new ZoomSlider(100, 500, 50);
 		statusbar.add(zoomslider, BorderLayout.EAST);
-		zoomslider.addListener(new EventfulListener() {
-			
-			@Override
-			public void change() {
-				setZoom(zoomslider.getValue() / 100f);
-			}
-		});
+		zoomslider.addListener(() -> setZoom(zoomslider.getValue() / 100f));
 				
 		scalePanel = createScaleControl();
 		statusbar.add(scalePanel, BorderLayout.WEST);
@@ -283,17 +293,12 @@ public class SkewUI extends JPanel {
 		Rectangle r = graphicsScroller.getVisibleRect();
 		if (graphics == null) return;
 		
-		
 		Dimension panesize = graphicsScroller.getSize();
 		
 		Dimension currentSize = graphics.getSize();
 		graphics.setSize(panesize);
-
 		graphics.setPreferredSize(new Dimension((int)(graphics.getUsedWidth(zoom)), (int)(graphics.getUsedHeight(zoom))));
-
 		graphics.setSize(currentSize);
-		
-		
 		
 		graphicsScroller.scrollRectToVisible(r);
 		
@@ -322,97 +327,66 @@ public class SkewUI extends JPanel {
 		
 			
 		ToolbarImageButton open = new ToolbarImageButton(StockIcon.DOCUMENT_OPEN, "Open File(s)");
-		open.addActionListener(new ActionListener() {
+		
+		open.addActionListener((e) -> {
+				
+			//create new UI
+			SkewUI ui = new SkewUI(parent);
+			ui.dummy = false;
+			parent.addTab(ui);
 			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				
-				
-				ISkewDataset dataset = SkewController.loadDataset(parent, controller.data.path());
-				if (dataset != null) {
-					//create new UI
-					SkewUI ui = new SkewUI(parent);
-					ui.dummy = false;
-					parent.addTab(ui);
-					ui.controller.actionSetDataset(dataset);
-					parent.tabs.setActiveTab(ui);
-					
-					//remove this one, if a placeholder
-					if (dummy) parent.tabs.closeTab(SkewUI.this);
-				}
-				
+						
+			InputSelection selection = SkewController.selectFiles(parent, controller.data.path(), ui);
+
+			if (selection != null && selection.datasource != null) {
+
+				parent.setTabTitle(ui, "Loading...");
+				SkewController.loadFiles(parent, selection.files, selection.datasource, ui);
+				parent.setActiveTab(ui);
+
+				//remove this one, if a placeholder
+				if (dummy) parent.tabs.closeTab(SkewUI.this);
+			} else {
+				parent.closeTab(ui);
 			}
+			
 		});
 
 		ToolbarImageButton tab = new ToolbarImageButton(StockIcon.WINDOW_TAB_NEW, "New Tab");
-		tab.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				
-				parent.newTab();
-
-			}
-		});
+		
+		tab.addActionListener((e) -> parent.newTab());
 		
 		savepictureButton = new ToolbarImageButton(StockIcon.DEVICE_CAMERA, "Save Picture");
-		savepictureButton.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				
-				controller.actionSavePicture();
-
-			}
-		});
+		savepictureButton.addActionListener((e) -> controller.actionSavePicture());
 		savepictureButton.setVisible(false);
 		
 		
 		viewSelector = new JComboBox<MapView>(new Vector<MapView>(controller.data.datasource().getViews()));
-		
-		viewSelector.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent arg0)
-			{
-				controller.actionViewChange((MapView)viewSelector.getSelectedItem());
-			}
-		});
+		viewSelector.addActionListener((e) -> controller.actionViewChange((MapView)viewSelector.getSelectedItem()));
 		
 		
 		savetextButton = new ToolbarImageButton(StockIcon.DOCUMENT_EXPORT, "Export Map Data");
-		savetextButton.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent arg0)
-			{
-				controller.actionSaveText();
-			}
-		});
+		savetextButton.addActionListener((a) -> controller.actionSaveText());
 		savetextButton.setVisible(false);
 		
 		
 		ToolbarImageButton about = new ToolbarImageButton(StockIcon.MISC_ABOUT, "About");
-		about.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				new AboutDialogue(
-						parent,
-						Version.name + " " + Version.short_version,
-						Version.description,
-						"www.sciencestudioproject.com",
-						"Copyright (c) 2012 by<br>The University of Western Ontario<br>and<br>The Canadian Light Source Inc.",
-						IOOperations.readTextFromJar("/skew/licence.txt"),
-						IOOperations.readTextFromJar("/skew/credits.txt"),
-						"skew",
-						"",
-						Version.long_version,
-						"",
-						Version.date
-					);
-			}
+		about.addActionListener((e) ->
+		{
+			new AboutDialogue(
+					parent,
+					Version.name + " " + Version.short_version,
+					Version.description,
+					"www.sciencestudioproject.com",
+					"Copyright (c) 2012-2014 by<br>The University of Western Ontario",
+					IOOperations.readTextFromJar("/skew/licence.txt"),
+					IOOperations.readTextFromJar("/skew/credits.txt"),
+					"skew",
+					"",
+					Version.long_version,
+					"",
+					Version.date
+				);
 		});
 		
 		
@@ -451,13 +425,8 @@ public class SkewUI extends JPanel {
 			scalePanel.add(subViewSelector, BorderLayout.CENTER);
 			controller.subView = subviews.get(0);
 			
-			subViewSelector.addActionListener(new ActionListener() {
-				
-				@Override
-				public void actionPerformed(ActionEvent arg0)
-				{
-					controller.actionSubviewChange((MapSubView) subViewSelector.getSelectedItem());
-				}
+			subViewSelector.addActionListener((e) -> {
+				controller.actionSubviewChange((MapSubView) subViewSelector.getSelectedItem());
 			});
 			
 		}
@@ -488,16 +457,7 @@ public class SkewUI extends JPanel {
 		
 		scaleSpinner = new JSpinner(model);
 		scalePanel.add(scaleSpinner, BorderLayout.EAST);
-	
-
-		scaleSpinner.addChangeListener(new ChangeListener() {
-			
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				controller.actionScaleChanged();
-			}
-		});
-		
+		scaleSpinner.addChangeListener((e) -> controller.actionScaleChanged());
 		
 		scaleSpinner.addKeyListener(new KeyListener() {
 			
@@ -539,7 +499,34 @@ public class SkewUI extends JPanel {
 		}
 		
 		setZoom(zoom);
-		repaint();
+		mainLayer.repaint();
+	}
+	
+	
+	public void setDialog(JPanel dialog) {
+		dialogLayer.removeAll();
+		
+		if (dialog != null) {
+			cards.show(this, "dialog");
+			
+			JPanel containerPanel = new JPanel();
+			containerPanel.setBorder(
+					new CompoundBorder(
+							new LineBorder(Color.BLACK),
+							new LineBorder(Color.WHITE)
+						)
+					);
+			containerPanel.add(dialog);
+			GridBagConstraints c = new GridBagConstraints();
+			c.fill = GridBagConstraints.NONE;
+			c.anchor = GridBagConstraints.CENTER;
+			dialogLayer.add(containerPanel, c);
+			dialogLayer.setVisible(true);
+			
+		} else {
+			dialogLayer.setVisible(false);			
+			cards.show(this, "main");
+		}
 	}
 	
 	
@@ -559,7 +546,7 @@ public class SkewUI extends JPanel {
 		if (views.size() == 0) {
 			viewSelector.setVisible(false);
 			zoomslider.setVisible(false);
-			graphics.setBackground(this.getBackground());
+			graphics.setBackground(this.mainLayer.getBackground());
 		} else if (views.size() == 1) {
 			viewSelector.setVisible(false);
 		} else {

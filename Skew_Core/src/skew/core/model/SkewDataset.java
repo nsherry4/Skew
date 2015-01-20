@@ -2,7 +2,7 @@ package skew.core.model;
 
 import java.util.List;
 
-import skew.core.datasource.IDataSource;
+import skew.core.datasource.DataSource;
 import fava.functionable.FList;
 
 public class SkewDataset implements ISkewDataset {
@@ -10,15 +10,15 @@ public class SkewDataset implements ISkewDataset {
 	private String name;
 	private String path;
 	private List<IModel> models;
-	private IDataSource ds;
+	private DataSource ds;
 	
 	
 	
-	public SkewDataset(String name, String path, IModel model, IDataSource ds) {
+	public SkewDataset(String name, String path, IModel model, DataSource ds) {
 		this(name, path, new FList<IModel>(model), ds);
 	}
 	
-	public SkewDataset(String name, String path, List<IModel> models, IDataSource ds) {
+	public SkewDataset(String name, String path, List<IModel> models, DataSource ds) {
 		this.name = name;
 		this.path = path;
 		this.models = models;
@@ -37,7 +37,7 @@ public class SkewDataset implements ISkewDataset {
 
 	
 	@Override
-	public IDataSource datasource() {
+	public DataSource datasource() {
 		return ds;
 	}
 

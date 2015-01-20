@@ -8,7 +8,7 @@ import plural.executor.ExecutorSet;
 import plural.executor.map.MapExecutor;
 import plural.executor.map.implementations.PluralMapExecutor;
 import scitypes.Coord;
-import skew.core.datasource.IDataSource;
+import skew.core.datasource.DataSource;
 import skew.core.model.ISkewDataset;
 import skew.core.model.ISkewPoint;
 import skew.core.model.SkewGrid;
@@ -37,7 +37,7 @@ import fava.functionable.FList;
 import fava.functionable.FStringInput;
 import fava.signatures.FnMap;
 
-public class SEQDataSource extends MisorientationDataSource implements IDataSource
+public class SEQDataSource extends MisorientationDataSource implements DataSource
 {
 	SkewGrid<IXRDStrain> strainModel;
 	
@@ -84,25 +84,22 @@ public class SEQDataSource extends MisorientationDataSource implements IDataSour
 			//strip header
 			if (lines.get(0).trim().startsWith("IMAGE")) lines.remove(0);
 			
-			FnMap<String, String> eachFilename = new FnMap<String, String>(){
+			FnMap<String, String> eachFilename = (line) -> {
 	
-				@Override
-				public String f(String line) {
-	
-					SequenceEntry seq = new SequenceEntry(line);
-					int index = seq.imageNumber();
-					
-					//Grab misorientation model information
-					ISkewPoint<IOrientationMatrix> omPoint = omModel.getPoint(index);
-					omPoint.setValid(loadOrientationMatrix(seq, omPoint.getData()));
-					
-					//Grab strain model information
-					ISkewPoint<IXRDStrain> strPoint = strainModel.getPoint(index);
-					strPoint.setValid(loadStrain(seq, strPoint.getData()));
+				SequenceEntry seq = new SequenceEntry(line);
+				int index = seq.imageNumber();
+				
+				//Grab misorientation model information
+				ISkewPoint<IOrientationMatrix> omPoint = misdata.omModel.getPoint(index);
+				omPoint.setValid(loadOrientationMatrix(seq, omPoint.getData()));
+				
+				//Grab strain model information
+				ISkewPoint<IXRDStrain> strPoint = strainModel.getPoint(index);
+				strPoint.setValid(loadStrain(seq, strPoint.getData()));
 
-					
-					return "";
-				}};
+				
+				return "";
+			};
 				
 			MapExecutor<String, String> exec = new PluralMapExecutor<String, String>(lines, eachFilename);
 			exec.setName("Reading Files");
@@ -166,13 +163,13 @@ public class SEQDataSource extends MisorientationDataSource implements IDataSour
 	public List<MapView> getViews()
 	{
 		return new FList<MapView>(
-				new CompositeView(new LocalView(misModel), grainView()),
-				new CompositeView(new InterGrainView(misModel, grainModel), grainView()),
-				new CompositeView(new MagnitudeView(misModel, grainModel), grainView()),
-				new CompositeView(new OrientationView(omModel), grainView()),
-				new CompositeView(new GrainLabelView(misModel, grainModel), grainView()),
-				new CompositeView(new StrainView(strainModel), grainView()),
-				new CompositeView(new StressView(strainModel), grainView())
+				new CompositeView(new LocalView(misdata.misModel), misdata.grainView()),
+				new CompositeView(new InterGrainView(misdata.misModel, misdata.grainModel), misdata.grainView()),
+				new CompositeView(new MagnitudeView(misdata.misModel, misdata.grainModel), misdata.grainView()),
+				new CompositeView(new OrientationView(misdata.omModel), misdata.grainView()),
+				new CompositeView(new GrainLabelView(misdata.misModel, misdata.grainModel), misdata.grainView()),
+				new CompositeView(new StrainView(strainModel), misdata.grainView()),
+				new CompositeView(new StressView(strainModel), misdata.grainView())
 			);
 
 	}
@@ -200,7 +197,7 @@ public class SEQDataSource extends MisorientationDataSource implements IDataSour
 		super.createModels(mapsize);
 		createStrainModel(mapsize);
 		
-		return Calculation.calculate(filenames, this, mapsize, boundaryParameter.getValue());
+		return Calculation.calculate(filenames, loadPoints(filenames), this, misdata, mapsize, misdata.boundaryParameter.getValue());
 				
 	}
 

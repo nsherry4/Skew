@@ -11,6 +11,7 @@ import plural.executor.ExecutorSet;
 import plural.executor.map.MapExecutor;
 import plural.executor.map.implementations.PluralMapExecutor;
 import scitypes.Coord;
+import scitypes.DirectionVector;
 import skew.core.datasource.DataSource;
 import skew.core.model.ISkewDataset;
 import skew.core.model.ISkewGrid;
@@ -19,15 +20,13 @@ import skew.core.viewer.modes.views.CompositeView;
 import skew.core.viewer.modes.views.MapView;
 import skew.datasources.misorientation.datasource.calculation.misorientation.Calculation;
 import skew.datasources.misorientation.datasource.calculation.misorientation.FoxmasFileName;
-import skew.models.misorientation.MisAngle;
 import skew.models.orientation.IOrientationMatrix;
-import skew.models.xrdmeta.XRDMeta;
 import skew.views.OrientationView;
 import skew.views.misorientation.GrainLabelView;
-import skew.views.misorientation.ThresholdSecondaryView;
 import skew.views.misorientation.InterGrainView;
 import skew.views.misorientation.LocalView;
 import skew.views.misorientation.MagnitudeView;
+import skew.views.xrdmeta.EllipticityView;
 import skew.views.xrdmeta.IndexQualityView;
 import fava.functionable.FList;
 import fava.signatures.FnGet;
@@ -37,7 +36,8 @@ public class INDDataSource extends MisorientationDataSource
 {
 	private static int startNum=1;
 	
-	public ISkewGrid<XRDMeta> xrdMetaModel;
+	public ISkewGrid<Integer> qualityModel;
+	public ISkewGrid<DirectionVector> ellipModel;
 	
 	@Override
 	public String extension()
@@ -70,24 +70,23 @@ public class INDDataSource extends MisorientationDataSource
 	
 
 	
-	@Override
 	public MapExecutor<String, String> loadPoints(List<String> filenames)
 	{
 
-		FnMap<String, String> eachFilename = new FnMap<String, String>(){
-
-			@Override
-			public String f(String filename) {
-				int index = FoxmasFileName.getFileNumber(filename)-startNum;
-				if (index >= omModel.size()) return "";
-				
-				//load orientation
-				ISkewPoint<IOrientationMatrix> om = omModel.getPoint(index);
-				ISkewPoint<XRDMeta> meta = xrdMetaModel.getPoint(index);
-				loadOM(filename, om, meta);
-				
-				return "";
-			}};
+		FnMap<String, String> eachFilename = (filename) -> {
+			int index = FoxmasFileName.getFileNumber(filename)-startNum;
+			if (index >= misdata.omModel.size()) return "";
+			
+			//load orientation
+			loadOM(
+					filename, 
+					misdata.omModel.getPoint(index), 
+					qualityModel.getPoint(index), 
+					ellipModel.getPoint(index)
+				);
+			
+			return "";
+		};
 			
 		MapExecutor<String, String> exec = new PluralMapExecutor<String, String>(filenames, eachFilename);
 		exec.setName("Reading Files");
@@ -95,11 +94,15 @@ public class INDDataSource extends MisorientationDataSource
 	}
 	
 	
-	public void loadOM(String inputFile, ISkewPoint<IOrientationMatrix> omPoint, ISkewPoint<XRDMeta> metaPoint)
+	public void loadOM(
+			String inputFile, 
+			ISkewPoint<IOrientationMatrix> omPoint, 
+			ISkewPoint<Integer> qualityPoint,
+			ISkewPoint<DirectionVector> ellipPoint
+		)
 	{
 		
 		IOrientationMatrix om = omPoint.getData();
-		XRDMeta meta = metaPoint.getData();
 		
 		BufferedReader reader = null;
 		String line;
@@ -135,14 +138,57 @@ public class INDDataSource extends MisorientationDataSource
 			if (tokens != null)
 			{
 				quality = Integer.parseInt(tokens[4]);
-				meta.indexQuality = quality;
+				qualityPoint.setData(quality);
 			}
+			
+			
 			// skip more lines until reaching the line for the matrix
+			//also read ellipticity out of here
+			float referenceAngle = 0f;
+			DirectionVector vector = new DirectionVector();
 			for (int i = 0; i < quality + 7; i++)
 			{
 				line = reader.readLine();
+				if (!(i > 0 && i <= quality)) continue;
+				
+				// break the line into tokens and remove spaces
+				tokens = line.split(delims);
+				List<String> list = new FList<>(tokens);
+				list.removeAll(Arrays.asList(""));
+				tokens = list.toArray(tokens);
+				
+				if (!(tokens.length > 15)) continue;
+				
+				// use the first angle as a reference point
+				if (i == 1)
+				{
+					referenceAngle = Float.parseFloat(tokens[15]);
+					float ydist = Float.parseFloat(tokens[14]);
+					float xdist = Float.parseFloat(tokens[13]);
+
+					vector = new DirectionVector(Math.max(xdist, ydist), Float.parseFloat(tokens[15]));
+				}
+
+				else
+				{
+					// calculate the angle and also the opposite direction vector
+					float angle1 = Float.parseFloat(tokens[15]);
+					float angle2 = angle1 + 180;
+
+					// find the closest to the reference point
+					float dif1 = Math.abs(referenceAngle - angle1);
+					if (dif1 > 180) { dif1 = 360 - dif1; }
+
+					float dif2 = Math.abs(referenceAngle - angle2);
+					if (dif2 > 180) { dif2 = 360 - dif2; }
+
+					if (dif1 < dif2)	{ vector = vector.add(new DirectionVector(Float.parseFloat(tokens[14]), angle1)); }
+					else				{ vector = vector.add(new DirectionVector(Float.parseFloat(tokens[14]), angle2)); }
+				}
 
 			}
+			ellipPoint.setData(vector);
+			ellipPoint.setValid(true);
 
 
 			// load the matrix
@@ -166,7 +212,7 @@ public class INDDataSource extends MisorientationDataSource
 			Calculation.invert3(om.getInverse(), om.getDirect());
 			
 			omPoint.setValid(true);
-			metaPoint.setValid(true);
+			qualityPoint.setValid(true);
 			
 		}
 		catch (Exception e)
@@ -194,12 +240,13 @@ public class INDDataSource extends MisorientationDataSource
 	{
 				
 		return new FList<MapView>(
-				new CompositeView(new LocalView(misModel), grainView()),
-				new CompositeView(new InterGrainView(misModel, grainModel), grainView()),
-				new CompositeView(new MagnitudeView(misModel, grainModel), grainView()),
-				new CompositeView(new OrientationView(omModel), grainView()),
-				new CompositeView(new GrainLabelView(misModel, grainModel), grainView()),
-				new CompositeView(new IndexQualityView(xrdMetaModel), grainView())
+				new CompositeView(new LocalView(misdata.misModel), misdata.grainView()),
+				new CompositeView(new InterGrainView(misdata.misModel, misdata.grainModel), misdata.grainView()),
+				new CompositeView(new MagnitudeView(misdata.misModel, misdata.grainModel), misdata.grainView()),
+				new CompositeView(new OrientationView(misdata.omModel), misdata.grainView()),
+				new CompositeView(new GrainLabelView(misdata.misModel, misdata.grainModel), misdata.grainView()),
+				new CompositeView(new IndexQualityView(qualityModel), misdata.grainView()),
+				new CompositeView(new EllipticityView(ellipModel), misdata.grainView())
 			);
 
 	}
@@ -213,17 +260,14 @@ public class INDDataSource extends MisorientationDataSource
 
 	public void createModels(Coord<Integer> mapSize) {
 		super.createModels(mapSize);
-		
-		//Create XRD Metadata Model
-		xrdMetaModel = DataSource.getEmptyGrid(mapSize, new FnGet<XRDMeta>(){
-			@Override public XRDMeta f() { return new XRDMeta(); }});
-		
+		qualityModel = DataSource.createGrid(mapSize, () -> 0);
+		ellipModel = DataSource.createGrid(mapSize, DirectionVector::new);
 	}
 	
 	@Override
 	public ExecutorSet<ISkewDataset> loadDataset(List<String> filenames, Coord<Integer> mapsize) {
 		createModels(mapsize);
-		return Calculation.calculate(filenames, this, mapsize, boundaryParameter.getValue());
+		return Calculation.calculate(filenames, loadPoints(filenames), this, misdata, mapsize, misdata.boundaryParameter.getValue());
 	}
 
 }

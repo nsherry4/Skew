@@ -15,6 +15,7 @@ public final class SkewPoint<T> implements ISkewPoint<T>
 		this.y = y;
 		this.index = index;
 		this.data = data;
+		this.validPoint = false;
 	}
 
 	

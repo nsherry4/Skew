@@ -1,12 +1,12 @@
 package skew.core.model;
 
-import skew.core.datasource.IDataSource;
+import skew.core.datasource.DataSource;
 
 public interface ISkewDataset {
 
 	String name();
 	String path();
-	IDataSource datasource();
+	DataSource datasource();
 	int getWidth();
 	int getHeight();
 

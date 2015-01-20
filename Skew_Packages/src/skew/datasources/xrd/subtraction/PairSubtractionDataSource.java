@@ -10,9 +10,10 @@ import com.google.common.base.Optional;
 
 import plural.executor.PluralExecutor;
 import scitypes.Coord;
-import skew.core.datasource.BasicDataSource;
+import skew.core.datasource.BasicExecutorDataSource;
 import skew.core.datasource.DataSource;
-import skew.core.datasource.IDataSource.FileOrFolder;
+import skew.core.datasource.DataSource.FileFormatAcceptance;
+import skew.core.datasource.DataSource.FileOrFolder;
 import skew.core.model.IModel;
 import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
@@ -43,7 +44,7 @@ import fava.functionable.FStringInput;
 import fava.signatures.FnEach;
 import fava.signatures.FnGet;
 
-public class PairSubtractionDataSource extends BasicDataSource
+public class PairSubtractionDataSource extends BasicExecutorDataSource
 {
 	String g = "Overlay";
 	private Parameter<Integer> hShift = new Parameter<>("Horizontal Shift", new IntegerEditor(), 0, g);
@@ -76,13 +77,9 @@ public class PairSubtractionDataSource extends BasicDataSource
 
 	@Override
 	public FileFormatAcceptance accepts(List<String> filenames) {
-		for (String filename : filenames)
-		{
-			if (!filename.endsWith(ext)) { return FileFormatAcceptance.REJECT; }
-		}
 		
-		return FileFormatAcceptance.ACCEPT;
-			
+		if (allWithExtension(filenames, ext)) return FileFormatAcceptance.ACCEPT;
+		return FileFormatAcceptance.REJECT;				
 	}
 
 	@Override
@@ -100,41 +97,25 @@ public class PairSubtractionDataSource extends BasicDataSource
 		
 		
 		//Strain models
-		FnGet<IXRDStrain> getStrPoint = new FnGet<IXRDStrain>() {
-			@Override public IXRDStrain f() { return new XRDStrain(); }};
-			
-		final List<ISkewPoint<IXRDStrain>> beforeStrList = DataSource.getEmptyPoints(dimensions, getStrPoint);
-		final List<ISkewPoint<IXRDStrain>> afterStrList = DataSource.getEmptyPoints(dimensions, getStrPoint);
-		final List<ISkewPoint<IXRDStrain>> subtractStrList = DataSource.getEmptyPoints(dimensions, getStrPoint);
-		
+		final List<ISkewPoint<IXRDStrain>> beforeStrList = DataSource.createPoints(dimensions, XRDStrain::new);
+		final List<ISkewPoint<IXRDStrain>> afterStrList = DataSource.createPoints(dimensions, XRDStrain::new);
+		final List<ISkewPoint<IXRDStrain>> subtractStrList = DataSource.createPoints(dimensions, XRDStrain::new);
 		
 		
 		//Orientation models
-		FnGet<IOrientationMatrix> getOMPoint = new FnGet<IOrientationMatrix>() {
-			@Override public IOrientationMatrix f() { return new OrientationMatrix(); }};
-			
-		final List<ISkewPoint<IOrientationMatrix>> beforeOMList = DataSource.getEmptyPoints(dimensions, getOMPoint);
-		final List<ISkewPoint<IOrientationMatrix>> afterOMList = DataSource.getEmptyPoints(dimensions, getOMPoint);
+		final List<ISkewPoint<IOrientationMatrix>> beforeOMList = DataSource.createPoints(dimensions, OrientationMatrix::new);
+		final List<ISkewPoint<IOrientationMatrix>> afterOMList = DataSource.createPoints(dimensions, OrientationMatrix::new);
+		
+		
+		//MisAngle models
+		beforeMisModel = new SkewGrid<MisAngle>(dimensions.x , dimensions.y, DataSource.createPoints(dimensions, MisAngle::new));
+		afterMisModel = new SkewGrid<MisAngle>(dimensions.x , dimensions.y, DataSource.createPoints(dimensions, MisAngle::new));
+		subtractMisModel = new SkewGrid<MisAngle>(dimensions.x , dimensions.y, DataSource.createPoints(dimensions, MisAngle::new));
 		
 		
 		//Grain models
-		FnGet<GrainPixel> getGrainPoint = new FnGet<GrainPixel>() {
-			@Override public GrainPixel f() { return new GrainPixel(); }};
-			
-		
-		//MisAngle models
-		FnGet<MisAngle> getMisPoint = new FnGet<MisAngle>() {
-
-			@Override
-			public MisAngle f() { return new MisAngle(); }
-		};		
-		beforeMisModel = new SkewGrid<MisAngle>(dimensions.x , dimensions.y, DataSource.getEmptyPoints(dimensions, getMisPoint));
-		afterMisModel = new SkewGrid<MisAngle>(dimensions.x , dimensions.y, DataSource.getEmptyPoints(dimensions, getMisPoint));
-		subtractMisModel = new SkewGrid<MisAngle>(dimensions.x , dimensions.y, DataSource.getEmptyPoints(dimensions, getMisPoint));
-		
-		
-		beforeGrainModel = new SkewGrid<GrainPixel>(dimensions.x , dimensions.y, DataSource.getEmptyPoints(dimensions, getGrainPoint));
-		afterGrainModel = new SkewGrid<GrainPixel>(dimensions.x , dimensions.y, DataSource.getEmptyPoints(dimensions, getGrainPoint));
+		beforeGrainModel = new SkewGrid<GrainPixel>(dimensions.x , dimensions.y, DataSource.createPoints(dimensions, GrainPixel::new));
+		afterGrainModel = new SkewGrid<GrainPixel>(dimensions.x , dimensions.y, DataSource.createPoints(dimensions, GrainPixel::new));
 		
 		
 		FList.wrap(filenames).each(new FnEach<String>() {

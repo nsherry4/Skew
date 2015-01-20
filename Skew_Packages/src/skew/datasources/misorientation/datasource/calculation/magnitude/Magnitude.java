@@ -2,7 +2,6 @@ package skew.datasources.misorientation.datasource.calculation.magnitude;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -74,15 +73,11 @@ public class Magnitude
 		
 		
 		FList<Grain> sortedGrains = new FList<Grain>(grains);
-		sortedGrains.sort(new Comparator<Grain>() {
-			
-			@Override
-			public int compare(Grain g1, Grain g2)
-			{
-				Integer s1 = g1.neighbours.size();
-				Integer s2 = g2.neighbours.size();
-				return s2.compareTo(s1);
-			}
+		sortedGrains.sort((g1, g2) ->
+		{
+			Integer s1 = g1.neighbours.size();
+			Integer s2 = g2.neighbours.size();
+			return s2.compareTo(s1);
 		});
 		
 		for (Grain g : sortedGrains)

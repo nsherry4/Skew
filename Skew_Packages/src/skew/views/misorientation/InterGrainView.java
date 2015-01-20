@@ -48,7 +48,7 @@ public class InterGrainView extends MisAngleView
 		List<Summary> summaries = new ArrayList<>();
 		Summary s = new Summary(getTitle());
 		summaries.add(s);
-		s.addHeader("Misorientation");
+		s.addCanonicalKey("Misorientation");
 				
 		GrainPixel point = grainModel.getData(x, y);
 		s.addValue("Misorientation", formatMisValue(point.intraGrainMisorientation));

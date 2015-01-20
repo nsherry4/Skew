@@ -7,7 +7,7 @@ import java.util.List;
 
 import plural.executor.PluralExecutor;
 import scitypes.Coord;
-import skew.core.datasource.BasicDataSource;
+import skew.core.datasource.BasicExecutorDataSource;
 import skew.core.model.IModel;
 import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
@@ -19,7 +19,7 @@ import autodialog.model.Parameter;
 import fava.functionable.FList;
 import fava.functionable.FStringInput;
 
-public class PixDevDataSource extends BasicDataSource
+public class PixDevDataSource extends BasicExecutorDataSource
 {
 
 	private ISkewGrid<Float> model;
@@ -32,11 +32,8 @@ public class PixDevDataSource extends BasicDataSource
 	@Override
 	public FileFormatAcceptance accepts(List<String> filenames)
 	{
-		for (String fn : filenames)
-		{
-			if (!fn.toLowerCase().endsWith("xpdm")) return FileFormatAcceptance.REJECT;
-		}
-		return FileFormatAcceptance.ACCEPT;
+		if (allWithExtension(filenames, "xpdm")) return FileFormatAcceptance.ACCEPT;
+		return FileFormatAcceptance.REJECT;	
 	}
 
 	@Override

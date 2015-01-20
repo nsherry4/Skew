@@ -7,8 +7,6 @@ import java.util.List;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 
-import scidraw.drawing.map.painters.MapPainter;
-import scidraw.drawing.map.painters.RasterColorMapPainter;
 import scidraw.drawing.map.painters.axis.SpectrumCoordsAxisPainter;
 import scidraw.drawing.map.palettes.AbstractPalette;
 import scidraw.drawing.map.palettes.ThermalScalePalette;
@@ -17,29 +15,22 @@ import scitypes.SigDigits;
 import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
-import skew.core.viewer.modes.views.MapView;
+import skew.core.viewer.modes.views.RasterColorMapView;
 import skew.core.viewer.modes.views.Summary;
 import skew.models.strain.IXRDStrain;
 import fava.datatypes.Pair;
 import fava.functionable.FList;
 
-public class StrainView extends MapView
+public class StrainView extends RasterColorMapView<IXRDStrain>
 {
 	
-	RasterColorMapPainter painter;
 	AbstractPalette palette;
 	
-	ISkewGrid<IXRDStrain> model;
 	
 	public StrainView(ISkewGrid<IXRDStrain> model)
 	{
-		super("Strain");
-		
-		this.model = model;
-		
-		painter = new RasterColorMapPainter();
+		super("Strain", model);
 		palette = new ThermalScalePalette(false, true);
-		
 	}
 
 	@Override
@@ -60,7 +51,7 @@ public class StrainView extends MapView
 		List<Summary> summaries = new ArrayList<>();
 		Summary s = new Summary(getTitle() + " Point");
 		summaries.add(s);
-		s.addHeader("XX", "YY", "ZZ", "XY", "XZ", "YZ", "VM");
+		s.addCanonicalKeys("XX", "YY", "ZZ", "XY", "XZ", "YZ", "VM");
 		
 		ISkewPoint<IXRDStrain> point = model.getPoint(x, y);
 		if (! point.isValid()) return summaries;
@@ -105,17 +96,7 @@ public class StrainView extends MapView
 		return 1;
 	}
 
-	@Override
-	public List<MapPainter> getPainters(MapSubView subview, float maximum)
-	{		
-		if (isUpdateRequired())
-		{
-			setupPainters(subview, maximum);
-			setUpdateComplete();
-		}
-		return new FList<MapPainter>(painter);
-	}
-		
+
 	@Override
 	public List<AxisPainter> getAxisPainters(MapSubView subview, float maxValue)
 	{
@@ -165,32 +146,15 @@ public class StrainView extends MapView
 	}
 
 	
-	private void setupPainters(MapSubView subview, float maximum)
-	{
-		
-		List<Color> pixelColours = new FList<Color>(model.getWidth() * model.getHeight());
-		for (int i = 0; i < model.getWidth() * model.getHeight(); i++){ pixelColours.add(Color.black); }
-		
-		Color c;
-
-		for (ISkewPoint<IXRDStrain> point : model.getPoints())
-		{	
-			IXRDStrain data = point.getData();
-			if (point.isValid()) 
-			{
-				double v = subview.select(data.strain());
-				c = palette.getFillColour(v, maximum);
-				pixelColours.set(point.getIndex(), c);
-			} else {
-				c = backgroundGray;
-			}
-		}
-		
-		painter.setPixels(pixelColours);
-	}
-
 	@Override
 	public void setPointSelected(int x, int y, boolean deselectAll) {}
+
+	@Override
+	protected Color colorForPoint(ISkewPoint<IXRDStrain> point, MapSubView subview, float maximum) {
+		IXRDStrain data = point.getData();
+		double v = subview.select(data.strain());
+		return palette.getFillColour(v, maximum);
+	}
 
 
 }

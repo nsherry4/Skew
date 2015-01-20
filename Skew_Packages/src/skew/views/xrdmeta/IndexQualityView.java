@@ -21,8 +21,6 @@ import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.MapView;
 import skew.core.viewer.modes.views.Summary;
-import skew.models.strain.IXRDStrain;
-import skew.models.xrdmeta.XRDMeta;
 
 public class IndexQualityView extends MapView
 {
@@ -30,9 +28,9 @@ public class IndexQualityView extends MapView
 	private RasterColorMapPainter painter;
 	private AbstractPalette palette;
 	
-	private ISkewGrid<XRDMeta> model;
+	private ISkewGrid<Integer> model;
 
-	public IndexQualityView(ISkewGrid<XRDMeta> model) {
+	public IndexQualityView(ISkewGrid<Integer> model) {
 		super("Index Quality");
 		this.model = model;
 		
@@ -60,16 +58,15 @@ public class IndexQualityView extends MapView
 	public List<Summary> getPointSummary(int x, int y) {
 		
 		List<Summary> summaries = new ArrayList<>();
-		Summary s = new Summary(getTitle());
+		Summary s = new Summary(getTitle(), "Quality");
 		summaries.add(s);
-		s.addHeader("Quality");
 		
-		ISkewPoint<XRDMeta> point = model.getPoint(x, y);
+		ISkewPoint<Integer> point = model.getPoint(x, y);
 		if (! point.isValid()) return summaries;
 		
-		XRDMeta data = point.getData();
+		Integer quality = point.getData();
 		
-		s.addValue("Quality", fmt(data.indexQuality));
+		s.addValue("Quality", fmt(quality));
 		
 		return summaries;
 	}
@@ -149,17 +146,18 @@ public class IndexQualityView extends MapView
 		
 		Color c;
 
-		for (ISkewPoint<XRDMeta> point : model.getPoints())
+		for (ISkewPoint<Integer> point : model.getPoints())
 		{	
-			XRDMeta data = point.getData();
+			Integer quality = point.getData();
 			if (point.isValid()) 
 			{
-				double v = data.indexQuality;
+				double v = quality;
 				c = palette.getFillColour(v, maximum);
-				pixelColours.set(point.getIndex(), c);
 			} else {
 				c = backgroundGray;
 			}
+			
+			pixelColours.set(point.getIndex(), c);
 		}
 		
 		painter.setPixels(pixelColours);

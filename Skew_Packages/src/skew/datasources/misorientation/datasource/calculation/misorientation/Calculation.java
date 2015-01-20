@@ -17,20 +17,20 @@ import java.util.List;
 import com.google.common.base.Optional;
 import com.google.common.collect.Multimap;
 
-import plural.executor.AbstractExecutor;
-import plural.executor.BasicExecutor;
-import plural.executor.DummyExecutor;
 import plural.executor.ExecutorSet;
+import plural.executor.RunnableExecutorSet;
 import plural.executor.eachindex.EachIndexExecutor;
 import plural.executor.eachindex.implementations.PluralEachIndexExecutor;
 import plural.executor.map.MapExecutor;
 import scitypes.Coord;
+import skew.core.datasource.DataSource;
 import skew.core.model.IModel;
 import skew.core.model.ISkewDataset;
 import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
 import skew.core.model.SkewDataset;
 import skew.datasources.misorientation.datasource.MisorientationDataSource;
+import skew.datasources.misorientation.datasource.MisorientationProvider;
 import skew.datasources.misorientation.datasource.calculation.magnitude.GrainIdentify;
 import skew.datasources.misorientation.datasource.calculation.magnitude.Magnitude;
 import skew.datasources.misorientation.datasource.calculation.magnitude.OrientationMap;
@@ -49,15 +49,12 @@ public class Calculation
 	private static CubicSymOP	symmetryOperators	= new CubicSymOP();
 
 	
-	public static ExecutorSet<ISkewDataset> calculate(final List<String> filenames, final MisorientationDataSource ds, final Coord<Integer> mapSize, final double boundary)
+	public static RunnableExecutorSet<ISkewDataset> calculate(List<String> filenames, MapExecutor<String, String> loadFilesExec, DataSource datasource, MisorientationProvider misdata, Coord<Integer> mapSize, double boundary)
 	{
 		
-		//Load data from files
-		final MapExecutor<String, String> loadFilesExec = ds.loadPoints(filenames);
-		
 		//Perform various calculations on loaded data
-		final EachIndexExecutor calculateExec = calcLocalMisorientation(ds.misModel, ds.omModel, mapSize.x, mapSize.y, boundary);
-		final EachIndexExecutor calcGrainExec = calculateGrainMagnitude(ds.grainModel, ds.misModel, ds.omModel);
+		final EachIndexExecutor calculateExec = calcLocalMisorientation(misdata.misModel, misdata.omModel, mapSize.x, mapSize.y, boundary);
+		final EachIndexExecutor calcGrainExec = calculateGrainMagnitude(misdata.grainModel, misdata.misModel, misdata.omModel);
 
 		
 		
@@ -65,9 +62,7 @@ public class Calculation
 		final String name = new File(datasetName).getName();
 		final String path = new File(filenames.get(0)).getParent();
 		
-		final BasicExecutor grainExecutor = new BasicExecutor(new Runnable() {
-			@Override public void run() { GrainIdentify.calculate(ds.misModel, ds.grainModel, boundary); }});
-		
+		/*
 		// define how the executors will operate
 		ExecutorSet<ISkewDataset> execset = new ExecutorSet<ISkewDataset>("Opening Data Set") {
 
@@ -84,18 +79,18 @@ public class Calculation
 
 
 				//calculate which grain each pixel belongs to
-				GrainIdentify.calculate(ds.misModel, ds.grainModel, boundary);
+				GrainIdentify.calculate(misdata.misModel, misdata.grainModel, boundary);
 
 				//create grain objects for all grain labels
-				Magnitude.setupGrains(ds.grainModel);
+				Magnitude.setupGrains(misdata.grainModel);
 
 				//calculate the misorientation magnitude of each grain
-				calcGrainExec.setWorkUnits(GrainUtil.grainCount(ds.grainModel));
+				calcGrainExec.setWorkUnits(GrainUtil.grainCount(misdata.grainModel));
 				calcGrainExec.executeBlocking();
 
-				OrientationMap.calculateOrientation(ds.misModel, ds.omModel);
+				OrientationMap.calculateOrientation(misdata.misModel, misdata.omModel);
 				
-				return new SkewDataset(name, path, new FList<IModel>(ds.misModel, ds.omModel, ds.grainModel), ds);
+				return new SkewDataset(name, path, new FList<IModel>(misdata.misModel, misdata.omModel, misdata.grainModel), datasource);
 
 
 			}
@@ -104,7 +99,28 @@ public class Calculation
 		execset.addExecutor(loadFilesExec);
 		execset.addExecutor(calculateExec);
 		execset.addExecutor(calcGrainExec);
+		 */
+		
+		
+		RunnableExecutorSet<ISkewDataset> execset = new RunnableExecutorSet<ISkewDataset>("Opening Data Set", () -> 
+			new SkewDataset(name, path, new FList<IModel>(misdata.misModel, misdata.omModel, misdata.grainModel), datasource)
+		);
 
+		execset.addExecutor(loadFilesExec, () -> loadFilesExec.executeBlocking());
+		execset.addExecutor(calculateExec, () -> calculateExec.executeBlocking());
+		execset.addExecutor(calcGrainExec, () -> {
+			//calculate which grain each pixel belongs to
+			GrainIdentify.calculate(misdata.misModel, misdata.grainModel, boundary);
+	
+			//create grain objects for all grain labels
+			Magnitude.setupGrains(misdata.grainModel);
+	
+			//calculate the misorientation magnitude of each grain
+			calcGrainExec.setWorkUnits(GrainUtil.grainCount(misdata.grainModel));
+			calcGrainExec.executeBlocking();
+	
+			OrientationMap.calculateOrientation(misdata.misModel, misdata.omModel);
+		});
 		
 		
 		return execset;
@@ -119,14 +135,7 @@ public class Calculation
 	public static EachIndexExecutor calcLocalMisorientation(final ISkewGrid<MisAngle> misModel, final ISkewGrid<IOrientationMatrix> omModel, final int width, final int height, final double boundary)
 	{
 
-		FnEach<Integer> eachIndex = new FnEach<Integer>() {
-
-			@Override
-			public void f(Integer index)
-			{
-				setMisAnglePoints(index, misModel, omModel, width, height, boundary);
-			}
-		};
+		FnEach<Integer> eachIndex = index -> setMisAnglePoints(index, misModel, omModel, width, height, boundary);
 
 		EachIndexExecutor exec = new PluralEachIndexExecutor(width * height, eachIndex);
 		exec.setName("Local Misorientation");

@@ -86,7 +86,7 @@ public class ThresholdSecondaryView extends SecondaryView
 		List<Summary> summaries = new ArrayList<>();
 		Summary s = new Summary(getTitle());
 		summaries.add(s);
-		s.addHeader("Number", "Size");
+		s.addCanonicalKeys("Number", "Size");
 
 		GrainPixel grainData = grainModel.getData(x, y);
 		if (!grainData.grainIndex.isPresent()) return summaries;

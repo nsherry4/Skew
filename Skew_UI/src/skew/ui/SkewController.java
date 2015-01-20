@@ -11,19 +11,24 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import javax.swing.JOptionPane;
 import javax.swing.border.TitledBorder;
 
 import plural.executor.ExecutorSet;
 import plural.swing.ExecutorSetView;
+import plural.swing.ExecutorSetViewPanel;
+import plural.swing.stream.StreamDialog;
 import scidraw.swing.SavePicture;
 import scitypes.Coord;
 import skew.DataSources;
 import skew.core.datasource.DataSourceSelection;
 import skew.core.datasource.DummyDataSource;
-import skew.core.datasource.IDataSource;
-import skew.core.datasource.IDataSource.FileFormatAcceptance;
+import skew.core.datasource.DataSource;
+import skew.core.datasource.ExecutorDataSource;
+import skew.core.datasource.DataSource.FileFormatAcceptance;
+import skew.core.datasource.StreamDataSource;
 import skew.core.model.DummyGrid;
 import skew.core.model.ISkewDataset;
 import skew.core.model.SkewDataset;
@@ -46,6 +51,7 @@ import autodialog.view.layouts.FramesADLayout;
 import com.ezware.dialog.task.TaskDialogs;
 
 import commonenvironment.AbstractFile;
+import eventful.EventfulListener;
 import fava.functionable.FList;
 
 public class SkewController
@@ -131,7 +137,7 @@ public class SkewController
 			
 			writer.write("X,  Y");
 			for (Summary s : summaries) {
-				for (String key : s.getHeaders()) writer.write(",  " + s.getTitle() + ": " + key);
+				for (String key : s.getCanonicalKeys()) writer.write(",  " + s.getName() + ": " + key);
 			}
 			writer.write("\n");
 			
@@ -170,7 +176,7 @@ public class SkewController
 	
 	private void writeSummary(BufferedWriter w, Summary s) throws IOException
 	{
-		for (String key : s.getHeaders()) {
+		for (String key : s.getCanonicalKeys()) {
 			w.write(", ");
 			if (s.getValues().containsKey(key)) {
 				w.write(s.getValues().get(key));
@@ -204,7 +210,7 @@ public class SkewController
 		for (Summary s : summaries) {
 			if (s.getValues().size() == 0) continue;
 			panel = new PropertyViewPanel(s.getValues(), null, 0, false, false);
-			panel.setBorder(new TitledBorder(s.getTitle()));
+			panel.setBorder(new TitledBorder(s.getName()));
 			ui.sidebarInfoPanel.add(panel);
 		}
 		
@@ -279,10 +285,10 @@ public class SkewController
 	
 	
 	
-	public static ISkewDataset loadDataset(SkewTabs window, String path)
+	public static InputSelection selectFiles(SkewTabs window, String path, SkewUI skewui)
 	{
 		
-		List<IDataSource> formats = DataSources.getSources();
+		List<DataSource> formats = DataSources.getSources();
 		
 		//get info for open dialogue
 		String[][] exts = new String[formats.size()][1];
@@ -305,9 +311,9 @@ public class SkewController
 		
 		
 		//filter for just the working data sources
-		List<IDataSource> acceptingFormats = new ArrayList<IDataSource>();
-		List<IDataSource> maybeFormats = new ArrayList<IDataSource>();
-		for (IDataSource ds : formats)
+		List<DataSource> acceptingFormats = new ArrayList<DataSource>();
+		List<DataSource> maybeFormats = new ArrayList<DataSource>();
+		for (DataSource ds : formats)
 		{
 			FileFormatAcceptance acc = ds.accepts(files);
 			if (acc == FileFormatAcceptance.ACCEPT) acceptingFormats.add(ds);
@@ -317,13 +323,13 @@ public class SkewController
 		
 		if (acceptingFormats.size() < 1) acceptingFormats = maybeFormats;
 		
-		IDataSource ds = null;
+		DataSource ds = null;
 		
 		if (acceptingFormats.size() > 1)
 		{
 			DataSourceSelection selection = new DataSourceSelection();
 			ds = selection.pickDSP(window, acceptingFormats);
-			if (ds != null) return loadFiles(window, files, ds);
+			if (ds != null) return new InputSelection(ds, files);
 			return null;
 		}
 		else if (acceptingFormats.size() == 0)
@@ -340,45 +346,95 @@ public class SkewController
 		else
 		{
 			ds = acceptingFormats.get(0);
-			return loadFiles(window, files, ds);
+			return new InputSelection(ds, files);
 		}
 		
 	}
 
+	public static void loadFiles(final SkewTabs window, List<String> files, DataSource datasource, final SkewUI skewui) {
+		
+		Coord<Integer> mapSize = queryLoadParameters(window, datasource);
+		if (mapSize == null) {
+			window.tabs.closeTab(skewui);
+			return;
+		}
+		
+		if (datasource instanceof StreamDataSource) {
+			loadFilesStream(window, files, (StreamDataSource) datasource, skewui, mapSize);
+		} else if (datasource instanceof ExecutorDataSource) {
+			loadFilesExecutor(window, files, (ExecutorDataSource) datasource, skewui, mapSize);
+		}
+	}
 	
-	private static ISkewDataset loadFiles(SkewTabs window, List<String> filenames, IDataSource ds)
+	private static Coord<Integer> queryLoadParameters(SkewTabs window, DataSource datasource) {
+		
+		String g = "Map Dimensions";
+		Parameter<Integer> paramWidth = new Parameter<>("Width", new IntegerEditor(), 1, g);
+		Parameter<Integer> paramHeight = new Parameter<>("Height", new IntegerEditor(), 1, g);
+		
+		List<Parameter<?>> params = new FList<>();
+		params.add(paramWidth);
+		params.add(paramHeight);
+		List<Parameter<?>> loadParameters = datasource.getLoadParameters();
+		if (loadParameters != null) params.addAll(loadParameters);
+		
+		SimpleADController dialogController = new SimpleADController(params);
+		
+		AutoDialog dialog = new AutoDialog(dialogController, AutoDialogButtons.OK_CANCEL, window);
+		dialog.setHelpTitle("Additional Dataset Information");
+		dialog.setHelpMessage(datasource.getLoadParametersInformation());
+		dialog.setModal(true);
+		dialog.setTitle("Dataset Parameters");
+		dialog.initialize(new FramesADLayout());
+		
+		
+		//User Cancel/Close?
+		if (!dialog.okSelected()) return null;
+		Coord<Integer> mapSize = new Coord<>((Integer)paramWidth.getValue(), (Integer)paramHeight.getValue());
+		return mapSize;
+		
+	}
+	
+	private static void loadFilesStream(final SkewTabs window, List<String> files, StreamDataSource datasource, final SkewUI skewui, Coord<Integer> mapSize) {
+		
+		StreamDialog dialog = new StreamDialog(window, files.size(), "Loading Data...");
+		Stream<String> guiStream = dialog.guiStream(files.parallelStream());
+
+		Thread loader = new Thread(() -> datasource.loadDataset(guiStream, mapSize));
+		loader.start();
+	}
+	
+	private static void loadFilesExecutor(final SkewTabs window, List<String> files, ExecutorDataSource datasource, final SkewUI skewui, Coord<Integer> mapSize)
+	{
+		final ExecutorSet<ISkewDataset> execset = getExecutor(window, files, datasource, skewui, mapSize);
+		
+		execset.addListener(() -> {
+			javax.swing.SwingUtilities.invokeLater(() ->
+			{
+				if (execset.getCompleted() || execset.isAborted()) {
+					skewui.setDialog(null);
+					skewui.controller.actionSetDataset(execset.getResult());
+					window.tabs.setActiveTab(skewui);
+				}
+			});
+		});
+		
+		
+		ExecutorSetViewPanel execPanel = new ExecutorSetViewPanel(execset);
+		skewui.setDialog(execPanel);
+		
+		execset.startWorking();
+	}
+	
+	
+	private static ExecutorSet<ISkewDataset> getExecutor(SkewTabs window, List<String> files, ExecutorDataSource datasource, final SkewUI skewui, Coord<Integer> mapSize)
 	{
 		
 		try {
 			
-			String g = "Map Dimensions";
-			Parameter<Integer> paramWidth = new Parameter<>("Width", new IntegerEditor(), 1, g);
-			Parameter<Integer> paramHeight = new Parameter<>("Height", new IntegerEditor(), 1, g);
-			
-			List<Parameter<?>> params = new FList<>();
-			params.add(paramWidth);
-			params.add(paramHeight);
-			List<Parameter<?>> loadParameters = ds.getLoadParameters();
-			if (loadParameters != null) params.addAll(loadParameters);
-			
-			SimpleADController dialogController = new SimpleADController(params);
-			
-			AutoDialog dialog = new AutoDialog(dialogController, AutoDialogButtons.OK_CANCEL, window);
-			dialog.setHelpTitle("Additional Dataset Information");
-			dialog.setHelpMessage(ds.getLoadParametersInformation());
-			dialog.setModal(true);
-			dialog.setTitle("Dataset Parameters");
-			dialog.initialize(new FramesADLayout());
-
-			//User Cancel/Close
-			if (!dialog.okSelected()) return null;
-			
-			Coord<Integer> mapSize = new Coord<>((Integer)paramWidth.getValue(), (Integer)paramHeight.getValue());
-			
-			
-			ExecutorSet<ISkewDataset> execset = ds.loadDataset(filenames, mapSize);
-			new ExecutorSetView(window, execset);
-			return execset.getResult();					
+			final ExecutorSet<ISkewDataset> execset = datasource.loadDataset(files, mapSize);
+			//new ExecutorSetView(window, execset);		
+			return execset;				
 			
 		}
 		catch (Exception ex)
@@ -389,7 +445,6 @@ public class SkewController
 		}
 		
 	}
-	
 	
 	
 	private File tempfile() throws IOException

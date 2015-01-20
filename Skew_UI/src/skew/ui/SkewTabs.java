@@ -59,10 +59,18 @@ public class SkewTabs extends JFrame
 		tabs.addTab(ui);
 	}
 	
+	public void closeTab(SkewUI ui) 
+	{
+		tabs.closeTab(ui);
+	}
+	
 	public void setTabTitle(SkewUI component, String title)
 	{
 		tabs.setTabTitle(component, title);
 	}
 
+	public void setActiveTab(SkewUI ui) {
+		tabs.setActiveTab(ui);
+	}
 	
 }

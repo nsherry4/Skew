@@ -9,7 +9,7 @@ import skew.core.viewer.modes.views.MapView;
 import autodialog.model.Parameter;
 import fava.functionable.FList;
 
-public class DummyDataSource implements IDataSource
+public class DummyDataSource implements ExecutorDataSource
 {
 
 	@Override

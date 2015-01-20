@@ -32,15 +32,17 @@ public class PixelDeviationComparisonView extends MapView
 		
 		this.model = model;
 		
+		
 		painter = new RasterColorMapWrapper<Float>() {
 			
 			@Override
 			protected Color valueToColor(ISkewPoint<Float> point)
 			{
-				
 				return getDevColor(point.getData());
 			}
 		};
+		
+
 		
 		palette = new AbstractPalette() {
 			

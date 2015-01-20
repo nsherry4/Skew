@@ -28,18 +28,18 @@ import swidget.widgets.toggle.ComplexToggleGroup;
 public class DataSourceSelection extends JDialog
 {
 	
-	private Map<ComplexToggle, IDataSource> toggleMap;
-	private IDataSource selected;
+	private Map<ComplexToggle, DataSource> toggleMap;
+	private DataSource selected;
 	
 	public DataSourceSelection()
 	{
 		
 	}
 	
-	public IDataSource pickDSP(Window parent, List<IDataSource> dsps)
+	public DataSource pickDSP(Window parent, List<DataSource> dsps)
 	{	
 		
-		toggleMap = new HashMap<ComplexToggle, IDataSource>();
+		toggleMap = new HashMap<ComplexToggle, DataSource>();
 		
 		setTitle("Please Select Data Format");
 		Container c = getContentPane();
@@ -60,7 +60,7 @@ public class DataSourceSelection extends JDialog
 		final List<ComplexToggle> toggleButtons = new ArrayList<ComplexToggle>();
 		ComplexToggle toggle;
 		final ComplexToggleGroup group = new ComplexToggleGroup();
-		for (IDataSource dsp : dsps)
+		for (DataSource dsp : dsps)
 		{
 			toggle = new ComplexToggle("", dsp.title() + " File(s)", dsp.description());
 			toggleMap.put(toggle, dsp);
@@ -84,24 +84,14 @@ public class DataSourceSelection extends JDialog
 		box.addRight(ok);
 		add(box, BorderLayout.SOUTH);
 		
-		ok.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent arg0)
-			{
-				selected = toggleMap.get(toggleButtons.get(group.getToggledIndex()));
-				setVisible(false);
-			}
+		ok.addActionListener((arg0) -> {
+			selected = toggleMap.get(toggleButtons.get(group.getToggledIndex()));
+			setVisible(false);
 		});
 		
-		cancel.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent arg0)
-			{
-				selected = null;
-				setVisible(false);
-			}
+		cancel.addActionListener((arg0) -> {
+			selected = null;
+			setVisible(false);
 		});
 		
 		

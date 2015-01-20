@@ -9,33 +9,51 @@ import java.util.Map;
 public class Summary
 {
 
-	private List<String> headers = new ArrayList<>();
+	private List<String> canonicalKeys = new ArrayList<>();
 	private Map<String, String> values = new LinkedHashMap<>();
-	private String title;
+	private String name;
 	
-	public Summary(String title) {
-		this.title = title;
+	public Summary(String name) {
+		this.name = name;
 	}
 	
-	public void addHeader(String header) {
-		headers.add(header);
+	public Summary(String name, String... canonicalKeys) {
+		this(name);
+		addCanonicalKeys(canonicalKeys);
 	}
 	
-	public void addHeader(String... hs) {
-		headers.addAll(Arrays.asList(hs));
+	/**
+	 * Registers a key as canonical, meaning that it will be included (even when absent) when this data is printed in tabular form.
+	 * @param key
+	 */
+	public void addCanonicalKey(String key) {
+		canonicalKeys.add(key);
+	}
+	
+	/**
+	 * Convenience function for {@link #addCanonicalKey(String)}
+	 * @param keys
+	 */
+	public void addCanonicalKeys(String... keys) {
+		canonicalKeys.addAll(Arrays.asList(keys));
 		
 	}
 	
-	public void addValue(String header, String value) {
-		values.put(header, value);
+	public void addCanonicalValue(String key, String value) {
+		addValue(key, value);
+		addCanonicalKey(key);
 	}
 	
-	public String getTitle(){
-		return title;
+	public void addValue(String key, String value) {
+		values.put(key, value);
 	}
 	
-	public List<String> getHeaders() {
-		return headers;
+	public String getName(){
+		return name;
+	}
+	
+	public List<String> getCanonicalKeys() {
+		return canonicalKeys;
 	}
 	
 	public Map<String, String> getValues() {

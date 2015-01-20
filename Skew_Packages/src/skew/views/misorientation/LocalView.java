@@ -41,7 +41,7 @@ public class LocalView extends MisAngleView
 		List<Summary> summaries = new ArrayList<>();
 		Summary s = new Summary(getTitle() + " Map");
 		summaries.add(s);
-		s.addHeader("Average");
+		s.addCanonicalKey("Average");
 		
 		
 		double average = 0d;
@@ -68,7 +68,7 @@ public class LocalView extends MisAngleView
 		List<Summary> summaries = new ArrayList<>();
 		Summary s = new Summary(getTitle());
 		summaries.add(s);
-		s.addHeader("8-Way Average", "Above", "Below", "Right", "Left");
+		s.addCanonicalKeys("8-Way Average", "Above", "Below", "Right", "Left");
 		
 		
 		if (!misModel.getPoint(x, y).isValid()) return summaries;

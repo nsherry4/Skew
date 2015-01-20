@@ -62,7 +62,6 @@ public class EBSDDataSource extends MisorientationDataSource
 		return FileFormatAcceptance.REJECT;
 	}
 
-	@Override
 	public MapExecutor<String, String> loadPoints(List<String> filenames)
 	{
 		
@@ -76,17 +75,14 @@ public class EBSDDataSource extends MisorientationDataSource
 			lines.remove(0);
 
 			
-			FnMap<String, String> eachFilename = new FnMap<String, String>(){
-	
-				@Override
-				public String f(String line) {
-	
-					List<String> words = FStringInput.words(line).toSink();
-					int index = Integer.parseInt(words.get(0)) - 1;
-					ISkewPoint<IOrientationMatrix> omPoint = omModel.getPoint(index);
-					omPoint.setValid(loadOrientationMatrix(words, omPoint.getData()));
-					return "";
-				}};
+			FnMap<String, String> eachFilename = (line) -> {
+				List<String> words = FStringInput.words(line).toSink();
+				int index = Integer.parseInt(words.get(0)) - 1;
+				ISkewPoint<IOrientationMatrix> omPoint = misdata.omModel.getPoint(index);
+				omPoint.setValid(loadOrientationMatrix(words, omPoint.getData()));
+				return "";
+			};
+				
 				
 			MapExecutor<String, String> exec = new PluralMapExecutor<String, String>(lines, eachFilename);
 			exec.setName("Reading Files");
@@ -130,14 +126,14 @@ public class EBSDDataSource extends MisorientationDataSource
 	@Override
 	public List<MapView> getViews()
 	{
-		double angle = boundaryParameter.getValue();
+		double angle = misdata.boundaryParameter.getValue();
 	
 		return new FList<MapView>(
-				new CompositeView(new LocalView(misModel), grainView()),
-				new CompositeView(new InterGrainView(misModel, grainModel), grainView()),
-				new CompositeView(new MagnitudeView(misModel, grainModel), grainView()),
-				new CompositeView(new OrientationView(omModel), grainView()),
-				new CompositeView(new GrainLabelView(misModel, grainModel), grainView())
+				new CompositeView(new LocalView(misdata.misModel), misdata.grainView()),
+				new CompositeView(new InterGrainView(misdata.misModel, misdata.grainModel), misdata.grainView()),
+				new CompositeView(new MagnitudeView(misdata.misModel, misdata.grainModel), misdata.grainView()),
+				new CompositeView(new OrientationView(misdata.omModel), misdata.grainView()),
+				new CompositeView(new GrainLabelView(misdata.misModel, misdata.grainModel), misdata.grainView())
 			);
 
 	}
@@ -151,7 +147,7 @@ public class EBSDDataSource extends MisorientationDataSource
 	@Override
 	public ExecutorSet<ISkewDataset> loadDataset(List<String> filenames, Coord<Integer> mapsize) {
 		super.createModels(mapsize);
-		return Calculation.calculate(filenames, this, mapsize, boundaryParameter.getValue());
+		return Calculation.calculate(filenames, loadPoints(filenames), this, misdata, mapsize, misdata.boundaryParameter.getValue());
 	}
 
 }

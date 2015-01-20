@@ -59,7 +59,7 @@ public class MagnitudeView extends MisAngleView
 		List<Summary> summaries = new ArrayList<>();
 		Summary s = new Summary(getTitle());
 		summaries.add(s);
-		s.addHeader("Magnitude (Min)", "Magnitude, (Avg)", "Magnitude (Max)");
+		s.addCanonicalKeys("Magnitude (Min)", "Magnitude, (Avg)", "Magnitude (Max)");
 		
 	
 		GrainPixel grainData = grainModel.getData(x, y);

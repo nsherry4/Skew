@@ -47,14 +47,10 @@ public class LocalSubtractionView extends LocalView
 		
 		AxisPainter spectrum = new SpectrumCoordsAxisPainter(
 				false, 
-				null, 
-				null, 
-				null, 
-				null, 
+				null, null, null, null, 
 				null, 
 				true, 
-				20, 
-				256, 
+				20, 256, 
 				misorientationPalettes, 
 				false, 
 				"Misorientation Angle in Degrees", 
