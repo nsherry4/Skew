@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane fx:id="box" stylesheets="@style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sciencestudio.skew.javafx.dataset.DatasetController">
+   <top>
+      <HBox styleClass="tool-bar" BorderPane.alignment="CENTER">
+         <children>
+            <Button mnemonicParsing="false" onAction="#open" styleClass="tool-bar-button">
+               <graphic>
+                  <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@icons/open.png" />
+                     </image></ImageView>
+               </graphic>
+            </Button>
+            <Button mnemonicParsing="false" styleClass="tool-bar-button">
+               <graphic>
+                  <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@icons/camera.png" />
+                     </image></ImageView>
+               </graphic>
+            </Button>
+            <Separator minWidth="50.0" visible="false" HBox.hgrow="ALWAYS" />
+            <ChoiceBox prefWidth="150.0" />
+            <Button mnemonicParsing="false" styleClass="tool-bar-button">
+               <graphic>
+                  <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@icons/export.png" />
+                     </image></ImageView>
+               </graphic></Button>
+            <Separator minWidth="50.0" visible="false" HBox.hgrow="ALWAYS" />
+            <Button mnemonicParsing="false" styleClass="tool-bar-button">
+               <graphic>
+                  <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@icons/about.png" />
+                     </image></ImageView>
+               </graphic></Button>
+         </children>
+      </HBox>
+   </top>
+   <left>
+      <VBox fx:id="sidebar" prefWidth="200.0" BorderPane.alignment="CENTER" />
+   </left>
+</BorderPane>
