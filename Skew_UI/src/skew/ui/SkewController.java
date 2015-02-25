@@ -14,18 +14,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.swing.JOptionPane;
 import javax.swing.border.TitledBorder;
 
 import plural.executor.ExecutorSet;
-import plural.swing.ExecutorSetView;
 import plural.swing.ExecutorSetViewPanel;
 import plural.swing.stream.StreamDialog;
 import scidraw.swing.SavePicture;
 import scitypes.Coord;
 import skew.DataSources;
 import skew.core.datasource.DataSourceDescription;
-import skew.core.datasource.DataSourceSelection;
 import skew.core.datasource.DummyDataSource;
 import skew.core.datasource.DataSource;
 import skew.core.datasource.ExecutorDataSource;
@@ -40,8 +37,6 @@ import skew.core.viewer.modes.views.DummyView;
 import skew.core.viewer.modes.views.MapView;
 import skew.core.viewer.modes.views.Summary;
 import swidget.dialogues.fileio.SwidgetIO;
-import swidget.icons.IconSize;
-import swidget.icons.StockIcon;
 import swidget.widgets.properties.PropertyViewPanel;
 import autodialog.controller.SimpleADController;
 import autodialog.model.Parameter;
@@ -53,7 +48,6 @@ import autodialog.view.layouts.FramesADLayout;
 import com.ezware.dialog.task.TaskDialogs;
 
 import commonenvironment.AbstractFile;
-import eventful.EventfulListener;
 import fava.functionable.FList;
 
 public class SkewController
@@ -290,7 +284,10 @@ public class SkewController
 		return DataSources.getSources().stream().map(ds -> ds.getDescription()).collect(Collectors.toList());
 	}
 	
-	public static InputSelection selectFiles(SkewTabs window, String path, SkewUI skewui)
+	
+	
+		
+	public static List<String> selectFiles(SkewTabs window, String path, SkewUI skewui)
 	{
 		
 		List<DataSource> formats = DataSources.getSources();
@@ -314,43 +311,12 @@ public class SkewController
 			files.add(af.getFileName());
 		}
 		
-		return openFiles(files, window);
+		return files;
 		
 	}
 	
 	
-	public static InputSelection openFiles(List<String> files, SkewTabs window) {
-		
-		//filter for just the working data sources
-		List<DataSource> acceptingFormats = getViableDataSources(files);
-		
-		DataSource ds = null;
-		
-		if (acceptingFormats.size() > 1)
-		{
-			DataSourceSelection selection = new DataSourceSelection();
-			ds = selection.pickDSP(window, acceptingFormats);
-			if (ds != null) return new InputSelection(ds, files);
-			return null;
-		}
-		else if (acceptingFormats.size() == 0)
-		{
-			JOptionPane.showMessageDialog(
-					window, 
-					"Could not determine the data format of the selected file(s)", 
-					"Open Failed", 
-					JOptionPane.ERROR_MESSAGE, 
-					StockIcon.BADGE_WARNING.toImageIcon(IconSize.ICON)
-				);
-			return null;
-		}
-		else
-		{
-			ds = acceptingFormats.get(0);
-			return new InputSelection(ds, files);
-		}
-		
-	}
+
 
 	public static List<DataSource> getViableDataSources(List<String> files) {
 		

@@ -26,6 +26,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
@@ -47,6 +48,8 @@ import scidraw.drawing.map.MapDrawing;
 import scidraw.swing.GraphicsPanel;
 import scitypes.Coord;
 import skew.Version;
+import skew.core.datasource.DataSource;
+import skew.core.datasource.DataSourceSelection;
 import skew.core.model.ISkewDataset;
 import skew.core.viewer.ScrollableGraphicsPanel;
 import skew.core.viewer.SettingType;
@@ -54,6 +57,7 @@ import skew.core.viewer.modes.subviews.MapSubView;
 import skew.core.viewer.modes.views.DummyView;
 import skew.core.viewer.modes.views.MapView;
 import swidget.dialogues.AboutDialogue;
+import swidget.icons.IconSize;
 import swidget.icons.StockIcon;
 import swidget.widgets.DraggingScrollPaneListener;
 import swidget.widgets.ToolbarImageButton;
@@ -335,8 +339,9 @@ public class SkewUI extends JPanel {
 			ui.dummy = false;
 			parent.addTab(ui);
 			
-						
-			InputSelection selection = SkewController.selectFiles(parent, controller.data.path(), ui);
+			
+			List<String> files = SkewController.selectFiles(parent, controller.data.path(), ui);
+			InputSelection selection = openFiles(files, parent);
 
 			if (selection != null && selection.datasource != null) {
 
@@ -409,6 +414,38 @@ public class SkewUI extends JPanel {
 		
 	}
 	
+	public static InputSelection openFiles(List<String> files, SkewTabs window) {
+		
+		//filter for just the working data sources
+		List<DataSource> acceptingFormats = SkewController.getViableDataSources(files);
+		
+		DataSource ds = null;
+		
+		if (acceptingFormats.size() > 1)
+		{
+			DataSourceSelection selection = new DataSourceSelection();
+			ds = selection.pickDSP(window, acceptingFormats);
+			if (ds != null) return new InputSelection(ds, files);
+			return null;
+		}
+		else if (acceptingFormats.size() == 0)
+		{
+			JOptionPane.showMessageDialog(
+					window, 
+					"Could not determine the data format of the selected file(s)", 
+					"Open Failed", 
+					JOptionPane.ERROR_MESSAGE, 
+					StockIcon.BADGE_WARNING.toImageIcon(IconSize.ICON)
+				);
+			return null;
+		}
+		else
+		{
+			ds = acceptingFormats.get(0);
+			return new InputSelection(ds, files);
+		}
+		
+	}
 	
 	public void setSubViewUI()
 	{
