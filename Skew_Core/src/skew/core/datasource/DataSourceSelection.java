@@ -62,7 +62,7 @@ public class DataSourceSelection extends JDialog
 		final ComplexToggleGroup group = new ComplexToggleGroup();
 		for (DataSource dsp : dsps)
 		{
-			toggle = new ComplexToggle("", dsp.title() + " File(s)", dsp.description());
+			toggle = new ComplexToggle("", dsp.getDescription().getTitle() + " File(s)", dsp.getDescription().getSummary());
 			toggleMap.put(toggle, dsp);
 			group.registerButton(toggle);	
 			toggleButtons.add(toggle);

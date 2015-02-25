@@ -9,6 +9,7 @@ import plural.executor.map.MapExecutor;
 import plural.executor.map.implementations.PluralMapExecutor;
 import scitypes.Coord;
 import skew.core.datasource.DataSource;
+import skew.core.datasource.DataSourceDescription;
 import skew.core.model.ISkewDataset;
 import skew.core.model.ISkewPoint;
 import skew.core.model.SkewGrid;
@@ -47,22 +48,10 @@ public class SEQDataSource extends MisorientationDataSource implements DataSourc
 	}
 	
 	@Override
-	public String extension()
-	{
-		return "seq";
+	public DataSourceDescription getDescription() {
+		return new DataSourceDescription("Sequence", "FOXMAS/XMAS Text Sequence File", "seq");
 	}
 	
-	@Override
-	public String title()
-	{
-		return "Sequence"; 
-	}
-	
-	@Override
-	public String description()
-	{
-		return "FOXMAS/XMAS Text Sequence File";
-	}
 
 	@Override
 	public FileFormatAcceptance accepts(List<String> filenames)
@@ -205,5 +194,7 @@ public class SEQDataSource extends MisorientationDataSource implements DataSourc
 	public FileOrFolder fileOrFolder() {
 		return FileOrFolder.FILE;
 	}
+
+
 
 }

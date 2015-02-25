@@ -32,9 +32,11 @@ public interface DataSource
 	/**
 	 * The file extension for this type of data. This should not include any leading dot.
 	 */
-	String extension();
+	/*String extension();
 	String description();
 	String title();
+	*/
+	DataSourceDescription getDescription();
 	
 	/**
 	 * Specifies if this datasource opens an entire folder, or one or more files.

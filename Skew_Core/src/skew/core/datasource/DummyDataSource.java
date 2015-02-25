@@ -13,21 +13,9 @@ public class DummyDataSource implements ExecutorDataSource
 {
 
 	@Override
-	public String extension()
+	public DataSourceDescription getDescription()
 	{
-		return "";
-	}
-
-	@Override
-	public String description()
-	{
-		return "";
-	}
-
-	@Override
-	public String title()
-	{
-		return "";
+		return new DataSourceDescription("", "", "");
 	}
 
 	@Override

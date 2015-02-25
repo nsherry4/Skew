@@ -15,31 +15,16 @@ import commonenvironment.IOOperations;
 public abstract class BasicExecutorDataSource implements ExecutorDataSource
 {
 
-	private String ext, desc, title;
+	private DataSourceDescription desc;
 	
 	public BasicExecutorDataSource(String extension, String description, String title)
 	{
-		this.ext = extension;
-		this.desc = description;
-		this.title = title;
+		desc = new DataSourceDescription(title, description, extension);
 	}
 	
 	@Override
-	public String extension()
-	{
-		return ext;
-	}
-
-	@Override
-	public String description()
-	{
+	public DataSourceDescription getDescription() {
 		return desc;
-	}
-
-	@Override
-	public String title()
-	{
-		return title;
 	}
 
 

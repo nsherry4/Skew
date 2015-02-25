@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.swing.JOptionPane;
@@ -23,6 +24,7 @@ import plural.swing.stream.StreamDialog;
 import scidraw.swing.SavePicture;
 import scitypes.Coord;
 import skew.DataSources;
+import skew.core.datasource.DataSourceDescription;
 import skew.core.datasource.DataSourceSelection;
 import skew.core.datasource.DummyDataSource;
 import skew.core.datasource.DataSource;
@@ -284,6 +286,9 @@ public class SkewController
 	}
 	
 	
+	public static List<DataSourceDescription> getDataSourceDescriptions() {
+		return DataSources.getSources().stream().map(ds -> ds.getDescription()).collect(Collectors.toList());
+	}
 	
 	public static InputSelection selectFiles(SkewTabs window, String path, SkewUI skewui)
 	{
@@ -295,8 +300,8 @@ public class SkewController
 		String[] descs = new String[formats.size()];
 		for (int i = 0; i < formats.size(); i++)
 		{
-			exts[i] = new String[]{formats.get(i).extension()};
-			descs[i] = formats.get(i).description();
+			exts[i] = new String[]{formats.get(i).getDescription().getExtensions().get(0)};
+			descs[i] = formats.get(i).getDescription().getSummary();
 		}
 		
 		//get a list of filenames from the user
@@ -309,19 +314,15 @@ public class SkewController
 			files.add(af.getFileName());
 		}
 		
+		return openFiles(files, window);
+		
+	}
+	
+	
+	public static InputSelection openFiles(List<String> files, SkewTabs window) {
 		
 		//filter for just the working data sources
-		List<DataSource> acceptingFormats = new ArrayList<DataSource>();
-		List<DataSource> maybeFormats = new ArrayList<DataSource>();
-		for (DataSource ds : formats)
-		{
-			FileFormatAcceptance acc = ds.accepts(files);
-			if (acc == FileFormatAcceptance.ACCEPT) acceptingFormats.add(ds);
-			if (acc == FileFormatAcceptance.MAYBE) maybeFormats.add(ds);
-		}
-		
-		
-		if (acceptingFormats.size() < 1) acceptingFormats = maybeFormats;
+		List<DataSource> acceptingFormats = getViableDataSources(files);
 		
 		DataSource ds = null;
 		
@@ -351,6 +352,29 @@ public class SkewController
 		
 	}
 
+	public static List<DataSource> getViableDataSources(List<String> files) {
+		
+		List<DataSource> formats = DataSources.getSources();
+		
+		//filter for just the working data sources
+		List<DataSource> acceptingFormats = new ArrayList<DataSource>();
+		List<DataSource> maybeFormats = new ArrayList<DataSource>();
+		for (DataSource ds : formats)
+		{
+			FileFormatAcceptance acc = ds.accepts(files);
+			if (acc == FileFormatAcceptance.ACCEPT) acceptingFormats.add(ds);
+			if (acc == FileFormatAcceptance.MAYBE) maybeFormats.add(ds);
+		}
+		
+		
+		if (acceptingFormats.size() < 1) { 
+			return maybeFormats; 
+		} else {
+			return acceptingFormats;
+		}
+		
+	}
+	
 	public static void loadFiles(final SkewTabs window, List<String> files, DataSource datasource, final SkewUI skewui) {
 		
 		Coord<Integer> mapSize = queryLoadParameters(window, datasource);

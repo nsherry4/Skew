@@ -10,6 +10,7 @@ import plural.executor.ExecutorSet;
 import plural.executor.map.MapExecutor;
 import plural.executor.map.implementations.PluralMapExecutor;
 import scitypes.Coord;
+import skew.core.datasource.DataSourceDescription;
 import skew.core.model.ISkewDataset;
 import skew.core.model.ISkewPoint;
 import skew.core.viewer.modes.views.CompositeView;
@@ -33,22 +34,10 @@ public class EBSDDataSource extends MisorientationDataSource
 {
 
 	@Override
-	public String extension()
-	{
-		return "txt";
-	}
-
-	@Override
-	public String title()
-	{
-		return "EBSD"; 
+	public DataSourceDescription getDescription() {
+		return new DataSourceDescription("EBSD", "EBSD File", "txt");
 	}
 	
-	@Override
-	public String description()
-	{
-		return "EBSD File";
-	}
 
 	@Override
 	public FileFormatAcceptance accepts(List<String> filenames)
@@ -149,5 +138,7 @@ public class EBSDDataSource extends MisorientationDataSource
 		super.createModels(mapsize);
 		return Calculation.calculate(filenames, loadPoints(filenames), this, misdata, mapsize, misdata.boundaryParameter.getValue());
 	}
+
+
 
 }

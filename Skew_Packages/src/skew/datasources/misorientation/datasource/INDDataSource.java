@@ -13,6 +13,7 @@ import plural.executor.map.implementations.PluralMapExecutor;
 import scitypes.Coord;
 import scitypes.DirectionVector;
 import skew.core.datasource.DataSource;
+import skew.core.datasource.DataSourceDescription;
 import skew.core.model.ISkewDataset;
 import skew.core.model.ISkewGrid;
 import skew.core.model.ISkewPoint;
@@ -40,22 +41,10 @@ public class INDDataSource extends MisorientationDataSource
 	public ISkewGrid<DirectionVector> ellipModel;
 	
 	@Override
-	public String extension()
-	{
-		return "ind";
+	public DataSourceDescription getDescription() {
+		return new DataSourceDescription("XRD Index Files", "XMAS/FOXMAS Index Files", "ind");
 	}
 	
-	@Override
-	public String title()
-	{
-		return "Index";
-	}
-
-	@Override
-	public String description()
-	{
-		return "XMAS/FOXMAS Index Files";
-	}
 
 	@Override
 	public FileFormatAcceptance accepts(List<String> filenames)
