@@ -138,6 +138,11 @@ public class EBSDDataSource extends MisorientationDataSource
 		super.createModels(mapsize);
 		return Calculation.calculate(filenames, loadPoints(filenames), this, misdata, mapsize, misdata.boundaryParameter.getValue());
 	}
+	
+	@Override
+	public String toString() {
+		return getDescription().getTitle();
+	}
 
 
 

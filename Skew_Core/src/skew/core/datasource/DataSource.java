@@ -1,8 +1,10 @@
 package skew.core.datasource;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import plural.executor.ExecutorSet;
 import scitypes.Coord;
@@ -43,6 +45,9 @@ public interface DataSource
 	 */
 	FileOrFolder fileOrFolder();
 	FileFormatAcceptance accepts(List<String> filenames);
+	default FileFormatAcceptance acceptsFiles(List<File> files) {
+		return accepts(files.stream().map(f -> f.getAbsolutePath()).collect(Collectors.toList()));
+	}
 	
 	List<Parameter<?>> getLoadParameters();
 	String getLoadParametersInformation();
